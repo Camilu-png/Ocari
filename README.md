@@ -53,8 +53,8 @@ lib/
 
 ### Requisitos previos
 
-- Flutter SDK `>=3.19.0`
-- Dart `>=3.3.0`
+- Flutter SDK `>=3.18.0`
+- Dart `>=3.8.1 <4.0.0`
 - Una cuenta en [Supabase](https://supabase.com) (free tier)
 
 ### Instalación
