@@ -1,16 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'core/router/app_router.dart';
 
 void main() {
-  runApp(const MainApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const ProviderScope(child: OcariApp()));
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class OcariApp extends ConsumerWidget {
+  const OcariApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: Center(child: Text('Ocari! \n JIJIJI'))),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(appRouter);
+    return MaterialApp.router(
+      title: 'Ocari',
+      routerConfig: router,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
     );
   }
 }
