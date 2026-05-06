@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class PlayerScreen extends StatelessWidget {
   final String songId;
@@ -9,7 +10,19 @@ class PlayerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Player')),
-      body: Center(child: Text('Player Screen - Song: $songId')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Player Screen - Song: $songId'),
+            const SizedBox(height: 24),
+            FilledButton(
+              onPressed: () => context.go('/songs'),
+              child: const Text('Volver a Songs'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
