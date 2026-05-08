@@ -71,3 +71,5 @@ windows/flutter/generated_plugins.cmake
 
 # Dart generated
 lib/generated_plugin_registrant.dart
+
+.env
