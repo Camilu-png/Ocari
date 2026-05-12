@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -39,6 +41,36 @@ class OcariApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            child ?? const SizedBox(),
+            if (kDebugMode)
+              _DebugButton(router: router),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _DebugButton extends StatelessWidget {
+  final GoRouter router;
+
+  const _DebugButton({required this.router});
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      bottom: 20,
+      right: 20,
+      child: FloatingActionButton(
+        heroTag: 'debug_btn',
+        onPressed: () => router.go('/debug'),
+        backgroundColor: Colors.purple,
+        mini: true,
+        child: const Icon(Icons.bug_report, size: 20),
+      ),
     );
   }
 }

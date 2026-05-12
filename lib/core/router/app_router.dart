@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +7,7 @@ import '../../features/auth/presentation/providers/auth_notifier.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/player/presentation/screens/player_screen.dart';
 import '../../features/songs/presentation/screens/songs_screen.dart';
+import '../theme/debug_screen.dart';
 
 final _routerKey = GlobalKey<NavigatorState>();
 
@@ -16,8 +18,9 @@ final appRouter = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final isAuth = ref.read(authProvider);
       final isOnLogin = state.matchedLocation == '/login';
+      final isOnDebug = state.matchedLocation == '/debug';
 
-      if (!isAuth && !isOnLogin) {
+      if (!isAuth && !isOnLogin && !isOnDebug) {
         return '/login';
       }
 
@@ -28,6 +31,11 @@ final appRouter = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      if (kDebugMode)
+        GoRoute(
+          path: '/debug',
+          builder: (context, state) => const DebugScreen(),
+        ),
       GoRoute(
         path: '/',
         redirect: (context, state) => '/songs',
