@@ -1,13 +1,16 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'core/router/app_router.dart';
+import 'core/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   await dotenv.load(fileName: '.env');
 
   final supabaseUrl = dotenv.get('SUPABASE_URL', fallback: '');
@@ -35,9 +38,38 @@ class OcariApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Ocari',
       routerConfig: router,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            child ?? const SizedBox(),
+            if (kDebugMode)
+              _DebugButton(router: router),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _DebugButton extends StatelessWidget {
+  final GoRouter router;
+
+  const _DebugButton({required this.router});
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      bottom: 20,
+      right: 20,
+      child: FloatingActionButton(
+        heroTag: 'debug_btn',
+        onPressed: () => router.go('/debug'),
+        backgroundColor: Colors.purple,
+        mini: true,
+        child: const Icon(Icons.bug_report, size: 20),
       ),
     );
   }
