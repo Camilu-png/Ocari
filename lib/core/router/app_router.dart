@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/auth/presentation/providers/auth_notifier.dart';
+import '../../features/auth/presentation/providers/auth_notifier.dart'
+    show authProvider;
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/player/presentation/screens/player_screen.dart';
 import '../../features/songs/presentation/screens/songs_screen.dart';
@@ -16,7 +17,8 @@ final appRouter = Provider<GoRouter>((ref) {
     navigatorKey: _routerKey,
     initialLocation: '/songs',
     redirect: (context, state) {
-      final isAuth = ref.read(authProvider);
+      final authState = ref.read(authProvider);
+      final isAuth = authState.isAuthenticated;
       final isOnLogin = state.matchedLocation == '/login';
       final isOnDebug = state.matchedLocation == '/debug';
 
