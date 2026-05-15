@@ -39,6 +39,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  # — Testing
+  mocktail: ^1.0.3
+
   # — Generadores de código (freezed + riverpod)
   build_runner: ^2.4.9
   freezed: ^2.5.2

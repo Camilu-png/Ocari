@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../auth/presentation/providers/auth_notifier.dart';
+import '../../../auth/presentation/providers/auth_notifier.dart'
+    show authProvider, AppAuthState, AuthStatus;
 
 final connectionStatusProvider = FutureProvider<bool>((ref) async {
   try {
@@ -50,7 +51,7 @@ class LoginScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             FilledButton(
               onPressed: () {
-                ref.read(authProvider.notifier).state = true;
+                ref.read(authProvider.notifier).state = const AppAuthState(status: AuthStatus.authenticated);
                 context.go('/songs');
               },
               child: const Text('Login (test)'),

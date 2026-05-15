@@ -21,9 +21,11 @@ class SongsScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () {
-              ref.read(authProvider.notifier).state = false;
-              context.go('/login');
+            onPressed: () async {
+              await ref.read(authProvider.notifier).logout();
+              if (context.mounted) {
+                context.go('/login');
+              }
             },
           ),
         ],
