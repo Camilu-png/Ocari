@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/providers/auth_notifier.dart'
     show authProvider, AppAuthState, AuthStatus;
 
@@ -55,6 +56,20 @@ class LoginScreen extends ConsumerWidget {
                 context.go('/songs');
               },
               child: const Text('Login (test)'),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '¿No tienes cuenta? ',
+                  style: context.textTheme.bodyMedium,
+                ),
+                TextButton(
+                  onPressed: () => context.go('/register'),
+                  child: const Text('Regístrate'),
+                ),
+              ],
             ),
           ],
         ),

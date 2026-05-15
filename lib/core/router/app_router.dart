@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/providers/auth_notifier.dart'
     show authProvider;
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/player/presentation/screens/player_screen.dart';
 import '../../features/songs/presentation/screens/songs_screen.dart';
 import '../theme/debug_screen.dart';
@@ -45,6 +46,10 @@ final appRouter = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/register',
+        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
         path: '/songs',

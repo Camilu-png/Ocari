@@ -67,6 +67,25 @@ class AuthNotifier extends Notifier<AppAuthState> {
     await authClient.signOut();
     state = const AppAuthState(status: AuthStatus.unauthenticated);
   }
+
+  Future<({bool success, String? error})> signUp({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final authClient = ref.read(supabaseAuthClientProvider);
+      final response = await authClient.signUp(
+        email: email,
+        password: password,
+      );
+      if (response.user != null) {
+        return (success: true, error: null);
+      }
+      return (success: false, error: 'Error al crear usuario');
+    } catch (e) {
+      return (success: false, error: e.toString());
+    }
+  }
 }
 
 final authProvider = NotifierProvider<AuthNotifier, AppAuthState>(
