@@ -21,13 +21,14 @@ final appRouter = Provider<GoRouter>((ref) {
       final authState = ref.read(authProvider);
       final isAuth = authState.isAuthenticated;
       final isOnLogin = state.matchedLocation == '/login';
+      final isOnRegister = state.matchedLocation == '/register';
       final isOnDebug = state.matchedLocation == '/debug';
 
-      if (!isAuth && !isOnLogin && !isOnDebug) {
+      if (!isAuth && !isOnLogin && !isOnRegister && !isOnDebug) {
         return '/login';
       }
 
-      if (isAuth && isOnLogin) {
+      if (isAuth && (isOnLogin || isOnRegister)) {
         return '/songs';
       }
 

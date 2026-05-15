@@ -86,6 +86,10 @@ class AuthNotifier extends Notifier<AppAuthState> {
       return (success: false, error: e.toString());
     }
   }
+
+  void loginForTest() {
+    state = const AppAuthState(status: AuthStatus.authenticated);
+  }
 }
 
 final authProvider = NotifierProvider<AuthNotifier, AppAuthState>(
