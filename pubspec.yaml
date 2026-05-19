@@ -20,6 +20,7 @@ dependencies:
   # — Backend / Auth
   supabase_flutter: ^2.12.4
   google_sign_in: ^6.2.1
+  flutter_signin_button: ^2.0.0
 
   # — Audio
   just_audio: ^0.9.39

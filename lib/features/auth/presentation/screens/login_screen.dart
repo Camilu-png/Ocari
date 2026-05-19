@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -53,41 +54,29 @@ class LoginScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 24),
-            SizedBox(
-              width: 250,
-              child: FilledButton.icon(
-                onPressed: isLoading
-                    ? null
-                    : () async {
-                        ref.read(googleSignInLoadingProvider.notifier).state =
-                            true;
-                        final result = await ref
-                            .read(authProvider.notifier)
-                            .signInWithGoogle();
-                        ref.read(googleSignInLoadingProvider.notifier).state =
-                            false;
-                        if (result.success && context.mounted) {
-                          context.go('/songs');
-                        } else if (!result.success && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(result.error ?? 'Error de login'),
-                            ),
-                          );
-                        }
-                      },
-                icon: isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.g_mobiledata, size: 24),
-                label: Text(isLoading ? 'Iniciando...' : 'Continuar con Google'),
-              ),
+            SignInButton(
+              Buttons.Google,
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      ref.read(googleSignInLoadingProvider.notifier).state =
+                          true;
+                      final result = await ref
+                          .read(authProvider.notifier)
+                          .signInWithGoogle();
+                      ref.read(googleSignInLoadingProvider.notifier).state =
+                          false;
+                      if (result.success && context.mounted) {
+                        context.go('/songs');
+                      } else if (!result.success && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(result.error ?? 'Error de login'),
+                          ),
+                        );
+                      }
+                    },
+              text: 'Continuar con Google',
             ),
             const SizedBox(height: AppSpacing.lg),
             Row(
