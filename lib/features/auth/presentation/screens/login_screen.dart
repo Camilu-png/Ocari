@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../auth/presentation/providers/auth_notifier.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../auth/presentation/providers/auth_notifier.dart'
+    show authProvider;
 
 final connectionStatusProvider = FutureProvider<bool>((ref) async {
   try {
@@ -19,12 +22,15 @@ final connectionStatusProvider = FutureProvider<bool>((ref) async {
   }
 });
 
+final googleSignInLoadingProvider = StateProvider<bool>((ref) => false);
+
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final connectionAsync = ref.watch(connectionStatusProvider);
+    final isLoading = ref.watch(googleSignInLoadingProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
@@ -48,12 +54,43 @@ class LoginScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () {
-                ref.read(authProvider.notifier).state = true;
-                context.go('/songs');
-              },
-              child: const Text('Login (test)'),
+            SignInButton(
+              Buttons.Google,
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      ref.read(googleSignInLoadingProvider.notifier).state =
+                          true;
+                      final result = await ref
+                          .read(authProvider.notifier)
+                          .signInWithGoogle();
+                      ref.read(googleSignInLoadingProvider.notifier).state =
+                          false;
+                      if (result.success && context.mounted) {
+                        context.go('/songs');
+                      } else if (!result.success && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(result.error ?? 'Error de login'),
+                          ),
+                        );
+                      }
+                    },
+              text: 'Continuar con Google',
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '¿No tienes cuenta? ',
+                  style: context.textTheme.bodyMedium,
+                ),
+                TextButton(
+                  onPressed: () => context.go('/register'),
+                  child: const Text('Regístrate'),
+                ),
+              ],
             ),
           ],
         ),
