@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/providers/auth_notifier.dart'
-    show authProvider, AppAuthState, AuthStatus;
+    show authProvider;
 
 final connectionStatusProvider = FutureProvider<bool>((ref) async {
   try {
@@ -20,12 +21,15 @@ final connectionStatusProvider = FutureProvider<bool>((ref) async {
   }
 });
 
+final googleSignInLoadingProvider = StateProvider<bool>((ref) => false);
+
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final connectionAsync = ref.watch(connectionStatusProvider);
+    final isLoading = ref.watch(googleSignInLoadingProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
@@ -49,12 +53,55 @@ class LoginScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () {
-                ref.read(authProvider.notifier).state = const AppAuthState(status: AuthStatus.authenticated);
-                context.go('/songs');
-              },
-              child: const Text('Login (test)'),
+            SizedBox(
+              width: 250,
+              child: FilledButton.icon(
+                onPressed: isLoading
+                    ? null
+                    : () async {
+                        ref.read(googleSignInLoadingProvider.notifier).state =
+                            true;
+                        final result = await ref
+                            .read(authProvider.notifier)
+                            .signInWithGoogle();
+                        ref.read(googleSignInLoadingProvider.notifier).state =
+                            false;
+                        if (result.success && context.mounted) {
+                          context.go('/songs');
+                        } else if (!result.success && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(result.error ?? 'Error de login'),
+                            ),
+                          );
+                        }
+                      },
+                icon: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.g_mobiledata, size: 24),
+                label: Text(isLoading ? 'Iniciando...' : 'Continuar con Google'),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '¿No tienes cuenta? ',
+                  style: context.textTheme.bodyMedium,
+                ),
+                TextButton(
+                  onPressed: () => context.go('/register'),
+                  child: const Text('Regístrate'),
+                ),
+              ],
             ),
           ],
         ),
