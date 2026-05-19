@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 enum AuthStatus { authenticated, unauthenticated, loading }
@@ -82,6 +83,41 @@ class AuthNotifier extends Notifier<AppAuthState> {
         return (success: true, error: null);
       }
       return (success: false, error: 'Error al crear usuario');
+    } catch (e) {
+      return (success: false, error: e.toString());
+    }
+  }
+
+  Future<({bool success, String? error})> signInWithGoogle() async {
+    try {
+      final googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+        serverClientId:
+            '744538709104-namv6gt3mfki4i8png1ntg96recealk8.apps.googleusercontent.com',
+      );
+
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        return (success: false, error: 'Google sign in cancelled');
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        return (success: false, error: 'Failed to get Google ID token');
+      }
+
+      final authClient = ref.read(supabaseAuthClientProvider);
+      final response = await authClient.signInWithIdToken(
+        provider: supabase.OAuthProvider.google,
+        idToken: idToken,
+      );
+
+      if (response.user != null) {
+        return (success: true, error: null);
+      }
+      return (success: false, error: 'Failed to sign in with Supabase');
     } catch (e) {
       return (success: false, error: e.toString());
     }
