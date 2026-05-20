@@ -11,7 +11,7 @@ class ThemePreview extends StatelessWidget {
     final colors = Theme.of(context).extension<AppColors>()!;
 
     return Container(
-      padding: AppSpacing.paddingMd,
+      padding: const EdgeInsets.all(AppSpacing.md),
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: collapsed ? _buildCollapsed(context, colors) : _buildExpanded(context, colors),
     );
@@ -42,11 +42,11 @@ class ThemePreview extends StatelessWidget {
           spacing: 8,
           runSpacing: 8,
           children: [
-            _ColorSwatch(label: 'primary', color: colors.primaryColor),
-            _ColorSwatch(label: 'accent', color: colors.accentColor),
+            _ColorSwatch(label: 'primary', color: colors.primary),
+            _ColorSwatch(label: 'accent', color: colors.accent),
             _ColorSwatch(label: 'bgDark', color: colors.bgDark),
             _ColorSwatch(label: 'bgLight', color: colors.bgLight),
-            _ColorSwatch(label: 'surface', color: colors.surfaceDark),
+            _ColorSwatch(label: 'surface', color: colors.surface),
           ],
         ),
         const SizedBox(height: 12),
@@ -56,10 +56,10 @@ class ThemePreview extends StatelessWidget {
           spacing: 8,
           runSpacing: 8,
           children: [
-            _ColorSwatch(label: 'primary', color: AppColors.dark.primaryColor),
-            _ColorSwatch(label: 'accent', color: AppColors.dark.accentColor),
+            _ColorSwatch(label: 'primary', color: AppColors.dark.primary),
+            _ColorSwatch(label: 'accent', color: AppColors.dark.accent),
             _ColorSwatch(label: 'bgDark', color: AppColors.dark.bgDark),
-            _ColorSwatch(label: 'surface', color: AppColors.dark.surfaceDark),
+            _ColorSwatch(label: 'surface', color: AppColors.dark.surface),
           ],
         ),
         const SizedBox(height: 12),
@@ -115,17 +115,17 @@ class ThemePreview extends StatelessWidget {
 
   List<Widget> _colorEntries(AppColors colors) {
     return [
-      _ColorEntry('primary', colors.primaryColor),
-      _ColorEntry('accent', colors.accentColor),
+      _ColorEntry('primary', colors.primary),
+      _ColorEntry('accent', colors.accent),
       _ColorEntry('bgDark', colors.bgDark),
       _ColorEntry('bgLight', colors.bgLight),
-      _ColorEntry('surfaceDark', colors.surfaceDark),
-      _ColorEntry('surfaceLight', colors.surfaceLight),
+      _ColorEntry('surface', colors.surface),
+      _ColorEntry('textSecondary', colors.textSecondary),
     ];
   }
 
   Widget _buildSpacingGrid() {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _SpacingRow('xs', AppSpacing.xs),
@@ -133,7 +133,6 @@ class ThemePreview extends StatelessWidget {
         _SpacingRow('md', AppSpacing.md),
         _SpacingRow('lg', AppSpacing.lg),
         _SpacingRow('xl', AppSpacing.xl),
-        _SpacingRow('xxl', AppSpacing.xxl),
       ],
     );
   }

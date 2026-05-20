@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'app_theme.dart';
+import '../widgets/ocari_button.dart';
 
 class DebugScreen extends StatelessWidget {
   const DebugScreen({super.key});
@@ -19,24 +20,30 @@ class DebugScreen extends StatelessWidget {
         ),
       ),
       body: SingleChildScrollView(
-        padding: AppSpacing.paddingMd,
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Theme Tokens', style: Theme.of(context).textTheme.headlineSmall),
+            Text('Theme Tokens',
+                style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 16),
             _buildColorSection(context, 'Light Theme', colors),
             const SizedBox(height: 24),
             _buildColorSection(context, 'Dark Theme', AppColors.dark),
             const SizedBox(height: 24),
             _buildSpacingSection(context),
+            const SizedBox(height: 24),
+            _buildButtonsSection(context),
+            const SizedBox(height: 24),
+            _buildDifficultySection(context, colors),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildColorSection(BuildContext context, String title, AppColors colors) {
+  Widget _buildColorSection(
+      BuildContext context, String title, AppColors colors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -46,11 +53,12 @@ class DebugScreen extends StatelessWidget {
           spacing: 12,
           runSpacing: 12,
           children: [
-            _ColorChip('primary', colors.primaryColor),
-            _ColorChip('accent', colors.accentColor),
+            _ColorChip('primary', colors.primary),
+            _ColorChip('accent', colors.accent),
             _ColorChip('bgDark', colors.bgDark),
             _ColorChip('bgLight', colors.bgLight),
-            _ColorChip('surface', colors.surfaceDark),
+            _ColorChip('surface', colors.surface),
+            _ColorChip('textSecondary', colors.textSecondary),
           ],
         ),
       ],
@@ -69,17 +77,65 @@ class DebugScreen extends StatelessWidget {
           ('md', AppSpacing.md),
           ('lg', AppSpacing.lg),
           ('xl', AppSpacing.xl),
-          ('xxl', AppSpacing.xxl),
         ].map((e) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            children: [
-              Container(width: e.$2, height: 20, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(width: 8),
-              Text('${e.$1} = ${e.$2}px', style: Theme.of(context).textTheme.bodySmall),
-            ],
-          ),
-        )),
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  Container(
+                      width: e.$2,
+                      height: 20,
+                      color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(width: 8),
+                  Text('${e.$1} = ${e.$2}px',
+                      style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+            )),
+      ],
+    );
+  }
+
+  Widget _buildButtonsSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Buttons', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 16),
+        const OcariButton(label: 'Default Button'),
+        const SizedBox(height: 12),
+        const OcariButton(
+          label: 'Loading Button',
+          isLoading: true,
+        ),
+        const SizedBox(height: 12),
+        const OcariButton(
+          label: 'Disabled Button',
+          onPressed: null,
+        ),
+        const SizedBox(height: 12),
+        const OcariButton(
+          label: 'Not Full Width',
+          isFullWidth: false,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDifficultySection(BuildContext context, AppColors colors) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Difficulty Colors', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            _ColorChip('Easy', colors.diffEasyBg),
+            _ColorChip('Medium', colors.diffMediumBg),
+            _ColorChip('Hard', colors.diffHardBg),
+          ],
+        ),
       ],
     );
   }

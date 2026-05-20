@@ -2,92 +2,129 @@ import 'package:flutter/material.dart';
 
 @immutable
 class AppColors extends ThemeExtension<AppColors> {
-  final Color primaryColor;
-  final Color onPrimaryColor;
-  final Color accentColor;
-  final Color onAccentColor;
+  final Color primary;
+  final Color onPrimary;
+  final Color accent;
+  final Color onAccent;
   final Color bgDark;
   final Color onBgDark;
   final Color bgLight;
   final Color onBgLight;
-  final Color surfaceDark;
-  final Color surfaceLight;
+  final Color surface;
+  final Color textSecondary;
   final Color error;
   final Color onError;
 
+  final Color diffEasyBg;
+  final Color diffEasyText;
+  final Color diffMediumBg;
+  final Color diffMediumText;
+  final Color diffHardBg;
+  final Color diffHardText;
+
   const AppColors({
-    required this.primaryColor,
-    required this.onPrimaryColor,
-    required this.accentColor,
-    required this.onAccentColor,
+    required this.primary,
+    required this.onPrimary,
+    required this.accent,
+    required this.onAccent,
     required this.bgDark,
     required this.onBgDark,
     required this.bgLight,
     required this.onBgLight,
-    required this.surfaceDark,
-    required this.surfaceLight,
+    required this.surface,
+    required this.textSecondary,
     required this.error,
     required this.onError,
+    required this.diffEasyBg,
+    required this.diffEasyText,
+    required this.diffMediumBg,
+    required this.diffMediumText,
+    required this.diffHardBg,
+    required this.diffHardText,
   });
 
-  static AppColors get light => const AppColors(
-    primaryColor: Color(0xFF2C2C2A),
-    onPrimaryColor: Color(0xFFF1EFE8),
-    accentColor: Color(0xFF7F77DD),
-    onAccentColor: Color(0xFFFFFFFF),
+  static const AppColors light = AppColors(
+    primary: Color(0xFF2C2C2A),
+    onPrimary: Color(0xFFF1EFE8),
+    accent: Color(0xFF7F77DD),
+    onAccent: Color(0xFF6C63D4),
     bgDark: Color(0xFF0D0D1A),
     onBgDark: Color(0xFFF1EFE8),
-    bgLight: Color(0xFFF1EFE8),
+    bgLight: Color(0xFFFAF7F0),
     onBgLight: Color(0xFF2C2C2A),
-    surfaceDark: Color(0xFF1A1A2E),
-    surfaceLight: Color(0xFFFFFFFF),
+    surface: Color(0xFFF3EFE6),
+    textSecondary: Color(0xFF888780),
     error: Color(0xFFB3261E),
     onError: Color(0xFFFFFFFF),
+    diffEasyBg: Color(0xFF4CAF50),
+    diffEasyText: Color(0xFFFFFFFF),
+    diffMediumBg: Color(0xFFFF9800),
+    diffMediumText: Color(0xFFFFFFFF),
+    diffHardBg: Color(0xFFF44336),
+    diffHardText: Color(0xFFFFFFFF),
   );
 
-  static AppColors get dark => const AppColors(
-    primaryColor: Color(0xFFF1EFE8),
-    onPrimaryColor: Color(0xFF2C2C2A),
-    accentColor: Color(0xFF7F77DD),
-    onAccentColor: Color(0xFFFFFFFF),
+  static const AppColors dark = AppColors(
+    primary: Color(0xFFF1EFE8),
+    onPrimary: Color(0xFF2C2C2A),
+    accent: Color(0xFF7F77DD),
+    onAccent: Color(0xFFFFFFFF),
     bgDark: Color(0xFF0D0D1A),
     onBgDark: Color(0xFFF1EFE8),
     bgLight: Color(0xFFF1EFE8),
     onBgLight: Color(0xFF2C2C2A),
-    surfaceDark: Color(0xFF1A1A2E),
-    surfaceLight: Color(0xFF1A1A2E),
+    surface: Color(0xFF1A1A2E),
+    textSecondary: Color(0xFF888780),
     error: Color(0xFFF2B8B5),
     onError: Color(0xFF601410),
+    diffEasyBg: Color(0xFF388E3C),
+    diffEasyText: Color(0xFFFFFFFF),
+    diffMediumBg: Color(0xFFF57C00),
+    diffMediumText: Color(0xFFFFFFFF),
+    diffHardBg: Color(0xFFD32F2F),
+    diffHardText: Color(0xFFFFFFFF),
   );
 
   @override
   AppColors copyWith({
-    Color? primaryColor,
-    Color? onPrimaryColor,
-    Color? accentColor,
-    Color? onAccentColor,
+    Color? primary,
+    Color? onPrimary,
+    Color? accent,
+    Color? onAccent,
     Color? bgDark,
     Color? onBgDark,
     Color? bgLight,
     Color? onBgLight,
-    Color? surfaceDark,
-    Color? surfaceLight,
+    Color? surface,
+    Color? textSecondary,
     Color? error,
     Color? onError,
+    Color? diffEasyBg,
+    Color? diffEasyText,
+    Color? diffMediumBg,
+    Color? diffMediumText,
+    Color? diffHardBg,
+    Color? diffHardText,
   }) {
     return AppColors(
-      primaryColor: primaryColor ?? this.primaryColor,
-      onPrimaryColor: onPrimaryColor ?? this.onPrimaryColor,
-      accentColor: accentColor ?? this.accentColor,
-      onAccentColor: onAccentColor ?? this.onAccentColor,
+      primary: primary ?? this.primary,
+      onPrimary: onPrimary ?? this.onPrimary,
+      accent: accent ?? this.accent,
+      onAccent: onAccent ?? this.onAccent,
       bgDark: bgDark ?? this.bgDark,
       onBgDark: onBgDark ?? this.onBgDark,
       bgLight: bgLight ?? this.bgLight,
       onBgLight: onBgLight ?? this.onBgLight,
-      surfaceDark: surfaceDark ?? this.surfaceDark,
-      surfaceLight: surfaceLight ?? this.surfaceLight,
+      surface: surface ?? this.surface,
+      textSecondary: textSecondary ?? this.textSecondary,
       error: error ?? this.error,
       onError: onError ?? this.onError,
+      diffEasyBg: diffEasyBg ?? this.diffEasyBg,
+      diffEasyText: diffEasyText ?? this.diffEasyText,
+      diffMediumBg: diffMediumBg ?? this.diffMediumBg,
+      diffMediumText: diffMediumText ?? this.diffMediumText,
+      diffHardBg: diffHardBg ?? this.diffHardBg,
+      diffHardText: diffHardText ?? this.diffHardText,
     );
   }
 
@@ -95,18 +132,24 @@ class AppColors extends ThemeExtension<AppColors> {
   AppColors lerp(ThemeExtension<AppColors>? other, double t) {
     if (other is! AppColors) return this;
     return AppColors(
-      primaryColor: Color.lerp(primaryColor, other.primaryColor, t)!,
-      onPrimaryColor: Color.lerp(onPrimaryColor, other.onPrimaryColor, t)!,
-      accentColor: Color.lerp(accentColor, other.accentColor, t)!,
-      onAccentColor: Color.lerp(onAccentColor, other.onAccentColor, t)!,
+      primary: Color.lerp(primary, other.primary, t)!,
+      onPrimary: Color.lerp(onPrimary, other.onPrimary, t)!,
+      accent: Color.lerp(accent, other.accent, t)!,
+      onAccent: Color.lerp(onAccent, other.onAccent, t)!,
       bgDark: Color.lerp(bgDark, other.bgDark, t)!,
       onBgDark: Color.lerp(onBgDark, other.onBgDark, t)!,
       bgLight: Color.lerp(bgLight, other.bgLight, t)!,
       onBgLight: Color.lerp(onBgLight, other.onBgLight, t)!,
-      surfaceDark: Color.lerp(surfaceDark, other.surfaceDark, t)!,
-      surfaceLight: Color.lerp(surfaceLight, other.surfaceLight, t)!,
+      surface: Color.lerp(surface, other.surface, t)!,
+      textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
       error: Color.lerp(error, other.error, t)!,
       onError: Color.lerp(onError, other.onError, t)!,
+      diffEasyBg: Color.lerp(diffEasyBg, other.diffEasyBg, t)!,
+      diffEasyText: Color.lerp(diffEasyText, other.diffEasyText, t)!,
+      diffMediumBg: Color.lerp(diffMediumBg, other.diffMediumBg, t)!,
+      diffMediumText: Color.lerp(diffMediumText, other.diffMediumText, t)!,
+      diffHardBg: Color.lerp(diffHardBg, other.diffHardBg, t)!,
+      diffHardText: Color.lerp(diffHardText, other.diffHardText, t)!,
     );
   }
 }
@@ -117,77 +160,120 @@ class AppTextStyles {
           fontSize: 57,
           fontWeight: FontWeight.w400,
           letterSpacing: -0.25,
+          fontFamily: '.SF Pro Text',
         ),
         displayMedium: TextStyle(
           fontSize: 45,
           fontWeight: FontWeight.w400,
           letterSpacing: 0,
+          fontFamily: '.SF Pro Text',
         ),
         displaySmall: TextStyle(
           fontSize: 36,
           fontWeight: FontWeight.w400,
           letterSpacing: 0,
+          fontFamily: '.SF Pro Text',
         ),
         headlineLarge: TextStyle(
           fontSize: 32,
           fontWeight: FontWeight.w600,
           letterSpacing: 0,
+          fontFamily: '.SF Pro Display',
         ),
         headlineMedium: TextStyle(
           fontSize: 28,
           fontWeight: FontWeight.w600,
           letterSpacing: 0,
+          fontFamily: '.SF Pro Display',
         ),
         headlineSmall: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.w600,
           letterSpacing: 0,
+          fontFamily: '.SF Pro Display',
         ),
         titleLarge: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w500,
           letterSpacing: 0,
+          fontFamily: '.SF Pro Text',
         ),
         titleMedium: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w500,
           letterSpacing: 0.15,
+          fontFamily: '.SF Pro Text',
         ),
         titleSmall: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           letterSpacing: 0.1,
+          fontFamily: '.SF Pro Text',
         ),
         bodyLarge: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w400,
           letterSpacing: 0.5,
+          fontFamily: '.SF Pro Text',
         ),
         bodyMedium: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w400,
           letterSpacing: 0.25,
+          fontFamily: '.SF Pro Text',
         ),
         bodySmall: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w400,
           letterSpacing: 0.4,
+          fontFamily: '.SF Pro Text',
         ),
         labelLarge: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           letterSpacing: 0.1,
+          fontFamily: '.SF Pro Text',
         ),
         labelMedium: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,
           letterSpacing: 0.5,
+          fontFamily: '.SF Pro Text',
         ),
         labelSmall: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w500,
           letterSpacing: 0.5,
+          fontFamily: '.SF Pro Text',
         ),
+      );
+
+  static TextStyle heading(Color color) => TextStyle(
+        fontSize: 24,
+        fontWeight: FontWeight.w600,
+        color: color,
+        fontFamily: '.SF Pro Display',
+      );
+
+  static TextStyle body(Color color) => TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+        color: color,
+        fontFamily: '.SF Pro Text',
+      );
+
+  static TextStyle caption(Color color) => TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w400,
+        color: color,
+        fontFamily: '.SF Pro Text',
+      );
+
+  static TextStyle label(Color color) => TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: color,
+        fontFamily: '.SF Pro Text',
       );
 }
 
@@ -197,27 +283,6 @@ class AppSpacing {
   static const double md = 16;
   static const double lg = 24;
   static const double xl = 32;
-  static const double xxl = 48;
-
-  static const EdgeInsets paddingXs =
-      EdgeInsets.all(xs);
-  static const EdgeInsets paddingSm =
-      EdgeInsets.all(sm);
-  static const EdgeInsets paddingMd =
-      EdgeInsets.all(md);
-  static const EdgeInsets paddingLg =
-      EdgeInsets.all(lg);
-  static const EdgeInsets paddingXl =
-      EdgeInsets.all(xl);
-
-  static const EdgeInsets horizontalMd =
-      EdgeInsets.symmetric(horizontal: md);
-  static const EdgeInsets verticalMd =
-      EdgeInsets.symmetric(vertical: md);
-  static const EdgeInsets horizontalLg =
-      EdgeInsets.symmetric(horizontal: lg);
-  static const EdgeInsets verticalLg =
-      EdgeInsets.symmetric(vertical: lg);
 }
 
 class AppRadius {
@@ -225,7 +290,6 @@ class AppRadius {
   static const double md = 8;
   static const double lg = 12;
   static const double xl = 16;
-  static const double xxl = 24;
 
   static const BorderRadius borderRadiusSm =
       BorderRadius.all(Radius.circular(sm));
@@ -235,13 +299,10 @@ class AppRadius {
       BorderRadius.all(Radius.circular(lg));
   static const BorderRadius borderRadiusXl =
       BorderRadius.all(Radius.circular(xl));
-  static const BorderRadius borderRadiusXxl =
-      BorderRadius.all(Radius.circular(xxl));
 }
 
 extension AppThemeExtension on BuildContext {
-  AppColors get colors =>
-      Theme.of(this).extension<AppColors>()!;
+  AppColors get colors => Theme.of(this).extension<AppColors>()!;
   TextTheme get textTheme => Theme.of(this).textTheme;
 }
 
@@ -252,17 +313,20 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: ColorScheme.light(
-        primary: colors.primaryColor,
-        onPrimary: colors.onPrimaryColor,
-        secondary: colors.accentColor,
-        onSecondary: colors.onAccentColor,
+        primary: colors.accent,
+        onPrimary: colors.onAccent,
+        secondary: colors.accent,
+        onSecondary: colors.onAccent,
         surface: colors.bgLight,
         onSurface: colors.onBgLight,
         error: colors.error,
         onError: colors.onError,
       ),
       scaffoldBackgroundColor: colors.bgLight,
-      textTheme: AppTextStyles.textTheme,
+      textTheme: AppTextStyles.textTheme.apply(
+        bodyColor: colors.onBgLight,
+        displayColor: colors.onBgLight,
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: colors.bgLight,
         foregroundColor: colors.onBgLight,
@@ -271,49 +335,35 @@ class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: colors.primaryColor,
-          foregroundColor: colors.onPrimaryColor,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
+          backgroundColor: colors.accent,
+          foregroundColor: colors.onAccent,
           shape: const RoundedRectangleBorder(
             borderRadius: AppRadius.borderRadiusMd,
-          ),
-        ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: colors.primaryColor,
-          side: BorderSide(color: colors.primaryColor),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          shape: const RoundedRectangleBorder(
-            borderRadius: AppRadius.borderRadiusMd,
-          ),
-        ),
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: colors.accentColor,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
           ),
         ),
       ),
       cardTheme: CardThemeData(
-        color: colors.surfaceLight,
+        color: colors.surface,
         elevation: 0,
-shape: const RoundedRectangleBorder(
-            borderRadius: AppRadius.borderRadiusLg,
-          ),
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppRadius.borderRadiusLg,
+        ),
       ),
-      iconTheme: IconThemeData(
-        color: colors.primaryColor,
-        size: 24,
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: colors.surface,
+        border: OutlineInputBorder(
+          borderRadius: AppRadius.borderRadiusMd,
+          borderSide: BorderSide(color: colors.textSecondary),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: AppRadius.borderRadiusMd,
+          borderSide: BorderSide(color: colors.textSecondary),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: AppRadius.borderRadiusMd,
+          borderSide: BorderSide(color: colors.accent),
+        ),
       ),
       extensions: [AppColors.light],
     );
@@ -325,10 +375,10 @@ shape: const RoundedRectangleBorder(
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: ColorScheme.dark(
-        primary: colors.accentColor,
-        onPrimary: colors.onAccentColor,
-        secondary: colors.accentColor,
-        onSecondary: colors.onAccentColor,
+        primary: colors.accent,
+        onPrimary: colors.onAccent,
+        secondary: colors.accent,
+        onSecondary: colors.onAccent,
         surface: colors.bgDark,
         onSurface: colors.onBgDark,
         error: colors.error,
@@ -347,49 +397,35 @@ shape: const RoundedRectangleBorder(
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: colors.accentColor,
-          foregroundColor: colors.onAccentColor,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
+          backgroundColor: colors.accent,
+          foregroundColor: colors.onAccent,
           shape: const RoundedRectangleBorder(
             borderRadius: AppRadius.borderRadiusMd,
-          ),
-        ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: colors.accentColor,
-          side: BorderSide(color: colors.accentColor),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          shape: const RoundedRectangleBorder(
-            borderRadius: AppRadius.borderRadiusMd,
-          ),
-        ),
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: colors.accentColor,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
           ),
         ),
       ),
       cardTheme: CardThemeData(
-        color: colors.surfaceDark,
+        color: colors.surface,
         elevation: 0,
-shape: const RoundedRectangleBorder(
-            borderRadius: AppRadius.borderRadiusLg,
-          ),
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppRadius.borderRadiusLg,
+        ),
       ),
-      iconTheme: IconThemeData(
-        color: colors.onBgDark,
-        size: 24,
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: colors.surface,
+        border: OutlineInputBorder(
+          borderRadius: AppRadius.borderRadiusMd,
+          borderSide: BorderSide(color: colors.textSecondary),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: AppRadius.borderRadiusMd,
+          borderSide: BorderSide(color: colors.textSecondary),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: AppRadius.borderRadiusMd,
+          borderSide: BorderSide(color: colors.accent),
+        ),
       ),
       extensions: [AppColors.dark],
     );

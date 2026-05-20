@@ -128,7 +128,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: AppSpacing.horizontalLg,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Form(
             key: _formKey,
             child: Column(
@@ -148,7 +148,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: AppSpacing.xxl),
+                const SizedBox(height: AppSpacing.xl + AppSpacing.md),
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
