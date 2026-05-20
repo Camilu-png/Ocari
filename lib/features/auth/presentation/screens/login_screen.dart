@@ -4,8 +4,8 @@ import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../core/theme/app_theme.dart';
-import '../../../auth/presentation/providers/auth_notifier.dart'
+import 'package:ocari/core/theme/app_theme.dart';
+import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart'
     show authProvider;
 
 final connectionStatusProvider = FutureProvider<bool>((ref) async {
