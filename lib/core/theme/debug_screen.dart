@@ -59,7 +59,9 @@ class DebugScreen extends StatelessWidget {
             _ColorChip('primary', colors.primary),
             _ColorChip('accent', colors.accent),
             _ColorChip('bgDark', colors.bgDark),
+            _ColorChip('onBgDarl', colors.onBgDark),
             _ColorChip('bgLight', colors.bgLight),
+            _ColorChip('onBgLight', colors.onBgLight),
             _ColorChip('surface', colors.surface),
             _ColorChip('textSecondary', colors.textSecondary),
           ],
@@ -128,7 +130,8 @@ class DebugScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Difficulty Colors', style: Theme.of(context).textTheme.titleMedium),
+        Text('Difficulty Colors',
+            style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         Wrap(
           spacing: 12,
