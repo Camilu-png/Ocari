@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'app_theme.dart';
 import '../widgets/ocari_button.dart';
+import '../widgets/ocari_text_field.dart';
 
 class DebugScreen extends StatelessWidget {
   const DebugScreen({super.key});
@@ -36,6 +37,8 @@ class DebugScreen extends StatelessWidget {
             _buildButtonsSection(context),
             const SizedBox(height: 24),
             _buildDifficultySection(context, colors),
+            const SizedBox(height: 24),
+            _buildTextFieldsSection(context),
           ],
         ),
       ),
@@ -135,6 +138,36 @@ class DebugScreen extends StatelessWidget {
             _ColorChip('Medium', colors.diffMediumBg),
             _ColorChip('Hard', colors.diffHardBg),
           ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextFieldsSection(BuildContext context) {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Text Fields', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 16),
+        OcariTextField(
+          label: 'Email',
+          controller: emailController,
+          keyboardType: TextInputType.emailAddress,
+        ),
+        const SizedBox(height: 16),
+        OcariTextField(
+          label: 'Password',
+          controller: passwordController,
+          obscureText: true,
+        ),
+        const SizedBox(height: 16),
+        OcariTextField(
+          label: 'With Error',
+          controller: TextEditingController(),
+          errorText: 'This field is required',
         ),
       ],
     );
