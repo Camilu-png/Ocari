@@ -5,8 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/auth_notifier.dart';
 
-final _formKey = GlobalKey<FormState>();
-
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
@@ -15,8 +13,8 @@ class RegisterScreen extends ConsumerStatefulWidget {
 }
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
@@ -25,43 +23,43 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'El email es obligatorio';
+      return 'Email is required';
     }
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(value)) {
-      return 'Ingresa un email válido';
+      return 'Enter a valid email';
     }
     return null;
   }
 
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'La contraseña es obligatoria';
+      return 'Password is required';
     }
     if (value.length < 8) {
-      return 'Mínimo 8 caracteres';
+      return 'Minimum 8 characters';
     }
     if (!RegExp(r'[A-Z]').hasMatch(value)) {
-      return 'Debe tener al menos una mayúscula';
+      return 'Must have at least one uppercase letter';
     }
     if (!RegExp(r'[a-z]').hasMatch(value)) {
-      return 'Debe tener al menos una minúscula';
+      return 'Must have at least one lowercase letter';
     }
     if (!RegExp(r'[0-9]').hasMatch(value)) {
-      return 'Debe tener al menos un número';
+      return 'Must have at least one number';
     }
     if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
-      return 'Debe tener al menos un símbolo';
+      return 'Must have at least one symbol';
     }
     return null;
   }
 
   String? _validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Confirma tu contraseña';
+      return 'Confirm your password';
     }
     if (value != _passwordController.text) {
-      return 'Las contraseñas no coinciden';
+      return 'Passwords do not match';
     }
     return null;
   }
@@ -85,7 +83,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result.error ?? 'Error al registrar'),
+          content: Text(result.error ?? 'Registration failed'),
           backgroundColor: context.colors.error,
         ),
       );
@@ -96,10 +94,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Revisa tu email'),
+        title: const Text('Check your email'),
         content: const Text(
-          'Te hemos enviado un enlace de confirmación a tu correo. '
-          'Por favor, revisa tu bandeja de entrada y sigue las instrucciones.',
+          'We have sent you a confirmation link. '
+          'Please check your inbox and follow the instructions.',
         ),
         actions: [
           TextButton(
@@ -117,7 +115,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   void dispose() {
     _emailController.dispose();
-    _usernameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -127,7 +124,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Crear cuenta'),
+        title: const Text('Create account'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -139,13 +136,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               children: [
                 const SizedBox(height: AppSpacing.xl),
                 Text(
-                  'Únete a Ocari',
+                  'Join Ocari',
                   style: context.textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'Crea una cuenta para comenzar',
+                  'Create an account to get started',
                   style: context.textTheme.bodyLarge?.copyWith(
                     color: context.colors.onBgLight.withValues(alpha: 0.7),
                   ),
@@ -164,20 +161,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 TextFormField(
-                  controller: _usernameController,
-                  textInputAction: TextInputAction.next,
-                  decoration: const InputDecoration(
-                    labelText: 'Nombre de usuario (opcional)',
-                    prefixIcon: Icon(Icons.person_outline),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
-                    labelText: 'Contraseña',
+                    labelText: 'Password',
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -194,7 +182,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'Mínimo 8 caracteres, mayúscula, minúscula, número y símbolo',
+                  'Minimum 8 characters, uppercase, lowercase, number and symbol',
                   style: context.textTheme.bodySmall?.copyWith(
                     color: context.colors.onBgLight.withValues(alpha: 0.5),
                   ),
@@ -206,7 +194,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   textInputAction: TextInputAction.done,
                   onFieldSubmitted: (_) => _handleRegister(),
                   decoration: InputDecoration(
-                    labelText: 'Confirmar contraseña',
+                    labelText: 'Confirm password',
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -233,19 +221,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text('Crear cuenta'),
+                      : const Text('Create account'),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      '¿Ya tienes cuenta? ',
+                      'Already have an account? ',
                       style: context.textTheme.bodyMedium,
                     ),
                     TextButton(
                       onPressed: () => context.go('/login'),
-                      child: const Text('Inicia sesión'),
+                      child: const Text('Sign in'),
                     ),
                   ],
                 ),

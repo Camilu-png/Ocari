@@ -142,3 +142,17 @@ class AuthNotifier extends Notifier<AppAuthState> {
 final authProvider = NotifierProvider<AuthNotifier, AppAuthState>(
   AuthNotifier.new,
 );
+
+final authStateStreamProvider = StreamProvider<AppAuthState>((ref) {
+  final authClient = ref.watch(supabaseAuthClientProvider);
+  return authClient.onAuthStateChange.map((event) {
+    final session = authClient.currentSession;
+    if (session != null) {
+      return AppAuthState(
+        status: AuthStatus.authenticated,
+        user: session.user,
+      );
+    }
+    return const AppAuthState(status: AuthStatus.unauthenticated);
+  });
+});
