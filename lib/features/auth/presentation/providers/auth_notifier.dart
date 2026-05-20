@@ -15,10 +15,10 @@ class AppAuthState {
     this.user,
   });
 
-  AppAuthState copyWith({AuthStatus? status, supabase.User? user}) {
+  AppAuthState copyWith({AuthStatus? status, supabase.User? user, bool clearUser = false}) {
     return AppAuthState(
       status: status ?? this.status,
-      user: user ?? this.user,
+      user: clearUser ? null : (user ?? this.user),
     );
   }
 
@@ -29,6 +29,20 @@ final supabaseAuthClientProvider = Provider<supabase.GoTrueClient>((ref) {
   return supabase.Supabase.instance.client.auth;
 });
 
+const _googleClientId = String.fromEnvironment(
+  'GOOGLE_SERVER_CLIENT_ID',
+  defaultValue: '',
+);
+
+final googleSignInProvider = Provider<GoogleSignIn>((ref) {
+  return GoogleSignIn(
+    scopes: ['email', 'profile'],
+    serverClientId: _googleClientId.isNotEmpty
+        ? _googleClientId
+        : null,
+  );
+});
+
 class AuthNotifier extends Notifier<AppAuthState> {
   StreamSubscription? _authSubscription;
 
@@ -36,17 +50,22 @@ class AuthNotifier extends Notifier<AppAuthState> {
   AppAuthState build() {
     final authClient = ref.watch(supabaseAuthClientProvider);
 
-    _authSubscription = authClient.onAuthStateChange.listen((event) {
-      final session = authClient.currentSession;
-      if (session != null) {
-        state = AppAuthState(
-          status: AuthStatus.authenticated,
-          user: session.user,
-        );
-      } else {
+    _authSubscription = authClient.onAuthStateChange.listen(
+      (event) {
+        final session = authClient.currentSession;
+        if (session != null) {
+          state = AppAuthState(
+            status: AuthStatus.authenticated,
+            user: session.user,
+          );
+        } else {
+          state = const AppAuthState(status: AuthStatus.unauthenticated);
+        }
+      },
+      onError: (error) {
         state = const AppAuthState(status: AuthStatus.unauthenticated);
-      }
-    });
+      },
+    );
 
     ref.onDispose(() {
       _authSubscription?.cancel();
@@ -82,7 +101,7 @@ class AuthNotifier extends Notifier<AppAuthState> {
       if (response.user != null) {
         return (success: true, error: null);
       }
-      return (success: false, error: 'Error al crear usuario');
+      return (success: false, error: 'Failed to create user');
     } catch (e) {
       return (success: false, error: e.toString());
     }
@@ -90,11 +109,7 @@ class AuthNotifier extends Notifier<AppAuthState> {
 
   Future<({bool success, String? error})> signInWithGoogle() async {
     try {
-      final googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile'],
-        serverClientId:
-            '744538709104-namv6gt3mfki4i8png1ntg96recealk8.apps.googleusercontent.com',
-      );
+      final googleSignIn = ref.read(googleSignInProvider);
 
       final googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
@@ -121,10 +136,6 @@ class AuthNotifier extends Notifier<AppAuthState> {
     } catch (e) {
       return (success: false, error: e.toString());
     }
-  }
-
-  void loginForTest() {
-    state = const AppAuthState(status: AuthStatus.authenticated);
   }
 }
 
