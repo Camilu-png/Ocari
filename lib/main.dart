@@ -17,8 +17,7 @@ void main() async {
   final supabaseAnonKey = dotenv.get('SUPABASE_ANON_KEY', fallback: '');
 
   if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
-    debugPrint('Error: SUPABASE_URL or SUPABASE_ANON_KEY not found in .env');
-    return;
+    throw Exception('Error: SUPABASE_URL or SUPABASE_ANON_KEY not found in .env');
   }
 
   await Supabase.initialize(
@@ -65,7 +64,7 @@ class _DebugButton extends StatelessWidget {
       bottom: 20,
       right: 20,
       child: FloatingActionButton(
-        heroTag: 'debug_btn',
+        heroTag: 'debug_fab',
         onPressed: () => router.go('/debug'),
         backgroundColor: Colors.purple,
         mini: true,

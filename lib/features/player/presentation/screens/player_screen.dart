@@ -17,8 +17,8 @@ class PlayerScreen extends StatelessWidget {
             Text('Player Screen - Song: $songId'),
             const SizedBox(height: 24),
             FilledButton(
-              onPressed: () => context.go('/songs'),
-              child: const Text('Volver a Songs'),
+onPressed: () => context.go('/songs'),
+                child: const Text('Back to Songs'),
             ),
           ],
         ),

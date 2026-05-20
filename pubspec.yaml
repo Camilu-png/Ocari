@@ -19,6 +19,8 @@ dependencies:
 
   # — Backend / Auth
   supabase_flutter: ^2.12.4
+  google_sign_in: ^6.2.1
+  flutter_signin_button: ^2.0.0
 
   # — Audio
   just_audio: ^0.9.39
@@ -38,6 +40,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  # — Testing
+  mocktail: ^1.0.3
 
   # — Generadores de código (freezed + riverpod)
   build_runner: ^2.4.9
