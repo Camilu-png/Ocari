@@ -4,13 +4,11 @@ on:
   push:
     branches:
       - develop
-
   pull_request:
 
 jobs:
   ci:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -19,6 +17,8 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.32.0"
+          channel: stable
+          cache: true
 
       - name: Install dependencies
         run: flutter pub get
@@ -30,4 +30,7 @@ jobs:
         run: flutter test
 
       - name: Verify APK build
-        run: flutter build apk --debug
+        run: |
+          flutter build apk --debug \
+            --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
+            --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
