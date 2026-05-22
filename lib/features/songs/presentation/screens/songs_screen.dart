@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/widgets/ocari_button.dart';
 import '../../../auth/presentation/providers/auth_notifier.dart';
 
 class Song {
@@ -49,9 +50,10 @@ class SongsScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             ...songs.map((song) => Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
-              child: FilledButton(
+              child: OcariButton(
+                label: song.title,
                 onPressed: () => context.go('/player/${song.id}'),
-                child: Text(song.title),
+                isFullWidth: false,
               ),
             )),
           ],

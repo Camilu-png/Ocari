@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/widgets/ocari_button.dart';
+
 class PlayerScreen extends StatelessWidget {
   final String songId;
 
@@ -16,9 +18,10 @@ class PlayerScreen extends StatelessWidget {
           children: [
             Text('Player Screen - Song: $songId'),
             const SizedBox(height: 24),
-            FilledButton(
-onPressed: () => context.go('/songs'),
-                child: const Text('Back to Songs'),
+            OcariButton(
+              label: 'Back to Songs',
+              onPressed: () => context.go('/songs'),
+              isFullWidth: false,
             ),
           ],
         ),

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/ocari_button.dart';
+import '../../../../core/widgets/ocari_text_field.dart';
 import '../providers/auth_notifier.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -18,8 +20,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
 
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
@@ -149,35 +149,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.xl + AppSpacing.md),
-                TextFormField(
+                OcariTextField(
+                  label: 'Email',
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email_outlined),
-                  ),
                   validator: _validateEmail,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                TextFormField(
+                OcariTextField(
+                  label: 'Password',
                   controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  textInputAction: TextInputAction.next,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                      ),
-                      onPressed: () {
-                        setState(() => _obscurePassword = !_obscurePassword);
-                      },
-                    ),
-                  ),
+                  obscureText: true,
                   validator: _validatePassword,
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -188,40 +170,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
-                TextFormField(
+                OcariTextField(
+                  label: 'Confirm password',
                   controller: _confirmPasswordController,
-                  obscureText: _obscureConfirmPassword,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _handleRegister(),
-                  decoration: InputDecoration(
-                    labelText: 'Confirm password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureConfirmPassword
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                      ),
-                      onPressed: () {
-                        setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
-                      },
-                    ),
-                  ),
+                  obscureText: true,
                   validator: _validateConfirmPassword,
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                FilledButton(
-                  onPressed: _isLoading ? null : _handleRegister,
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Create account'),
+                OcariButton(
+                  label: 'Create account',
+                  isLoading: _isLoading,
+                  onPressed: _handleRegister,
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Row(

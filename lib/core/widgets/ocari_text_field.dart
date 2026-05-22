@@ -8,6 +8,7 @@ class OcariTextField extends StatefulWidget {
   final String? errorText;
   final TextInputType keyboardType;
   final ValueChanged<String>? onChanged;
+  final FormFieldValidator<String>? validator;
 
   const OcariTextField({
     super.key,
@@ -17,6 +18,7 @@ class OcariTextField extends StatefulWidget {
     this.errorText,
     this.keyboardType = TextInputType.text,
     this.onChanged,
+    this.validator,
   });
 
   @override
@@ -49,6 +51,7 @@ class _OcariTextFieldState extends State<OcariTextField> {
           obscureText: widget.obscureText && _isObscured,
           keyboardType: widget.keyboardType,
           onChanged: widget.onChanged,
+          validator: widget.validator,
           style: AppTextStyles.body(colors.onBgLight),
           decoration: InputDecoration(
             filled: true,
