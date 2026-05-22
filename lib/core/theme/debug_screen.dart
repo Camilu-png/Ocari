@@ -6,6 +6,9 @@ import '../widgets/difficulty_badge.dart';
 import '../widgets/ocari_button.dart';
 import '../widgets/ocari_scaffold.dart';
 import '../widgets/ocari_text_field.dart';
+import '../widgets/song_card.dart';
+
+void _noop() {}
 
 class DebugScreen extends StatelessWidget {
   const DebugScreen({super.key});
@@ -47,6 +50,8 @@ class DebugScreen extends StatelessWidget {
             const _TextFieldsPreview(),
             const SizedBox(height: 24),
             _buildScaffoldSection(context),
+            const SizedBox(height: 24),
+            _buildSongCardsSection(),
             const SizedBox(height: 40),
           ],
         ),
@@ -205,6 +210,49 @@ class DebugScreen extends StatelessWidget {
       ],
     );
   }
+
+  Widget _buildSongCardsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Song Cards'),
+        const SizedBox(height: 16),
+        const SongCard(
+          title: 'Twinkle Twinkle',
+          artist: 'Mozart',
+          difficulty: 'easy',
+          durationSeconds: 120,
+          onTap: _noop,
+        ),
+        const SizedBox(height: 8),
+        const SongCard(
+          title: 'Moonlight Sonata',
+          artist: 'Beethoven',
+          difficulty: 'medium',
+          durationSeconds: 420,
+          onTap: _noop,
+        ),
+        const SizedBox(height: 8),
+        const SongCard(
+          title: 'Flight of the Bumblebee',
+          artist: 'Rimsky-Korsakov',
+          difficulty: 'hard',
+          durationSeconds: 90,
+          onTap: _noop,
+        ),
+        const SizedBox(height: 8),
+        const SongCard(
+          title: 'Locked Song',
+          artist: 'Unknown',
+          difficulty: 'hard',
+          durationSeconds: 180,
+          isLocked: true,
+          onTap: _noop,
+        ),
+      ],
+    );
+  }
+
 }
 
 class _ScaffoldPreviewRoute extends StatelessWidget {
