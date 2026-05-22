@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'app_theme.dart';
+import '../widgets/difficulty_badge.dart';
 import '../widgets/ocari_button.dart';
 import '../widgets/ocari_scaffold.dart';
 import '../widgets/ocari_text_field.dart';
@@ -168,6 +169,16 @@ class DebugScreen extends StatelessWidget {
             _ColorChip('mediumText', colors.diffMediumText),
             _ColorChip('hardBg', colors.diffHardBg),
             _ColorChip('hardText', colors.diffHardText),
+          ],
+        ),
+        const SizedBox(height: 16),
+        const Wrap(
+          spacing: 12,
+          runSpacing: 8,
+          children: [
+            DifficultyBadge(difficulty: 'easy'),
+            DifficultyBadge(difficulty: 'medium'),
+            DifficultyBadge(difficulty: 'hard'),
           ],
         ),
       ],
