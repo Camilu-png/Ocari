@@ -9,7 +9,6 @@ class OcariScaffold extends StatelessWidget {
   final Widget? floatingActionButton;
   final bool showBackButton;
 
-  // Permite usar un fondo distinto al default — útil para el PlayerScreen
   final Color? backgroundColor;
 
   const OcariScaffold({
@@ -28,12 +27,10 @@ class OcariScaffold extends StatelessWidget {
     final canPop = showBackButton && Navigator.canPop(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // AppBar siempre usa accent (púrpura) — identidad visual de Ocari
     const appBarBg = Color(0xFF7F77DD);
     const appBarFg = Colors.white;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      // Iconos del status bar en blanco — contrasta con el appBarBg púrpura
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
         backgroundColor:
@@ -64,7 +61,6 @@ class OcariScaffold extends StatelessWidget {
                 )
               : null,
           actions: actions,
-          // Línea sutil bajo la AppBar solo en modo claro
           bottom: isDark
               ? null
               : PreferredSize(
