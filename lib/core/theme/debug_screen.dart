@@ -8,8 +8,6 @@ import '../widgets/ocari_scaffold.dart';
 import '../widgets/ocari_text_field.dart';
 import '../widgets/song_card.dart';
 
-void _noop() {}
-
 class DebugScreen extends StatelessWidget {
   const DebugScreen({super.key});
 
@@ -217,37 +215,37 @@ class DebugScreen extends StatelessWidget {
       children: [
         const Text('Song Cards'),
         const SizedBox(height: 16),
-        const SongCard(
+        SongCard(
           title: 'Twinkle Twinkle',
           artist: 'Mozart',
           difficulty: 'easy',
           durationSeconds: 120,
-          onTap: _noop,
+          onTap: () {},
         ),
         const SizedBox(height: 8),
-        const SongCard(
+        SongCard(
           title: 'Moonlight Sonata',
           artist: 'Beethoven',
           difficulty: 'medium',
           durationSeconds: 420,
-          onTap: _noop,
+          onTap: () {},
         ),
         const SizedBox(height: 8),
-        const SongCard(
+        SongCard(
           title: 'Flight of the Bumblebee',
           artist: 'Rimsky-Korsakov',
           difficulty: 'hard',
           durationSeconds: 90,
-          onTap: _noop,
+          onTap: () {},
         ),
         const SizedBox(height: 8),
-        const SongCard(
+        SongCard(
           title: 'Locked Song',
           artist: 'Unknown',
           difficulty: 'hard',
           durationSeconds: 180,
           isLocked: true,
-          onTap: _noop,
+          onTap: () {},
         ),
       ],
     );

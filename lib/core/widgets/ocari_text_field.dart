@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_theme.dart';
+import '../theme/app_theme.dart';
 
 class OcariTextField extends StatefulWidget {
   final String label;

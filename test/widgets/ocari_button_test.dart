@@ -75,7 +75,9 @@ void main() {
         ),
       );
 
-      final sizedBox = tester.widget<SizedBox>(find.byType(SizedBox).first);
+      final sizedBox = tester.widget<SizedBox>(
+        find.byKey(const Key('ocari_button_sized_box')),
+      );
       expect(sizedBox.width, equals(double.infinity));
     });
 
@@ -89,7 +91,9 @@ void main() {
         ),
       );
 
-      final sizedBox = tester.widget<SizedBox>(find.byType(SizedBox).first);
+      final sizedBox = tester.widget<SizedBox>(
+        find.byKey(const Key('ocari_button_sized_box')),
+      );
       expect(sizedBox.width, isNull);
     });
 
