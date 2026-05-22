@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/ocari_button.dart';
+import '../../../../core/widgets/ocari_scaffold.dart';
 import '../../../../core/widgets/ocari_text_field.dart';
 import '../providers/auth_notifier.dart';
 
@@ -122,12 +123,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create account'),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
+    return OcariScaffold(
+      title: 'Create account',
+      body: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Form(
             key: _formKey,
@@ -201,7 +199,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ),
           ),
         ),
-      ),
     );
   }
 }

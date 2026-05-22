@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'app_theme.dart';
 import '../widgets/ocari_button.dart';
+import '../widgets/ocari_scaffold.dart';
 import '../widgets/ocari_text_field.dart';
 
 class DebugScreen extends StatelessWidget {
@@ -43,6 +44,8 @@ class DebugScreen extends StatelessWidget {
             _buildDifficultySection(context, colors),
             const SizedBox(height: 24),
             const _TextFieldsPreview(),
+            const SizedBox(height: 24),
+            _buildScaffoldSection(context),
             const SizedBox(height: 40),
           ],
         ),
@@ -168,6 +171,64 @@ class DebugScreen extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildScaffoldSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Scaffold', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 16),
+        OcariButton(
+          label: 'Open Scaffold Preview',
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const _ScaffoldPreviewRoute(),
+              ),
+            );
+          },
+          isFullWidth: false,
+        ),
+      ],
+    );
+  }
+}
+
+class _ScaffoldPreviewRoute extends StatelessWidget {
+  const _ScaffoldPreviewRoute();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return OcariScaffold(
+      title: 'Scaffold Preview',
+      body: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'OcariScaffold in action',
+              style: context.textTheme.headlineSmall,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'The AppBar uses AppColors.primary as background '
+              'with AppTextStyles.heading for the title.',
+              style: context.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'Tap back to return to debug screen.',
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: colors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
