@@ -47,7 +47,7 @@ class AppColors extends ThemeExtension<AppColors> {
     primary: Color(0xFF2C2C2A),
     onPrimary: Color(0xFFF1EFE8),
     accent: Color(0xFF7F77DD),
-    onAccent: Color(0xFF6C63D4),
+    onAccent: Color(0xFFFFFFFF),
     bgDark: Color(0xFF0D0D1A),
     onBgDark: Color(0xFFF1EFE8),
     bgLight: Color(0xFFFAF7F0),

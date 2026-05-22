@@ -17,14 +17,24 @@ class OcariButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDisabled = isLoading || onPressed == null;
+    final colors = context.colors;
+    final isDisabled = !isLoading && onPressed == null;
+    final Color bgColor =
+        isDisabled ? colors.accent.withValues(alpha: 0.38) : colors.accent;
+
+    final Color fgColor =
+        isDisabled ? colors.onAccent.withValues(alpha: 0.6) : colors.onAccent;
 
     return SizedBox(
       width: isFullWidth ? double.infinity : null,
       height: 48,
       child: FilledButton(
-        onPressed: isDisabled ? null : onPressed,
+        onPressed: (isLoading || isDisabled) ? null : onPressed,
         style: FilledButton.styleFrom(
+          backgroundColor: bgColor,
+          foregroundColor: fgColor,
+          disabledBackgroundColor: bgColor,
+          disabledForegroundColor: fgColor,
           shape: const RoundedRectangleBorder(
             borderRadius: AppRadius.borderRadiusLg,
           ),
@@ -39,16 +49,12 @@ class OcariButton extends StatelessWidget {
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).colorScheme.onPrimary,
-                  ),
+                  valueColor: AlwaysStoppedAnimation<Color>(fgColor),
                 ),
               )
             : Text(
                 label,
-                style: context.textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
+                style: context.textTheme.labelLarge?.copyWith(color: fgColor),
               ),
       ),
     );

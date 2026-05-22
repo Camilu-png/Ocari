@@ -25,10 +25,14 @@ class DebugScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Theme Tokens',
-                style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              'Theme Tokens',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             const SizedBox(height: 16),
-            _buildColorSection(context, 'Light Theme', colors),
+            _buildColorSection(context, 'Current Theme', colors),
+            const SizedBox(height: 24),
+            _buildColorSection(context, 'Light Theme', AppColors.light),
             const SizedBox(height: 24),
             _buildColorSection(context, 'Dark Theme', AppColors.dark),
             const SizedBox(height: 24),
@@ -38,7 +42,8 @@ class DebugScreen extends StatelessWidget {
             const SizedBox(height: 24),
             _buildDifficultySection(context, colors),
             const SizedBox(height: 24),
-            _buildTextFieldsSection(context),
+            const _TextFieldsPreview(),
+            const SizedBox(height: 40),
           ],
         ),
       ),
@@ -46,7 +51,10 @@ class DebugScreen extends StatelessWidget {
   }
 
   Widget _buildColorSection(
-      BuildContext context, String title, AppColors colors) {
+    BuildContext context,
+    String title,
+    AppColors colors,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -57,13 +65,16 @@ class DebugScreen extends StatelessWidget {
           runSpacing: 12,
           children: [
             _ColorChip('primary', colors.primary),
+            _ColorChip('onPrimary', colors.onPrimary),
             _ColorChip('accent', colors.accent),
+            _ColorChip('onAccent', colors.onAccent),
             _ColorChip('bgDark', colors.bgDark),
-            _ColorChip('onBgDarl', colors.onBgDark),
+            _ColorChip('onBgDark', colors.onBgDark),
             _ColorChip('bgLight', colors.bgLight),
             _ColorChip('onBgLight', colors.onBgLight),
             _ColorChip('surface', colors.surface),
             _ColorChip('textSecondary', colors.textSecondary),
+            _ColorChip('error', colors.error),
           ],
         ),
       ],
@@ -82,20 +93,25 @@ class DebugScreen extends StatelessWidget {
           ('md', AppSpacing.md),
           ('lg', AppSpacing.lg),
           ('xl', AppSpacing.xl),
-        ].map((e) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Container(
-                      width: e.$2,
-                      height: 20,
-                      color: Theme.of(context).colorScheme.primary),
-                  const SizedBox(width: 8),
-                  Text('${e.$1} = ${e.$2}px',
-                      style: Theme.of(context).textTheme.bodySmall),
-                ],
-              ),
-            )),
+        ].map(
+          (e) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              children: [
+                Container(
+                  width: e.$2,
+                  height: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${e.$1} = ${e.$2}px',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -106,7 +122,10 @@ class DebugScreen extends StatelessWidget {
       children: [
         Text('Buttons', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 16),
-        const OcariButton(label: 'Default Button'),
+        OcariButton(
+          label: 'Default Button',
+          onPressed: () {},
+        ),
         const SizedBox(height: 12),
         const OcariButton(
           label: 'Loading Button',
@@ -118,9 +137,10 @@ class DebugScreen extends StatelessWidget {
           onPressed: null,
         ),
         const SizedBox(height: 12),
-        const OcariButton(
+        OcariButton(
           label: 'Not Full Width',
           isFullWidth: false,
+          onPressed: () {},
         ),
       ],
     );
@@ -130,26 +150,50 @@ class DebugScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Difficulty Colors',
-            style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          'Difficulty Colors',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 12,
           runSpacing: 12,
           children: [
-            _ColorChip('Easy', colors.diffEasyBg),
-            _ColorChip('Medium', colors.diffMediumBg),
-            _ColorChip('Hard', colors.diffHardBg),
+            _ColorChip('easyBg', colors.diffEasyBg),
+            _ColorChip('easyText', colors.diffEasyText),
+            _ColorChip('mediumBg', colors.diffMediumBg),
+            _ColorChip('mediumText', colors.diffMediumText),
+            _ColorChip('hardBg', colors.diffHardBg),
+            _ColorChip('hardText', colors.diffHardText),
           ],
         ),
       ],
     );
   }
+}
 
-  Widget _buildTextFieldsSection(BuildContext context) {
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
+class _TextFieldsPreview extends StatefulWidget {
+  const _TextFieldsPreview();
 
+  @override
+  State<_TextFieldsPreview> createState() => _TextFieldsPreviewState();
+}
+
+class _TextFieldsPreviewState extends State<_TextFieldsPreview> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _errorController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _errorController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -157,25 +201,27 @@ class DebugScreen extends StatelessWidget {
         const SizedBox(height: 16),
         OcariTextField(
           label: 'Email',
-          controller: emailController,
+          controller: _emailController,
           keyboardType: TextInputType.emailAddress,
         ),
         const SizedBox(height: 16),
         OcariTextField(
           label: 'Password',
-          controller: passwordController,
+          controller: _passwordController,
           obscureText: true,
         ),
         const SizedBox(height: 16),
         OcariTextField(
           label: 'With Error',
-          controller: TextEditingController(),
+          controller: _errorController,
           errorText: 'This field is required',
         ),
       ],
     );
   }
 }
+
+// — Color Chip ----------------------------------------------------------------
 
 class _ColorChip extends StatelessWidget {
   final String label;
