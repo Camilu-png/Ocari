@@ -23,7 +23,6 @@ class OcariScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final canPop = showBackButton && Navigator.canPop(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
