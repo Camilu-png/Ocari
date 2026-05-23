@@ -308,7 +308,7 @@ extension AppThemeExtension on BuildContext {
 
 class AppTheme {
   static ThemeData get lightTheme {
-    final colors = AppColors.light;
+    const colors = AppColors.light;
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
@@ -365,12 +365,12 @@ class AppTheme {
           borderSide: BorderSide(color: colors.accent),
         ),
       ),
-      extensions: [AppColors.light],
+      extensions: const [AppColors.light],
     );
   }
 
   static ThemeData get darkTheme {
-    final colors = AppColors.dark;
+    const colors = AppColors.dark;
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
@@ -427,7 +427,7 @@ class AppTheme {
           borderSide: BorderSide(color: colors.accent),
         ),
       ),
-      extensions: [AppColors.dark],
+      extensions: const [AppColors.dark],
     );
   }
 }

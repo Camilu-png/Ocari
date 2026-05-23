@@ -212,36 +212,36 @@ class DebugScreen extends StatelessWidget {
   }
 
   Widget _buildSongCardsSection() {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Song Cards'),
-        const SizedBox(height: 16),
-        const SongCard(
+        Text('Song Cards'),
+        SizedBox(height: 16),
+        SongCard(
           title: 'Twinkle Twinkle',
           artist: 'Mozart',
           difficulty: 'easy',
           durationSeconds: 120,
           onTap: _noop,
         ),
-        const SizedBox(height: 8),
-        const SongCard(
+        SizedBox(height: 8),
+        SongCard(
           title: 'Moonlight Sonata',
           artist: 'Beethoven',
           difficulty: 'medium',
           durationSeconds: 420,
           onTap: _noop,
         ),
-        const SizedBox(height: 8),
-        const SongCard(
+        SizedBox(height: 8),
+        SongCard(
           title: 'Flight of the Bumblebee',
           artist: 'Rimsky-Korsakov',
           difficulty: 'hard',
           durationSeconds: 90,
           onTap: _noop,
         ),
-        const SizedBox(height: 8),
-        const SongCard(
+        SizedBox(height: 8),
+        SongCard(
           title: 'Locked Song',
           artist: 'Unknown',
           difficulty: 'hard',
