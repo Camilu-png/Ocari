@@ -82,6 +82,7 @@ class AuthNotifier extends Notifier<AppAuthState> {
   }
 
   Future<({bool success, String? error})> signUp({
+    required String name,
     required String email,
     required String password,
   }) async {
@@ -90,6 +91,7 @@ class AuthNotifier extends Notifier<AppAuthState> {
       final response = await authClient.signUp(
         email: email,
         password: password,
+        data: {'full_name': name},
       );
       if (response.user != null) {
         return (success: true, error: null);
@@ -97,6 +99,38 @@ class AuthNotifier extends Notifier<AppAuthState> {
       return (success: false, error: 'Failed to create user');
     } catch (e) {
       return (success: false, error: e.toString());
+    }
+  }
+
+  Future<({bool success, String? error})> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final authClient = ref.read(supabaseAuthClientProvider);
+      final response = await authClient.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      if (response.user != null) {
+        return (success: true, error: null);
+      }
+      return (success: false, error: 'Login failed');
+    } on supabase.AuthException catch (e) {
+      final message = e.message.toLowerCase();
+      if (message.contains('invalid') || message.contains('credentials') || message.contains('grant')) {
+        return (success: false, error: 'Incorrect email or password.');
+      }
+      return (success: false, error: e.message);
+    } catch (e) {
+      final errStr = e.toString().toLowerCase();
+      if (errStr.contains('socketexception') ||
+          errStr.contains('connection') ||
+          errStr.contains('failed host lookup') ||
+          errStr.contains('network')) {
+        return (success: false, error: 'Connection error. Please check your internet connection.');
+      }
+      return (success: false, error: 'An unexpected error occurred.');
     }
   }
 

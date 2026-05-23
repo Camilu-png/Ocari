@@ -17,10 +17,21 @@ class RegisterScreen extends ConsumerStatefulWidget {
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
+
+  String? _validateName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Name is required';
+    }
+    if (value.trim().length < 2) {
+      return 'Name must be at least 2 characters';
+    }
+    return null;
+  }
 
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
@@ -49,7 +60,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (!RegExp(r'[0-9]').hasMatch(value)) {
       return 'Must have at least one number';
     }
-    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
+    if (!RegExp(r'[^a-zA-Z0-9\s]').hasMatch(value)) {
       return 'Must have at least one symbol';
     }
     return null;
@@ -71,6 +82,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     setState(() => _isLoading = true);
 
     final result = await ref.read(authProvider.notifier).signUp(
+          name: _nameController.text.trim(),
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
@@ -115,6 +127,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -147,6 +160,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.xl + AppSpacing.md),
+                OcariTextField(
+                  label: 'Name',
+                  controller: _nameController,
+                  validator: _validateName,
+                ),
+                const SizedBox(height: AppSpacing.md),
                 OcariTextField(
                   label: 'Email',
                   controller: _emailController,
