@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'core/router/app_router.dart';
-import 'core/theme/app_theme.dart';
+import 'package:ocari/core/router/app_router.dart';
+import 'package:ocari/core/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,7 +17,8 @@ void main() async {
   final supabaseAnonKey = dotenv.get('SUPABASE_ANON_KEY', fallback: '');
 
   if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
-    throw Exception('Error: SUPABASE_URL or SUPABASE_ANON_KEY not found in .env');
+    throw Exception(
+        'Error: SUPABASE_URL or SUPABASE_ANON_KEY not found in .env');
   }
 
   await Supabase.initialize(
@@ -44,8 +45,7 @@ class OcariApp extends ConsumerWidget {
         return Stack(
           children: [
             child ?? const SizedBox(),
-            if (kDebugMode)
-              _DebugButton(router: router),
+            if (kDebugMode) _DebugButton(router: router),
           ],
         );
       },
