@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/ocari_button.dart';
-import '../../../../core/widgets/ocari_scaffold.dart';
-import '../../../../core/widgets/ocari_text_field.dart';
-import '../providers/auth_notifier.dart';
+import 'package:ocari/core/theme/app_theme.dart';
+import 'package:ocari/core/widgets/ocari_button.dart';
+import 'package:ocari/core/widgets/ocari_scaffold.dart';
+import 'package:ocari/core/widgets/ocari_text_field.dart';
+import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -126,79 +126,79 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return OcariScaffold(
       title: 'Create account',
       body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: AppSpacing.xl),
-                Text(
-                  'Join Ocari',
-                  style: context.textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: AppSpacing.xl),
+              Text(
+                'Join Ocari',
+                style: context.textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Create an account to get started',
+                style: context.textTheme.bodyLarge?.copyWith(
+                  color: context.colors.onBgLight.withValues(alpha: 0.7),
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'Create an account to get started',
-                  style: context.textTheme.bodyLarge?.copyWith(
-                    color: context.colors.onBgLight.withValues(alpha: 0.7),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.xl + AppSpacing.md),
+              OcariTextField(
+                label: 'Email',
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                validator: _validateEmail,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              OcariTextField(
+                label: 'Password',
+                controller: _passwordController,
+                obscureText: true,
+                validator: _validatePassword,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Minimum 8 characters, uppercase, lowercase, number and symbol',
+                style: context.textTheme.bodySmall?.copyWith(
+                  color: context.colors.onBgLight.withValues(alpha: 0.5),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              OcariTextField(
+                label: 'Confirm password',
+                controller: _confirmPasswordController,
+                obscureText: true,
+                validator: _validateConfirmPassword,
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              OcariButton(
+                label: 'Create account',
+                isLoading: _isLoading,
+                onPressed: _handleRegister,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Already have an account? ',
+                    style: context.textTheme.bodyMedium,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.xl + AppSpacing.md),
-                OcariTextField(
-                  label: 'Email',
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: _validateEmail,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                OcariTextField(
-                  label: 'Password',
-                  controller: _passwordController,
-                  obscureText: true,
-                  validator: _validatePassword,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'Minimum 8 characters, uppercase, lowercase, number and symbol',
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: context.colors.onBgLight.withValues(alpha: 0.5),
+                  TextButton(
+                    onPressed: () => context.go('/login'),
+                    child: const Text('Sign in'),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                OcariTextField(
-                  label: 'Confirm password',
-                  controller: _confirmPasswordController,
-                  obscureText: true,
-                  validator: _validateConfirmPassword,
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                OcariButton(
-                  label: 'Create account',
-                  isLoading: _isLoading,
-                  onPressed: _handleRegister,
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Already have an account? ',
-                      style: context.textTheme.bodyMedium,
-                    ),
-                    TextButton(
-                      onPressed: () => context.go('/login'),
-                      child: const Text('Sign in'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xl),
-              ],
-            ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xl),
+            ],
           ),
         ),
+      ),
     );
   }
 }
