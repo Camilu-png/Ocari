@@ -250,7 +250,6 @@ class DebugScreen extends StatelessWidget {
       ],
     );
   }
-
 }
 
 class _ScaffoldPreviewRoute extends StatelessWidget {
@@ -338,8 +337,6 @@ class _TextFieldsPreviewState extends State<_TextFieldsPreview> {
     );
   }
 }
-
-// — Color Chip ----------------------------------------------------------------
 
 class _ColorChip extends StatelessWidget {
   final String label;
