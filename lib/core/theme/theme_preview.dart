@@ -125,7 +125,7 @@ class ThemePreview extends StatelessWidget {
   }
 
   Widget _buildSpacingGrid() {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _SpacingRow('xs', AppSpacing.xs),
