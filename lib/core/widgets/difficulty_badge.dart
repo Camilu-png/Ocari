@@ -10,10 +10,11 @@ class DifficultyBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    final (Color bg, Color fg, String label) = switch (difficulty.toLowerCase()) {
-      'easy' => (colors.diffEasyBg, colors.diffEasyText, 'Fácil'),
-      'medium' => (colors.diffMediumBg, colors.diffMediumText, 'Medio'),
-      'hard' => (colors.diffHardBg, colors.diffHardText, 'Difícil'),
+    final (Color bg, Color fg, String label) =
+        switch (difficulty.toLowerCase()) {
+      'easy' => (colors.diffEasyBg, colors.diffEasyText, 'Easy'),
+      'medium' => (colors.diffMediumBg, colors.diffMediumText, 'Medium'),
+      'hard' => (colors.diffHardBg, colors.diffHardText, 'Hard'),
       _ => (colors.textSecondary, colors.onBgLight, difficulty),
     };
 
