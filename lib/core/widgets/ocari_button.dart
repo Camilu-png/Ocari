@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
+import 'package:ocari/core/theme/app_theme.dart';
 
 class OcariButton extends StatelessWidget {
   final String label;
@@ -18,18 +18,21 @@ class OcariButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final isDisabled = !isLoading && onPressed == null;
-    final Color bgColor =
-        isDisabled ? colors.accent.withValues(alpha: 0.38) : colors.accent;
+    final isEffectivelyDisabled = !isLoading && onPressed == null;
+    final Color bgColor = isEffectivelyDisabled
+        ? colors.accent.withValues(alpha: 0.38)
+        : colors.accent;
 
-    final Color fgColor =
-        isDisabled ? colors.onAccent.withValues(alpha: 0.6) : colors.onAccent;
+    final Color fgColor = isEffectivelyDisabled
+        ? colors.onAccent.withValues(alpha: 0.6)
+        : colors.onAccent;
 
     return SizedBox(
+      key: const Key('ocari_button_sized_box'),
       width: isFullWidth ? double.infinity : null,
       height: 48,
       child: FilledButton(
-        onPressed: (isLoading || isDisabled) ? null : onPressed,
+        onPressed: (isLoading || isEffectivelyDisabled) ? null : onPressed,
         style: FilledButton.styleFrom(
           backgroundColor: bgColor,
           foregroundColor: fgColor,

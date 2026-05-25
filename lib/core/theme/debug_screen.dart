@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'app_theme.dart';
-import '../widgets/difficulty_badge.dart';
-import '../widgets/ocari_button.dart';
-import '../widgets/ocari_scaffold.dart';
-import '../widgets/ocari_text_field.dart';
-import '../widgets/song_card.dart';
-
-void _noop() {}
+import 'package:ocari/core/widgets/difficulty_badge.dart';
+import 'package:ocari/core/widgets/ocari_button.dart';
+import 'package:ocari/core/widgets/ocari_scaffold.dart';
+import 'package:ocari/core/widgets/ocari_text_field.dart';
+import 'package:ocari/core/widgets/song_card.dart';
 
 class DebugScreen extends StatelessWidget {
   const DebugScreen({super.key});
@@ -222,7 +220,7 @@ class DebugScreen extends StatelessWidget {
           artist: 'Mozart',
           difficulty: 'easy',
           durationSeconds: 120,
-          onTap: _noop,
+          onTap: () {},
         ),
         SizedBox(height: 8),
         SongCard(
@@ -230,7 +228,7 @@ class DebugScreen extends StatelessWidget {
           artist: 'Beethoven',
           difficulty: 'medium',
           durationSeconds: 420,
-          onTap: _noop,
+          onTap: () {},
         ),
         SizedBox(height: 8),
         SongCard(
@@ -238,7 +236,7 @@ class DebugScreen extends StatelessWidget {
           artist: 'Rimsky-Korsakov',
           difficulty: 'hard',
           durationSeconds: 90,
-          onTap: _noop,
+          onTap: () {},
         ),
         SizedBox(height: 8),
         SongCard(
@@ -247,12 +245,11 @@ class DebugScreen extends StatelessWidget {
           difficulty: 'hard',
           durationSeconds: 180,
           isLocked: true,
-          onTap: _noop,
+          onTap: () {},
         ),
       ],
     );
   }
-
 }
 
 class _ScaffoldPreviewRoute extends StatelessWidget {
@@ -340,8 +337,6 @@ class _TextFieldsPreviewState extends State<_TextFieldsPreview> {
     );
   }
 }
-
-// — Color Chip ----------------------------------------------------------------
 
 class _ColorChip extends StatelessWidget {
   final String label;

@@ -3,21 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'core/router/app_router.dart';
-import 'core/theme/app_theme.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-// Las credenciales se inyectan en tiempo de compilación via --dart-define.
-// Nunca viajan en el bundle ni en el repo.
+import 'package:ocari/core/router/app_router.dart';
+import 'package:ocari/core/theme/app_theme.dart';
+
 const _supabaseUrl = String.fromEnvironment('SUPABASE_URL');
 const _supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (_supabaseUrl.isEmpty || _supabaseAnonKey.isEmpty) {
+  await dotenv.load(fileName: '.env');
+
+  final supabaseUrl = dotenv.get('SUPABASE_URL', fallback: '');
+  final supabaseAnonKey = dotenv.get('SUPABASE_ANON_KEY', fallback: '');
+
+  if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
     throw Exception(
-      'Missing env vars. Run with: flutter run --dart-define-from-file=.env',
-    );
+        'Error: SUPABASE_URL or SUPABASE_ANON_KEY not found in .env');
   }
 
   await Supabase.initialize(

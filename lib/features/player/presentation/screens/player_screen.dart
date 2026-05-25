@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/widgets/ocari_button.dart';
-import '../../../../core/widgets/ocari_scaffold.dart';
+import 'package:ocari/core/widgets/ocari_button.dart';
+import 'package:ocari/core/widgets/ocari_scaffold.dart';
 
 class PlayerScreen extends StatelessWidget {
   final String songId;

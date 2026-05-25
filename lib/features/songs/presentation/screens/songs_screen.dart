@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/widgets/ocari_button.dart';
-import '../../../../core/widgets/ocari_scaffold.dart';
-import '../../../auth/presentation/providers/auth_notifier.dart';
+import 'package:ocari/core/widgets/ocari_button.dart';
+import 'package:ocari/core/widgets/ocari_scaffold.dart';
+import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart';
 
 class Song {
   final String id;
@@ -48,13 +48,13 @@ class SongsScreen extends ConsumerWidget {
             const Text('Songs Screen'),
             const SizedBox(height: 24),
             ...songs.map((song) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: OcariButton(
-                label: song.title,
-                onPressed: () => context.go('/player/${song.id}'),
-                isFullWidth: false,
-              ),
-            )),
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: OcariButton(
+                    label: song.title,
+                    onPressed: () => context.go('/player/${song.id}'),
+                    isFullWidth: false,
+                  ),
+                )),
           ],
         ),
       ),
