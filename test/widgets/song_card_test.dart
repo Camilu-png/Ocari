@@ -82,7 +82,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Fácil'), findsNothing);
+      expect(find.text('Easy'), findsNothing);
     });
 
     testWidgets('formats 90 seconds as 1:30', (tester) async {
@@ -169,7 +169,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Medio'), findsOneWidget);
+      expect(find.text('Medium'), findsOneWidget);
     });
   });
 }
