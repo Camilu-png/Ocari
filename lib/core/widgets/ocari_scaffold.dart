@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:ocari/core/theme/app_theme.dart';
 
 class OcariScaffold extends StatelessWidget {
@@ -25,6 +24,7 @@ class OcariScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final canPop = showBackButton && Navigator.canPop(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -38,11 +38,11 @@ class OcariScaffold extends StatelessWidget {
           elevation: 0,
           centerTitle: true,
           systemOverlayStyle: SystemUiOverlayStyle.light,
-          leading: showBackButton
+          leading: canPop
               ? IconButton(
                   icon: Icon(Icons.arrow_back_ios_new_rounded,
                       color: colors.onAccent, size: 20),
-                  onPressed: () => context.pop(),
+                  onPressed: () => Navigator.of(context).pop(),
                 )
               : null,
           title: title != null
