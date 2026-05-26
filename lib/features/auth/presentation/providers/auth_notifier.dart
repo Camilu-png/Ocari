@@ -82,16 +82,17 @@ class AuthNotifier extends Notifier<AppAuthState> {
   }
 
   Future<({bool success, String? error})> signUp({
-    required String name,
     required String email,
     required String password,
+    String? name,
   }) async {
     try {
       final authClient = ref.read(supabaseAuthClientProvider);
+      final data = name != null ? {'full_name': name} : null;
       final response = await authClient.signUp(
         email: email,
         password: password,
-        data: {'full_name': name},
+        data: data,
       );
       if (response.user != null) {
         return (success: true, error: null);
