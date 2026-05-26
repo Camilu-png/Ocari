@@ -131,25 +131,26 @@ class AppColors extends ThemeExtension<AppColors> {
   @override
   AppColors lerp(ThemeExtension<AppColors>? other, double t) {
     if (other is! AppColors) return this;
+    Color lerpColor(Color a, Color b) => Color.lerp(a, b, t)!;
     return AppColors(
-      primary: Color.lerp(primary, other.primary, t)!,
-      onPrimary: Color.lerp(onPrimary, other.onPrimary, t)!,
-      accent: Color.lerp(accent, other.accent, t)!,
-      onAccent: Color.lerp(onAccent, other.onAccent, t)!,
-      bgDark: Color.lerp(bgDark, other.bgDark, t)!,
-      onBgDark: Color.lerp(onBgDark, other.onBgDark, t)!,
-      bgLight: Color.lerp(bgLight, other.bgLight, t)!,
-      onBgLight: Color.lerp(onBgLight, other.onBgLight, t)!,
-      surface: Color.lerp(surface, other.surface, t)!,
-      textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
-      error: Color.lerp(error, other.error, t)!,
-      onError: Color.lerp(onError, other.onError, t)!,
-      diffEasyBg: Color.lerp(diffEasyBg, other.diffEasyBg, t)!,
-      diffEasyText: Color.lerp(diffEasyText, other.diffEasyText, t)!,
-      diffMediumBg: Color.lerp(diffMediumBg, other.diffMediumBg, t)!,
-      diffMediumText: Color.lerp(diffMediumText, other.diffMediumText, t)!,
-      diffHardBg: Color.lerp(diffHardBg, other.diffHardBg, t)!,
-      diffHardText: Color.lerp(diffHardText, other.diffHardText, t)!,
+      primary: lerpColor(primary, other.primary),
+      onPrimary: lerpColor(onPrimary, other.onPrimary),
+      accent: lerpColor(accent, other.accent),
+      onAccent: lerpColor(onAccent, other.onAccent),
+      bgDark: lerpColor(bgDark, other.bgDark),
+      onBgDark: lerpColor(onBgDark, other.onBgDark),
+      bgLight: lerpColor(bgLight, other.bgLight),
+      onBgLight: lerpColor(onBgLight, other.onBgLight),
+      surface: lerpColor(surface, other.surface),
+      textSecondary: lerpColor(textSecondary, other.textSecondary),
+      error: lerpColor(error, other.error),
+      onError: lerpColor(onError, other.onError),
+      diffEasyBg: lerpColor(diffEasyBg, other.diffEasyBg),
+      diffEasyText: lerpColor(diffEasyText, other.diffEasyText),
+      diffMediumBg: lerpColor(diffMediumBg, other.diffMediumBg),
+      diffMediumText: lerpColor(diffMediumText, other.diffMediumText),
+      diffHardBg: lerpColor(diffHardBg, other.diffHardBg),
+      diffHardText: lerpColor(diffHardText, other.diffHardText),
     );
   }
 }

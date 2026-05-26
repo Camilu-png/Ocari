@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart'
-    show authProvider, AuthStatus;
+import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:ocari/features/auth/presentation/screens/login_screen.dart';
 import 'package:ocari/features/auth/presentation/screens/register_screen.dart';
 import 'package:ocari/features/player/presentation/screens/player_screen.dart';
@@ -18,10 +17,9 @@ class _AuthRedirectNotifier extends ChangeNotifier {
   bool _isAuthenticated = false;
 
   _AuthRedirectNotifier(this._ref) {
-    _ref.listen<dynamic>(authProvider, (previous, next) {
-      final authState = next;
+    _ref.listen<AppAuthState>(authProvider, (previous, next) {
       final wasAuthenticated = _isAuthenticated;
-      _isAuthenticated = authState.status == AuthStatus.authenticated;
+      _isAuthenticated = next.status == AuthStatus.authenticated;
       if (wasAuthenticated != _isAuthenticated) {
         notifyListeners();
       }
@@ -39,7 +37,7 @@ final appRouter = Provider<GoRouter>((ref) {
   final authNotifier = ref.watch(_authRedirectNotifierProvider);
   return GoRouter(
     navigatorKey: _routerKey,
-    initialLocation: '/songs',
+    initialLocation: '/login',
     refreshListenable: authNotifier,
     redirect: (context, state) {
       final isAuth = authNotifier.isAuthenticated;

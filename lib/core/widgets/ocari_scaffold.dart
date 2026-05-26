@@ -37,7 +37,6 @@ class OcariScaffold extends StatelessWidget {
           foregroundColor: colors.onAccent,
           elevation: 0,
           centerTitle: true,
-          automaticallyImplyLeading: false,
           systemOverlayStyle: SystemUiOverlayStyle.light,
           leading: canPop
               ? IconButton(

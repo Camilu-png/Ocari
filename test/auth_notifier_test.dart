@@ -88,6 +88,76 @@ void main() {
 
       container.dispose();
     });
+
+    test('signInWithEmailAndPassword success updates state to authenticated', () async {
+      final mockUser = _createMockUser('user-123');
+      final mockSession = _createMockSession(mockUser);
+      final mockResponse = supabase.AuthResponse(session: mockSession, user: mockUser);
+
+      when(() => mockAuthClient.signInWithPassword(
+            email: 'test@example.com',
+            password: 'password123',
+          )).thenAnswer((_) async => mockResponse);
+
+      final container = ProviderContainer(
+        overrides: [
+          supabaseAuthClientProvider.overrideWithValue(mockAuthClient),
+        ],
+      );
+
+      final result = await container.read(authProvider.notifier).signInWithEmailAndPassword(
+            email: 'test@example.com',
+            password: 'password123',
+          );
+
+      expect(result.success, isTrue);
+      expect(result.error, isNull);
+      container.dispose();
+    });
+
+    test('signInWithEmailAndPassword failure invalid credentials returns error message', () async {
+      when(() => mockAuthClient.signInWithPassword(
+            email: 'test@example.com',
+            password: 'wrongpassword',
+          )).thenThrow(const supabase.AuthException('Invalid login credentials', statusCode: '400'));
+
+      final container = ProviderContainer(
+        overrides: [
+          supabaseAuthClientProvider.overrideWithValue(mockAuthClient),
+        ],
+      );
+
+      final result = await container.read(authProvider.notifier).signInWithEmailAndPassword(
+            email: 'test@example.com',
+            password: 'wrongpassword',
+          );
+
+      expect(result.success, isFalse);
+      expect(result.error, equals('Incorrect email or password.'));
+      container.dispose();
+    });
+
+    test('signInWithEmailAndPassword failure connection error returns connection message', () async {
+      when(() => mockAuthClient.signInWithPassword(
+            email: 'test@example.com',
+            password: 'password123',
+          )).thenThrow(const FormatException('SocketException: Failed host lookup'));
+
+      final container = ProviderContainer(
+        overrides: [
+          supabaseAuthClientProvider.overrideWithValue(mockAuthClient),
+        ],
+      );
+
+      final result = await container.read(authProvider.notifier).signInWithEmailAndPassword(
+            email: 'test@example.com',
+            password: 'password123',
+          );
+
+      expect(result.success, isFalse);
+      expect(result.error, contains('Connection error'));
+      container.dispose();
+    });
   });
 }
 

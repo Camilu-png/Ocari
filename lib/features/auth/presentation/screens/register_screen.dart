@@ -49,7 +49,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (!RegExp(r'[0-9]').hasMatch(value)) {
       return 'Must have at least one number';
     }
-    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
+    if (!RegExp(r'[^a-zA-Z0-9\s]').hasMatch(value)) {
       return 'Must have at least one symbol';
     }
     return null;
@@ -66,7 +66,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _handleRegister() async {
-    if (!_formKey.currentState!.validate()) return;
+    final form = _formKey.currentState;
+    if (form == null || !form.validate()) return;
 
     setState(() => _isLoading = true);
 
@@ -75,9 +76,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           password: _passwordController.text,
         );
 
-    setState(() => _isLoading = false);
-
     if (!mounted) return;
+    setState(() => _isLoading = false);
 
     if (result.success) {
       _showConfirmationDialog();

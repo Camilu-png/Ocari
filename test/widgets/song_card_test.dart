@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ocari/core/difficulty.dart';
 import 'package:ocari/core/theme/app_theme.dart';
 import 'package:ocari/core/widgets/song_card.dart';
 
@@ -7,7 +8,7 @@ void main() {
   group('SongCard', () {
     Widget createWidgetUnderTest({
       required String title,
-      required String difficulty,
+      required Difficulty difficulty,
       required int durationSeconds,
       required VoidCallback onTap,
       String? artist,
@@ -34,7 +35,7 @@ void main() {
       await tester.pumpWidget(
         createWidgetUnderTest(
           title: 'Twinkle Twinkle',
-          difficulty: 'easy',
+          difficulty: Difficulty.easy,
           durationSeconds: 120,
           onTap: () {},
         ),
@@ -47,7 +48,7 @@ void main() {
       await tester.pumpWidget(
         createWidgetUnderTest(
           title: 'Twinkle Twinkle',
-          difficulty: 'easy',
+          difficulty: Difficulty.easy,
           durationSeconds: 120,
           onTap: () {},
           artist: 'Mozart',
@@ -61,7 +62,7 @@ void main() {
       await tester.pumpWidget(
         createWidgetUnderTest(
           title: 'Twinkle Twinkle',
-          difficulty: 'easy',
+          difficulty: Difficulty.easy,
           durationSeconds: 120,
           onTap: () {},
           isLocked: true,
@@ -75,7 +76,7 @@ void main() {
       await tester.pumpWidget(
         createWidgetUnderTest(
           title: 'Twinkle Twinkle',
-          difficulty: 'easy',
+          difficulty: Difficulty.easy,
           durationSeconds: 120,
           onTap: () {},
           isLocked: true,
@@ -89,7 +90,7 @@ void main() {
       await tester.pumpWidget(
         createWidgetUnderTest(
           title: 'Twinkle Twinkle',
-          difficulty: 'easy',
+          difficulty: Difficulty.easy,
           durationSeconds: 90,
           onTap: () {},
         ),
@@ -102,7 +103,7 @@ void main() {
       await tester.pumpWidget(
         createWidgetUnderTest(
           title: 'Twinkle Twinkle',
-          difficulty: 'easy',
+          difficulty: Difficulty.easy,
           durationSeconds: 0,
           onTap: () {},
         ),
@@ -115,7 +116,7 @@ void main() {
       await tester.pumpWidget(
         createWidgetUnderTest(
           title: 'Twinkle Twinkle',
-          difficulty: 'easy',
+          difficulty: Difficulty.easy,
           durationSeconds: 3661,
           onTap: () {},
         ),
@@ -129,7 +130,7 @@ void main() {
       await tester.pumpWidget(
         createWidgetUnderTest(
           title: 'Twinkle Twinkle',
-          difficulty: 'easy',
+          difficulty: Difficulty.easy,
           durationSeconds: 120,
           onTap: () {
             tapped = true;
@@ -146,7 +147,7 @@ void main() {
       await tester.pumpWidget(
         createWidgetUnderTest(
           title: 'Twinkle Twinkle',
-          difficulty: 'easy',
+          difficulty: Difficulty.easy,
           durationSeconds: 120,
           onTap: () {
             tapped = true;
@@ -163,7 +164,7 @@ void main() {
       await tester.pumpWidget(
         createWidgetUnderTest(
           title: 'Twinkle Twinkle',
-          difficulty: 'medium',
+          difficulty: Difficulty.medium,
           durationSeconds: 120,
           onTap: () {},
         ),

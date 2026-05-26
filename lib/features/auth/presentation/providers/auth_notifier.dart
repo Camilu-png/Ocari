@@ -29,10 +29,12 @@ final supabaseAuthClientProvider = Provider<supabase.GoTrueClient>((ref) {
   return supabase.Supabase.instance.client.auth;
 });
 
+const _googleServerClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
+
 final googleSignInProvider = Provider<GoogleSignIn>((ref) {
   return GoogleSignIn(
     scopes: ['email', 'profile'],
-    serverClientId: '744538709104-namv6gt3mfki4i8png1ntg96recealk8.apps.googleusercontent.com',
+    serverClientId: _googleServerClientId.isNotEmpty ? _googleServerClientId : null,
   );
 });
 
@@ -84,12 +86,15 @@ class AuthNotifier extends Notifier<AppAuthState> {
   Future<({bool success, String? error})> signUp({
     required String email,
     required String password,
+    String? name,
   }) async {
     try {
       final authClient = ref.read(supabaseAuthClientProvider);
+      final data = name != null ? {'full_name': name} : null;
       final response = await authClient.signUp(
         email: email,
         password: password,
+        data: data,
       );
       if (response.user != null) {
         return (success: true, error: null);
@@ -97,6 +102,38 @@ class AuthNotifier extends Notifier<AppAuthState> {
       return (success: false, error: 'Failed to create user');
     } catch (e) {
       return (success: false, error: e.toString());
+    }
+  }
+
+  Future<({bool success, String? error})> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final authClient = ref.read(supabaseAuthClientProvider);
+      final response = await authClient.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      if (response.user != null) {
+        return (success: true, error: null);
+      }
+      return (success: false, error: 'Login failed');
+    } on supabase.AuthException catch (e) {
+      final message = e.message.toLowerCase();
+      if (message.contains('invalid') || message.contains('credentials') || message.contains('grant')) {
+        return (success: false, error: 'Incorrect email or password.');
+      }
+      return (success: false, error: e.message);
+    } catch (e) {
+      final errStr = e.toString().toLowerCase();
+      if (errStr.contains('socketexception') ||
+          errStr.contains('connection') ||
+          errStr.contains('failed host lookup') ||
+          errStr.contains('network')) {
+        return (success: false, error: 'Connection error. Please check your internet connection.');
+      }
+      return (success: false, error: 'An unexpected error occurred.');
     }
   }
 
