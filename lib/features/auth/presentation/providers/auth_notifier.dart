@@ -29,10 +29,12 @@ final supabaseAuthClientProvider = Provider<supabase.GoTrueClient>((ref) {
   return supabase.Supabase.instance.client.auth;
 });
 
+const _googleServerClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
+
 final googleSignInProvider = Provider<GoogleSignIn>((ref) {
   return GoogleSignIn(
     scopes: ['email', 'profile'],
-    serverClientId: '744538709104-namv6gt3mfki4i8png1ntg96recealk8.apps.googleusercontent.com',
+    serverClientId: _googleServerClientId.isNotEmpty ? _googleServerClientId : null,
   );
 });
 

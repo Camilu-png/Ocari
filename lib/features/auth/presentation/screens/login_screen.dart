@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:ocari/core/theme/app_theme.dart';
 import 'package:ocari/core/widgets/ocari_button.dart';
@@ -10,20 +9,6 @@ import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/core/widgets/ocari_text_field.dart';
 import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart'
     show authProvider;
-
-final connectionStatusProvider = FutureProvider<bool>((ref) async {
-  try {
-    final client = Supabase.instance.client;
-    final session = client.auth.currentSession;
-    if (session == null) {
-      debugPrint('No active session, but Supabase is connected');
-    }
-    return true;
-  } catch (e) {
-    debugPrint('Connection error: $e');
-    return false;
-  }
-});
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -60,7 +45,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _handleEmailLogin() async {
-    if (!_formKey.currentState!.validate()) return;
+    final form = _formKey.currentState;
+    if (form == null || !form.validate()) return;
 
     setState(() => _isLoading = true);
 
@@ -69,16 +55,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           password: _passwordController.text,
         );
 
-    setState(() => _isLoading = false);
-
     if (!mounted) return;
+    setState(() => _isLoading = false);
 
     if (result.success) {
       context.go('/songs');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result.error ?? 'Login failed'),
+          content: Text(
+            result.error ?? 'Login failed',
+            style: TextStyle(color: context.colors.onError),
+          ),
           backgroundColor: context.colors.error,
         ),
       );
@@ -94,8 +82,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final connectionAsync = ref.watch(connectionStatusProvider);
-
     return OcariScaffold(
       title: 'Sign in',
       body: SingleChildScrollView(
@@ -194,27 +180,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: const Text('Sign up'),
                   ),
                 ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Center(
-                child: connectionAsync.when(
-                  data: (connected) => Text(
-                    connected ? '✓ Connected to Supabase' : '✗ No connection',
-                    style: TextStyle(
-                      color: connected ? Colors.green : Colors.red,
-                      fontSize: 12,
-                    ),
-                  ),
-                  loading: () => const SizedBox(
-                    width: 12,
-                    height: 12,
-                    child: CircularProgressIndicator(strokeWidth: 1.5),
-                  ),
-                  error: (_, __) => const Text(
-                    '✗ Connection error',
-                    style: TextStyle(color: Colors.red, fontSize: 12),
-                  ),
-                ),
               ),
               const SizedBox(height: AppSpacing.xl),
             ],

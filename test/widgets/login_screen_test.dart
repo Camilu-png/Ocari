@@ -51,7 +51,6 @@ void main() {
     return ProviderScope(
       overrides: [
         supabaseAuthClientProvider.overrideWithValue(mockAuthClient),
-        connectionStatusProvider.overrideWith((ref) async => true),
       ],
       child: MaterialApp(
         theme: AppTheme.lightTheme,
@@ -71,7 +70,6 @@ void main() {
       expect(find.byType(TextFormField), findsNWidgets(2));
       expect(find.widgetWithText(FilledButton, 'Sign in'), findsOneWidget);
       expect(find.text('Google'), findsOneWidget);
-      expect(find.text('✓ Connected to Supabase'), findsOneWidget);
 
       await tester.binding.setSurfaceSize(null);
     });
