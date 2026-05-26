@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'app_theme.dart';
-import '../widgets/difficulty_badge.dart';
-import '../widgets/ocari_button.dart';
-import '../widgets/ocari_scaffold.dart';
-import '../widgets/ocari_text_field.dart';
-import '../widgets/song_card.dart';
+import 'package:ocari/core/widgets/difficulty_badge.dart';
+import 'package:ocari/core/widgets/ocari_button.dart';
+import 'package:ocari/core/widgets/ocari_scaffold.dart';
+import 'package:ocari/core/widgets/ocari_text_field.dart';
+import 'package:ocari/core/widgets/song_card.dart';
 
 class DebugScreen extends StatelessWidget {
   const DebugScreen({super.key});
@@ -250,7 +250,6 @@ class DebugScreen extends StatelessWidget {
       ],
     );
   }
-
 }
 
 class _ScaffoldPreviewRoute extends StatelessWidget {
@@ -338,8 +337,6 @@ class _TextFieldsPreviewState extends State<_TextFieldsPreview> {
     );
   }
 }
-
-// — Color Chip ----------------------------------------------------------------
 
 class _ColorChip extends StatelessWidget {
   final String label;

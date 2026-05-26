@@ -16,19 +16,19 @@ void main() {
       );
     }
 
-    testWidgets('renders Fácil for easy', (tester) async {
+    testWidgets('renders Easy for easy', (tester) async {
       await tester.pumpWidget(createWidgetUnderTest('easy'));
-      expect(find.text('Fácil'), findsOneWidget);
+      expect(find.text('Easy'), findsOneWidget);
     });
 
-    testWidgets('renders Medio for medium', (tester) async {
+    testWidgets('renders Medium for medium', (tester) async {
       await tester.pumpWidget(createWidgetUnderTest('medium'));
-      expect(find.text('Medio'), findsOneWidget);
+      expect(find.text('Medium'), findsOneWidget);
     });
 
-    testWidgets('renders Difícil for hard', (tester) async {
+    testWidgets('renders Hard for hard', (tester) async {
       await tester.pumpWidget(createWidgetUnderTest('hard'));
-      expect(find.text('Difícil'), findsOneWidget);
+      expect(find.text('Hard'), findsOneWidget);
     });
 
     testWidgets('applies easy background color', (tester) async {

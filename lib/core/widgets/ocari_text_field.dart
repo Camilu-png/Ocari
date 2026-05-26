@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
+import 'package:ocari/core/theme/app_theme.dart';
 
 class OcariTextField extends StatefulWidget {
   final String label;
@@ -63,13 +63,17 @@ class _OcariTextFieldState extends State<OcariTextField> {
             border: OutlineInputBorder(
               borderRadius: AppRadius.borderRadiusLg,
               borderSide: BorderSide(
-                color: widget.errorText != null ? colors.error : colors.textSecondary,
+                color: widget.errorText != null
+                    ? colors.error
+                    : colors.textSecondary,
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: AppRadius.borderRadiusLg,
               borderSide: BorderSide(
-                color: widget.errorText != null ? colors.error : colors.textSecondary,
+                color: widget.errorText != null
+                    ? colors.error
+                    : colors.textSecondary,
               ),
             ),
             focusedBorder: OutlineInputBorder(
@@ -81,7 +85,9 @@ class _OcariTextFieldState extends State<OcariTextField> {
             suffixIcon: widget.obscureText
                 ? IconButton(
                     icon: Icon(
-                      _isObscured ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                      _isObscured
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
                       color: colors.textSecondary,
                     ),
                     onPressed: () {
