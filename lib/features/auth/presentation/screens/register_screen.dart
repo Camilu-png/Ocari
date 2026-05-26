@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:ocari/core/theme/app_theme.dart';
 import 'package:ocari/core/widgets/ocari_button.dart';
 import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/core/widgets/ocari_text_field.dart';
-import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart'
-    show authProvider;
+import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends ConsumerStatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
 
   String? _validateEmail(String? value) {
@@ -39,18 +38,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return 'Password is required';
     }
     if (value.length < 8) {
-      return 'Password must be at least 8 characters';
+      return 'Minimum 8 characters';
+    }
+    if (!RegExp(r'[A-Z]').hasMatch(value)) {
+      return 'Must have at least one uppercase letter';
+    }
+    if (!RegExp(r'[a-z]').hasMatch(value)) {
+      return 'Must have at least one lowercase letter';
+    }
+    if (!RegExp(r'[0-9]').hasMatch(value)) {
+      return 'Must have at least one number';
+    }
+    if (!RegExp(r'[^a-zA-Z0-9\s]').hasMatch(value)) {
+      return 'Must have at least one symbol';
     }
     return null;
   }
 
-  Future<void> _handleEmailLogin() async {
+  String? _validateConfirmPassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Confirm your password';
+    }
+    if (value != _passwordController.text) {
+      return 'Passwords do not match';
+    }
+    return null;
+  }
+
+  Future<void> _handleRegister() async {
     final form = _formKey.currentState;
     if (form == null || !form.validate()) return;
 
     setState(() => _isLoading = true);
 
-    final result = await ref.read(authProvider.notifier).signInWithEmailAndPassword(
+    final result = await ref.read(authProvider.notifier).signUp(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
@@ -59,31 +80,51 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isLoading = false);
 
     if (result.success) {
-      context.go('/songs');
+      _showConfirmationDialog();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            result.error ?? 'Login failed',
-            style: TextStyle(color: context.colors.onError),
-          ),
+          content: Text(result.error ?? 'Registration failed'),
           backgroundColor: context.colors.error,
         ),
       );
     }
   }
 
+  void _showConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Check your email'),
+        content: const Text(
+          'We have sent you a confirmation link. '
+          'Please check your inbox and follow the instructions.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.go('/login');
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return OcariScaffold(
-      title: 'Sign in',
+      title: 'Create account',
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         child: Form(
@@ -93,19 +134,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               const SizedBox(height: AppSpacing.xl),
               Text(
-                'Welcome Back',
+                'Join Ocari',
                 style: context.textTheme.headlineMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Sign in to your account',
+                'Create an account to get started',
                 style: context.textTheme.bodyLarge?.copyWith(
                   color: context.colors.onBgLight.withValues(alpha: 0.7),
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: AppSpacing.xl),
+              const SizedBox(height: AppSpacing.xl + AppSpacing.md),
               OcariTextField(
                 label: 'Email',
                 controller: _emailController,
@@ -119,65 +160,37 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 obscureText: true,
                 validator: _validatePassword,
               ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Minimum 8 characters, uppercase, lowercase, number and symbol',
+                style: context.textTheme.bodySmall?.copyWith(
+                  color: context.colors.onBgLight.withValues(alpha: 0.5),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              OcariTextField(
+                label: 'Confirm password',
+                controller: _confirmPasswordController,
+                obscureText: true,
+                validator: _validateConfirmPassword,
+              ),
               const SizedBox(height: AppSpacing.xl),
               OcariButton(
-                label: 'Sign in',
+                label: 'Create account',
                 isLoading: _isLoading,
-                onPressed: _handleEmailLogin,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Row(
-                children: [
-                  const Expanded(child: Divider()),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                    child: Text(
-                      'Or',
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: context.colors.onBgLight.withValues(alpha: 0.5),
-                      ),
-                    ),
-                  ),
-                  const Expanded(child: Divider()),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Center(
-                child: SignInButton(
-                  Buttons.Google,
-                  onPressed: _isLoading
-                      ? null
-                      : () async {
-                          setState(() => _isLoading = true);
-                          final result = await ref
-                              .read(authProvider.notifier)
-                              .signInWithGoogle();
-                          setState(() => _isLoading = false);
-                          if (result.success && context.mounted) {
-                            context.go('/songs');
-                          } else if (!result.success && context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(result.error ?? 'Login failed'),
-                                backgroundColor: context.colors.error,
-                              ),
-                            );
-                          }
-                        },
-                  text: 'Google',
-                ),
+                onPressed: _handleRegister,
               ),
               const SizedBox(height: AppSpacing.lg),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Don't have an account? ",
+                    'Already have an account? ',
                     style: context.textTheme.bodyMedium,
                   ),
                   TextButton(
-                    onPressed: () => context.go('/register'),
-                    child: const Text('Sign up'),
+                    onPressed: () => context.go('/login'),
+                    child: const Text('Sign in'),
                   ),
                 ],
               ),
