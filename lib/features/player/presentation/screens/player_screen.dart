@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 
 import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/core/theme/app_theme.dart';
+import 'package:ocari/features/player/data/player_cache.dart';
 import 'package:ocari/features/songs/domain/models/song.dart';
 import 'package:ocari/features/songs/presentation/providers/songs_provider.dart';
 
@@ -17,35 +20,65 @@ class PlayerScreen extends ConsumerStatefulWidget {
 }
 
 class _PlayerScreenState extends ConsumerState<PlayerScreen> {
-  final _player = AudioPlayer();
+  late final AudioPlayer _player;
+  StreamSubscription? _stateSub;
+  StreamSubscription? _positionSub;
+  StreamSubscription? _durationSub;
   PlayerState? _playerState;
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
   bool _audioReady = false;
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _player = ref.read(playerCacheProvider).getOrCreate(widget.songId);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initIfReady());
+  }
+
+  void _initIfReady() {
+    if (_initialized) return;
+    final song = ref.read(songByIdProvider(widget.songId)).valueOrNull;
+    if (song?.audioUrl != null) {
+      _initPlayer(song!.audioUrl!);
+    }
+  }
 
   @override
   void dispose() {
-    _player.dispose();
+    _stateSub?.cancel();
+    _positionSub?.cancel();
+    _durationSub?.cancel();
     super.dispose();
   }
 
   Future<void> _initPlayer(String audioUrl) async {
-    if (_audioReady) return;
+    if (_initialized) return;
+    _initialized = true;
+
     try {
-      if (audioUrl.startsWith('http://') || audioUrl.startsWith('https://')) {
-        await _player.setUrl(audioUrl);
+      if (_player.audioSource == null) {
+        if (audioUrl.startsWith('http://') || audioUrl.startsWith('https://')) {
+          await _player.setUrl(audioUrl);
+        } else {
+          await _player.setAsset(audioUrl);
+        }
       } else {
-        await _player.setAsset(audioUrl);
+        await _player.seek(Duration.zero);
+        await _player.pause();
       }
-      _player.playerStateStream.listen((state) {
+
+      _stateSub = _player.playerStateStream.listen((state) {
         if (mounted) setState(() => _playerState = state);
       });
-      _player.positionStream.listen((p) {
+      _positionSub = _player.positionStream.listen((p) {
         if (mounted) setState(() => _position = p);
       });
-      _player.durationStream.listen((d) {
+      _durationSub = _player.durationStream.listen((d) {
         if (mounted) setState(() => _duration = d ?? Duration.zero);
       });
+
       if (mounted) setState(() => _audioReady = true);
     } catch (e) {
       if (mounted) {
@@ -69,10 +102,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     final isPlaying = _playerState?.playing ?? false;
 
     ref.listen(songByIdProvider(widget.songId), (_, next) {
-      final song = next.valueOrNull;
-      if (song != null && song.audioUrl != null) {
-        _initPlayer(song.audioUrl!);
-      }
+      _initIfReady();
     });
 
     return songAsync.when(
