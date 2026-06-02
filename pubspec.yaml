@@ -36,3 +36,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+assets:
+  - assets/data/fingerings.json
+  - assets/data/songs/
+  - assets/audio/
