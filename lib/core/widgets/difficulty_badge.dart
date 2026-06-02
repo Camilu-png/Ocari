@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ocari/core/difficulty.dart';
 import 'package:ocari/core/theme/app_theme.dart';
 
 class DifficultyBadge extends StatelessWidget {
-  final Difficulty difficulty;
+  final String difficulty;
 
   const DifficultyBadge({super.key, required this.difficulty});
 
@@ -11,10 +10,11 @@ class DifficultyBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    final (Color bg, Color fg) = switch (difficulty) {
-      Difficulty.easy => (colors.diffEasyBg, colors.diffEasyText),
-      Difficulty.medium => (colors.diffMediumBg, colors.diffMediumText),
-      Difficulty.hard => (colors.diffHardBg, colors.diffHardText),
+    final (Color bg, Color fg, String label) = switch (difficulty) {
+      'easy' => (colors.diffEasyBg, colors.diffEasyText, 'Fácil'),
+      'medium' => (colors.diffMediumBg, colors.diffMediumText, 'Media'),
+      'hard' => (colors.diffHardBg, colors.diffHardText, 'Difícil'),
+      _ => (colors.diffEasyBg, colors.diffEasyText, difficulty),
     };
 
     return Container(
@@ -24,7 +24,7 @@ class DifficultyBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(100),
       ),
       child: Text(
-        difficulty.label,
+        label,
         style: TextStyle(
           color: fg,
           fontSize: 11,

@@ -24,6 +24,10 @@ dependencies:
   # — Audio
   just_audio: ^0.9.39
 
+  # — Modelos inmutables
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -33,6 +37,11 @@ dev_dependencies:
 
   # — Linting
   flutter_lints: ^4.0.0
+
+  # — Generación de código
+  build_runner: ^2.4.13
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
 
 flutter:
   uses-material-design: true

@@ -57,7 +57,7 @@ class SongsScreen extends ConsumerWidget {
                       artist: song.artist,
                       difficulty: song.difficulty,
                       durationSeconds: song.durationSeconds,
-                      isLocked: song.isLocked,
+                      isLocked: song.isPremium,
                       onTap: () => context.push('/player/${song.id}'),
                     ),
                   ))

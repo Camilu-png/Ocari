@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:ocari/core/difficulty.dart';
 import 'package:ocari/core/theme/app_theme.dart';
 import 'difficulty_badge.dart';
 
 class SongCard extends StatelessWidget {
   final String title;
-  final Difficulty difficulty;
+  final String difficulty;
   final int durationSeconds;
   final VoidCallback onTap;
   final String? artist;
