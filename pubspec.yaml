@@ -39,5 +39,3 @@ flutter:
 
 assets:
   - assets/data/fingerings.json
-  - assets/data/songs/
-  - assets/audio/
