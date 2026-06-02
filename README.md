@@ -122,16 +122,16 @@ git checkout -b feature/07-login-email
 ### Sprint 0 — Fundación _(en progreso)_
 
 - [x] Aplicación base Flutter inicializada
-- [ ] Estructura de carpetas y arquitectura
-- [ ] Configuración de Supabase
-- [ ] Navegación base con go_router
-- [ ] Auth (login, registro, Google Sign-In)
-- [ ] Design system y componentes base
-- [ ] CI/CD con GitHub Actions
+- [x] Estructura de carpetas y arquitectura
+- [x] Configuración de Supabase
+- [x] Navegación base con go_router
+- [x] Auth (login, registro, Google Sign-In)
+- [x] Design system y componentes base
+- [x] CI/CD con GitHub Actions
 
 ### Sprint 1 — Reproductor _(próximo)_
 
-- [ ] Pantalla de lista de canciones
+- [x] Pantalla de lista de canciones
 - [ ] Reproductor con ocarina animada (CustomPainter)
 - [ ] Sincronización audio → nota → digitación
 - [ ] Control de velocidad de reproducción
