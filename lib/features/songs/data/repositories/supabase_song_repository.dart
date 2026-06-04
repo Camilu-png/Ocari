@@ -9,10 +9,13 @@ import 'package:ocari/features/songs/domain/repositories/song_repository.dart';
 
 class SupabaseSongRepository implements SongRepository {
   final SupabaseClient _client;
+  final AssetBundle _bundle;
 
-  SupabaseSongRepository(this._client);
+  SupabaseSongRepository(this._client, [AssetBundle? bundle])
+      : _bundle = bundle ?? rootBundle;
 
-  Map<String, dynamic> _normalize(Map<String, dynamic> raw) {
+  @visibleForTesting
+  static Map<String, dynamic> normalize(Map<String, dynamic> raw) {
     final data = Map<String, dynamic>.from(raw);
     data['artist'] ??= 'Desconocido';
 
@@ -28,13 +31,26 @@ class SupabaseSongRepository implements SongRepository {
     return data;
   }
 
+  @visibleForTesting
+  Future<List<Song>> fetchAllFromSupabase() async {
+    final response = await _client.from('songs').select('*');
+    return (response as List)
+        .map((e) => Song.fromJson(normalize(e as Map<String, dynamic>)))
+        .toList();
+  }
+
+  @visibleForTesting
+  Future<Song?> fetchByIdFromSupabase(String id) async {
+    final response =
+        await _client.from('songs').select('*').eq('id', id).maybeSingle();
+    if (response == null) return null;
+    return Song.fromJson(normalize(response));
+  }
+
   @override
   Future<List<Song>> fetchAll() async {
     try {
-      final response = await _client.from('songs').select('*');
-      return (response as List)
-          .map((e) => Song.fromJson(_normalize(e as Map<String, dynamic>)))
-          .toList();
+      return await fetchAllFromSupabase();
     } catch (e) {
       debugPrint('Supabase fetchAll failed, falling back to local assets: $e');
       return _fallbackAll();
@@ -44,10 +60,7 @@ class SupabaseSongRepository implements SongRepository {
   @override
   Future<Song?> fetchById(String id) async {
     try {
-      final response =
-          await _client.from('songs').select('*').eq('id', id).maybeSingle();
-      if (response == null) return null;
-      return Song.fromJson(_normalize(response));
+      return await fetchByIdFromSupabase(id);
     } catch (e) {
       debugPrint('Supabase fetchById($id) failed, falling back: $e');
       return _fallbackById(id);
@@ -55,30 +68,40 @@ class SupabaseSongRepository implements SongRepository {
   }
 
   Future<List<Song>> _fallbackAll() async {
-    final indexJson = await rootBundle.loadString('assets/data/songs_index.json');
-    final ids = jsonDecode(indexJson) as List<dynamic>;
+    try {
+      final indexJson = await _bundle.loadString('assets/data/songs_index.json');
+      final ids = jsonDecode(indexJson) as List<dynamic>;
 
-    final songs = <Song>[];
-    for (final id in ids) {
-      try {
-        final song = await _fallbackById(id as String);
-        if (song != null) {
-          songs.add(song);
-        } else {
-          debugPrint('Fallback: failed to load song $id');
+      final songs = <Song>[];
+      for (final id in ids) {
+        try {
+          final song = await _fallbackById(id as String);
+          if (song != null) {
+            songs.add(song);
+          } else {
+            debugPrint('Fallback: failed to load song $id');
+          }
+        } catch (e) {
+          debugPrint('Fallback: error loading song $id: $e');
         }
-      } catch (e) {
-        debugPrint('Fallback: error loading song $id: $e');
       }
+      return songs;
+    } catch (e) {
+      debugPrint('Fallback: failed to load song index: $e');
+      return [];
     }
-    return songs;
   }
 
   Future<Song?> _fallbackById(String id) async {
-    final path = 'assets/data/songs/$id.json';
-    final jsonStr = await rootBundle.loadString(path);
-    final data = jsonDecode(jsonStr) as Map<String, dynamic>;
-    data['id'] = id;
-    return Song.fromJson(_normalize(data));
+    try {
+      final path = 'assets/data/songs/$id.json';
+      final jsonStr = await _bundle.loadString(path);
+      final data = jsonDecode(jsonStr) as Map<String, dynamic>;
+      data['id'] = id;
+      return Song.fromJson(normalize(data));
+    } catch (e) {
+      debugPrint('Fallback: failed to load song $id: $e');
+      return null;
+    }
   }
 }
