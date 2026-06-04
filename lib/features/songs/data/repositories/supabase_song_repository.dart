@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -34,7 +35,8 @@ class SupabaseSongRepository implements SongRepository {
       return (response as List)
           .map((e) => Song.fromJson(_normalize(e as Map<String, dynamic>)))
           .toList();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Supabase fetchAll failed, falling back to local assets: $e');
       return _fallbackAll();
     }
   }
@@ -46,42 +48,37 @@ class SupabaseSongRepository implements SongRepository {
           await _client.from('songs').select('*').eq('id', id).maybeSingle();
       if (response == null) return null;
       return Song.fromJson(_normalize(response));
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Supabase fetchById($id) failed, falling back: $e');
       return _fallbackById(id);
     }
   }
 
   Future<List<Song>> _fallbackAll() async {
-    try {
-      final manifest = await rootBundle.loadString('AssetManifest.json');
-      final assets = (jsonDecode(manifest) as Map<String, dynamic>).keys;
-      final songFiles = assets
-          .where((a) =>
-              a.startsWith('assets/data/songs/') && a.endsWith('.json'))
-          .toList();
+    final indexJson = await rootBundle.loadString('assets/data/songs_index.json');
+    final ids = jsonDecode(indexJson) as List<dynamic>;
 
-      final songs = <Song>[];
-      for (final path in songFiles) {
-        final jsonStr = await rootBundle.loadString(path);
-        final data = jsonDecode(jsonStr) as Map<String, dynamic>;
-        data['id'] = path.split('/').last.replaceAll('.json', '');
-        songs.add(Song.fromJson(_normalize(data)));
+    final songs = <Song>[];
+    for (final id in ids) {
+      try {
+        final song = await _fallbackById(id as String);
+        if (song != null) {
+          songs.add(song);
+        } else {
+          debugPrint('Fallback: failed to load song $id');
+        }
+      } catch (e) {
+        debugPrint('Fallback: error loading song $id: $e');
       }
-      return songs;
-    } catch (_) {
-      return [];
     }
+    return songs;
   }
 
   Future<Song?> _fallbackById(String id) async {
-    try {
-      final jsonStr =
-          await rootBundle.loadString('assets/data/songs/$id.json');
-      final data = jsonDecode(jsonStr) as Map<String, dynamic>;
-      data['id'] = id;
-      return Song.fromJson(_normalize(data));
-    } catch (_) {
-      return null;
-    }
+    final path = 'assets/data/songs/$id.json';
+    final jsonStr = await rootBundle.loadString(path);
+    final data = jsonDecode(jsonStr) as Map<String, dynamic>;
+    data['id'] = id;
+    return Song.fromJson(_normalize(data));
   }
 }

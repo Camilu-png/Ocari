@@ -47,22 +47,47 @@ class SongsScreen extends ConsumerWidget {
       body: songsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text('Failed to load songs: $err')),
-        data: (songs) => ListView(
-          padding: const EdgeInsets.all(16),
-          children: songs
-              .map((song) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: SongCard(
-                      title: song.title,
-                      artist: song.artist,
-                      difficulty: song.difficulty,
-                      durationSeconds: song.durationSeconds,
-                      isLocked: song.isPremium,
-                      onTap: () => context.push('/player/${song.id}'),
-                    ),
-                  ))
-              .toList(),
-        ),
+        data: (songs) {
+          if (songs.isEmpty) {
+            return ListView(
+              children: [
+                SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                Center(
+                  child: Column(
+                    children: [
+                      Icon(Icons.music_note, size: 64, color: Theme.of(context).disabledColor),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No songs available',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () => ref.read(songsProvider.notifier).refresh(),
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: songs
+                  .map((song) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: SongCard(
+                          title: song.title,
+                          artist: song.artist,
+                          difficulty: song.difficulty,
+                          durationSeconds: song.durationSeconds,
+                          isLocked: song.isPremium,
+                          onTap: () => context.push('/player/${song.id}'),
+                        ),
+                      ))
+                  .toList(),
+            ),
+          );
+        },
       ),
     );
   }
