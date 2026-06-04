@@ -50,6 +50,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     _stateSub?.cancel();
     _positionSub?.cancel();
     _durationSub?.cancel();
+    _player.stop();
     super.dispose();
   }
 
