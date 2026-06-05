@@ -17,7 +17,7 @@ class SupabaseSongRepository implements SongRepository {
   @visibleForTesting
   static Map<String, dynamic> normalize(Map<String, dynamic> raw) {
     final data = Map<String, dynamic>.from(raw);
-    data['artist'] ??= 'Desconocido';
+    data['artist'] ??= 'Unknown';
 
     if (data['notes_json'] is String) {
       try {
@@ -69,7 +69,8 @@ class SupabaseSongRepository implements SongRepository {
 
   Future<List<Song>> _fallbackAll() async {
     try {
-      final indexJson = await _bundle.loadString('assets/data/songs_index.json');
+      final indexJson =
+          await _bundle.loadString('assets/data/songs_index.json');
       final ids = jsonDecode(indexJson) as List<dynamic>;
 
       final songs = <Song>[];

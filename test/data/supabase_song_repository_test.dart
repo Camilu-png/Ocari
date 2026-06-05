@@ -52,7 +52,7 @@ void main() {
   });
 
   group('normalize', () {
-    test('defaults artist to Desconocido when missing', () {
+    test('defaults artist to Unknown when missing', () {
       final result = SupabaseSongRepository.normalize({
         'id': '1',
         'title': 'Test',
@@ -60,7 +60,7 @@ void main() {
         'duration_seconds': 30,
         'is_premium': false,
       });
-      expect(result['artist'], 'Desconocido');
+      expect(result['artist'], 'Unknown');
     });
 
     test('preserves artist when present', () {
@@ -120,7 +120,7 @@ void main() {
         const Song(
           id: '1',
           title: 'Song One',
-          artist: 'Desconocido',
+          artist: 'Unknown',
           difficulty: Difficulty.easy,
           durationSeconds: 30,
           isPremium: false,
@@ -164,7 +164,8 @@ void main() {
     });
 
     test('returns empty list when both sources fail', () async {
-      when(() => mockBundle.loadString(any())).thenThrow(Exception('Asset not found'));
+      when(() => mockBundle.loadString(any()))
+          .thenThrow(Exception('Asset not found'));
 
       final repo = TestRepo(bundle: mockBundle, throwOnFetchAll: true);
       final songs = await repo.fetchAll();
@@ -217,7 +218,8 @@ void main() {
     });
 
     test('returns null when both sources fail', () async {
-      when(() => mockBundle.loadString(any())).thenThrow(Exception('Asset not found'));
+      when(() => mockBundle.loadString(any()))
+          .thenThrow(Exception('Asset not found'));
 
       final repo = TestRepo(bundle: mockBundle, throwOnFetchById: true);
       final song = await repo.fetchById('missing');

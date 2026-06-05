@@ -75,7 +75,7 @@ void main() {
       final song = Song.fromJson(map);
       expect(song.id, 'abc-123');
       expect(song.title, 'Test Song');
-      expect(song.artist, 'Desconocido');
+      expect(song.artist, 'Unknown');
       expect(song.difficulty, Difficulty.hard);
       expect(song.durationSeconds, 120);
       expect(song.isPremium, true);
@@ -96,7 +96,7 @@ void main() {
       expect(song.isPremium, true);
     });
 
-    test('defaults artist to Desconocido when missing', () {
+    test('defaults artist to Unknown when missing', () {
       final map = {
         'id': '1',
         'title': 'Test',
@@ -105,10 +105,10 @@ void main() {
       };
 
       final song = Song.fromJson(map);
-      expect(song.artist, 'Desconocido');
+      expect(song.artist, 'Unknown');
     });
 
-    test('defaults artist to Desconocido when artist is null', () {
+    test('defaults artist to Unknown when artist is null', () {
       final map = {
         'id': '1',
         'title': 'Test',
@@ -118,7 +118,7 @@ void main() {
       };
 
       final song = Song.fromJson(map);
-      expect(song.artist, 'Desconocido');
+      expect(song.artist, 'Unknown');
     });
 
     test('stores null when notes_json is null', () {
