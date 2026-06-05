@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ocari/features/songs/domain/models/song.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
+import 'package:ocari/features/songs/domain/models/difficulty.dart';
 
 void main() {
   group('Song JSON files', () {
@@ -54,7 +55,7 @@ void main() {
       expect(song.id, map['id']);
       expect(song.title, "Zelda's Lullaby");
       expect(song.artist, 'The Legend of Zelda: Ocarina of Time');
-      expect(song.difficulty, 'easy');
+      expect(song.difficulty, Difficulty.easy);
       expect(song.durationSeconds, 75);
       expect(song.isPremium, false);
       expect(song.audioPath, 'https://example.com/audio/zeldas_lullaby.mp3');
@@ -75,7 +76,7 @@ void main() {
       expect(song.id, 'abc-123');
       expect(song.title, 'Test Song');
       expect(song.artist, 'Desconocido');
-      expect(song.difficulty, 'hard');
+      expect(song.difficulty, Difficulty.hard);
       expect(song.durationSeconds, 120);
       expect(song.isPremium, true);
       expect(song.audioPath, isNull);

@@ -23,7 +23,7 @@ mixin _$Song {
   String get id => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
   String get artist => throw _privateConstructorUsedError;
-  String get difficulty => throw _privateConstructorUsedError;
+  Difficulty get difficulty => throw _privateConstructorUsedError;
   @JsonKey(name: 'duration_seconds')
   int get durationSeconds => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_premium')
@@ -51,7 +51,7 @@ abstract class $SongCopyWith<$Res> {
       {String id,
       String title,
       String artist,
-      String difficulty,
+      Difficulty difficulty,
       @JsonKey(name: 'duration_seconds') int durationSeconds,
       @JsonKey(name: 'is_premium') bool isPremium,
       @JsonKey(name: 'audio_url') String? audioPath,
@@ -98,7 +98,7 @@ class _$SongCopyWithImpl<$Res, $Val extends Song>
       difficulty: null == difficulty
           ? _value.difficulty
           : difficulty // ignore: cast_nullable_to_non_nullable
-              as String,
+              as Difficulty,
       durationSeconds: null == durationSeconds
           ? _value.durationSeconds
           : durationSeconds // ignore: cast_nullable_to_non_nullable
@@ -130,7 +130,7 @@ abstract class _$$SongImplCopyWith<$Res> implements $SongCopyWith<$Res> {
       {String id,
       String title,
       String artist,
-      String difficulty,
+      Difficulty difficulty,
       @JsonKey(name: 'duration_seconds') int durationSeconds,
       @JsonKey(name: 'is_premium') bool isPremium,
       @JsonKey(name: 'audio_url') String? audioPath,
@@ -174,7 +174,7 @@ class __$$SongImplCopyWithImpl<$Res>
       difficulty: null == difficulty
           ? _value.difficulty
           : difficulty // ignore: cast_nullable_to_non_nullable
-              as String,
+              as Difficulty,
       durationSeconds: null == durationSeconds
           ? _value.durationSeconds
           : durationSeconds // ignore: cast_nullable_to_non_nullable
@@ -201,7 +201,7 @@ class _$SongImpl implements _Song {
   const _$SongImpl(
       {required this.id,
       required this.title,
-      this.artist = 'Desconocido',
+      this.artist = 'Unknown',
       required this.difficulty,
       @JsonKey(name: 'duration_seconds') required this.durationSeconds,
       @JsonKey(name: 'is_premium') this.isPremium = false,
@@ -220,7 +220,7 @@ class _$SongImpl implements _Song {
   @JsonKey()
   final String artist;
   @override
-  final String difficulty;
+  final Difficulty difficulty;
   @override
   @JsonKey(name: 'duration_seconds')
   final int durationSeconds;
@@ -300,7 +300,7 @@ abstract class _Song implements Song {
           {required final String id,
           required final String title,
           final String artist,
-          required final String difficulty,
+          required final Difficulty difficulty,
           @JsonKey(name: 'duration_seconds') required final int durationSeconds,
           @JsonKey(name: 'is_premium') final bool isPremium,
           @JsonKey(name: 'audio_url') final String? audioPath,
@@ -316,7 +316,7 @@ abstract class _Song implements Song {
   @override
   String get artist;
   @override
-  String get difficulty;
+  Difficulty get difficulty;
   @override
   @JsonKey(name: 'duration_seconds')
   int get durationSeconds;

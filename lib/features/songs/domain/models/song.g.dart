@@ -9,8 +9,8 @@ part of 'song.dart';
 _$SongImpl _$$SongImplFromJson(Map<String, dynamic> json) => _$SongImpl(
       id: json['id'] as String,
       title: json['title'] as String,
-      artist: json['artist'] as String? ?? 'Desconocido',
-      difficulty: json['difficulty'] as String,
+      artist: json['artist'] as String? ?? 'Unknown',
+      difficulty: $enumDecode(_$DifficultyEnumMap, json['difficulty']),
       durationSeconds: (json['duration_seconds'] as num).toInt(),
       isPremium: json['is_premium'] as bool? ?? false,
       audioPath: json['audio_url'] as String?,
@@ -22,9 +22,15 @@ Map<String, dynamic> _$$SongImplToJson(_$SongImpl instance) =>
       'id': instance.id,
       'title': instance.title,
       'artist': instance.artist,
-      'difficulty': instance.difficulty,
+      'difficulty': _$DifficultyEnumMap[instance.difficulty]!,
       'duration_seconds': instance.durationSeconds,
       'is_premium': instance.isPremium,
       'audio_url': instance.audioPath,
       'notes_json': instance.notesJson,
     };
+
+const _$DifficultyEnumMap = {
+  Difficulty.easy: 'easy',
+  Difficulty.medium: 'medium',
+  Difficulty.hard: 'hard',
+};

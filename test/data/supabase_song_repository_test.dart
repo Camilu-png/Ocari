@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 import 'package:ocari/features/songs/data/repositories/supabase_song_repository.dart';
 import 'package:ocari/features/songs/domain/models/song.dart';
+import 'package:ocari/features/songs/domain/models/difficulty.dart';
 
 class MockAssetBundle extends Mock implements AssetBundle {}
 
@@ -120,7 +121,7 @@ void main() {
           id: '1',
           title: 'Song One',
           artist: 'Desconocido',
-          difficulty: 'easy',
+          difficulty: Difficulty.easy,
           durationSeconds: 30,
           isPremium: false,
         ),
@@ -128,7 +129,7 @@ void main() {
           id: '2',
           title: 'Song Two',
           artist: 'Artist',
-          difficulty: 'hard',
+          difficulty: Difficulty.hard,
           durationSeconds: 60,
           isPremium: true,
           audioPath: 'https://example.com/audio.mp3',
@@ -178,7 +179,7 @@ void main() {
         id: '1',
         title: 'Found Song',
         artist: 'Test Artist',
-        difficulty: 'medium',
+        difficulty: Difficulty.medium,
         durationSeconds: 90,
         isPremium: true,
       );

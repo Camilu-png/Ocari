@@ -7,6 +7,7 @@ import 'package:ocari/core/widgets/ocari_button.dart';
 import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/core/widgets/ocari_text_field.dart';
 import 'package:ocari/core/widgets/song_card.dart';
+import 'package:ocari/features/songs/domain/models/difficulty.dart';
 
 class DebugScreen extends StatelessWidget {
   const DebugScreen({super.key});
@@ -179,9 +180,9 @@ class DebugScreen extends StatelessWidget {
           spacing: 12,
           runSpacing: 8,
           children: [
-            DifficultyBadge(difficulty: 'easy'),
-            DifficultyBadge(difficulty: 'medium'),
-            DifficultyBadge(difficulty: 'hard'),
+            DifficultyBadge(difficulty: Difficulty.easy),
+            DifficultyBadge(difficulty: Difficulty.medium),
+            DifficultyBadge(difficulty: Difficulty.hard),
           ],
         ),
       ],
@@ -218,7 +219,7 @@ class DebugScreen extends StatelessWidget {
         SongCard(
           title: 'Twinkle Twinkle',
           artist: 'Mozart',
-          difficulty: 'easy',
+          difficulty: Difficulty.easy,
           durationSeconds: 120,
           onTap: () {},
         ),
@@ -226,7 +227,7 @@ class DebugScreen extends StatelessWidget {
         SongCard(
           title: 'Moonlight Sonata',
           artist: 'Beethoven',
-          difficulty: 'medium',
+          difficulty: Difficulty.medium,
           durationSeconds: 420,
           onTap: () {},
         ),
@@ -234,7 +235,7 @@ class DebugScreen extends StatelessWidget {
         SongCard(
           title: 'Flight of the Bumblebee',
           artist: 'Rimsky-Korsakov',
-          difficulty: 'hard',
+          difficulty: Difficulty.hard,
           durationSeconds: 90,
           onTap: () {},
         ),
@@ -242,7 +243,7 @@ class DebugScreen extends StatelessWidget {
         SongCard(
           title: 'Locked Song',
           artist: 'Unknown',
-          difficulty: 'hard',
+          difficulty: Difficulty.hard,
           durationSeconds: 180,
           isLocked: true,
           onTap: () {},
