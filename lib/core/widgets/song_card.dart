@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ocari/core/difficulty.dart';
 import 'package:ocari/core/theme/app_theme.dart';
+import 'package:ocari/features/songs/domain/models/difficulty.dart';
 import 'difficulty_badge.dart';
 
 class SongCard extends StatelessWidget {

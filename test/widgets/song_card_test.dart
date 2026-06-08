@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ocari/core/difficulty.dart';
 import 'package:ocari/core/theme/app_theme.dart';
 import 'package:ocari/core/widgets/song_card.dart';
+import 'package:ocari/features/songs/domain/models/difficulty.dart';
 
 void main() {
   group('SongCard', () {

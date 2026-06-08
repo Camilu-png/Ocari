@@ -40,8 +40,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   void _initIfReady() {
     if (_initialized) return;
     final song = ref.read(songByIdProvider(widget.songId)).valueOrNull;
-    if (song?.audioUrl != null) {
-      _initPlayer(song!.audioUrl!);
+    if (song?.audioPath != null) {
+      _initPlayer(song!.audioPath!);
     }
   }
 
@@ -50,6 +50,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     _stateSub?.cancel();
     _positionSub?.cancel();
     _durationSub?.cancel();
+    _player.stop();
     super.dispose();
   }
 
@@ -137,9 +138,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
             Icon(Icons.music_note_rounded, size: 80, color: colors.accent),
             const SizedBox(height: 24),
             Text(song.title, style: AppTextStyles.heading(colors.onBgLight)),
-            if (song.artist != null) ...[
+            if (song.artist.isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text(song.artist!,
+              Text(song.artist,
                   style: AppTextStyles.body(colors.textSecondary)),
             ],
             const SizedBox(height: 32),
@@ -178,7 +179,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 ),
               ),
             const SizedBox(height: 24),
-            if (!_audioReady && song.audioUrl != null)
+            if (!_audioReady && song.audioPath != null)
               const CircularProgressIndicator()
             else
               IconButton(

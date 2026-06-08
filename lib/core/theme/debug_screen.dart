@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:ocari/core/difficulty.dart';
 import 'app_theme.dart';
 import 'package:ocari/core/widgets/difficulty_badge.dart';
 import 'package:ocari/core/widgets/ocari_button.dart';
 import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/core/widgets/ocari_text_field.dart';
 import 'package:ocari/core/widgets/song_card.dart';
+import 'package:ocari/features/songs/domain/models/difficulty.dart';
 
 class DebugScreen extends StatelessWidget {
   const DebugScreen({super.key});
