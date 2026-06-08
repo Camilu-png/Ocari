@@ -9,6 +9,8 @@ import 'package:ocari/features/songs/domain/models/difficulty.dart';
 import 'package:ocari/features/songs/domain/models/song.dart';
 import 'package:ocari/features/songs/presentation/providers/songs_provider.dart';
 
+const _iconSizeLg = 48.0;
+
 class SongsScreen extends ConsumerStatefulWidget {
   const SongsScreen({super.key});
 
@@ -37,7 +39,8 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
       }).toList();
     }
     if (_difficultyFilter != null) {
-      result = result.where((s) => s.difficulty == _difficultyFilter).toList();
+      result =
+          result.where((s) => s.difficulty == _difficultyFilter).toList();
     }
     return result;
   }
@@ -51,7 +54,7 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.lock_rounded, size: 48, color: colors.accent),
+            Icon(Icons.lock_rounded, size: _iconSizeLg, color: colors.accent),
             const SizedBox(height: AppSpacing.md),
             Text('Próximamente', style: context.textTheme.titleLarge),
             const SizedBox(height: AppSpacing.sm),
@@ -76,22 +79,78 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
   @override
   Widget build(BuildContext context) {
     final songsAsync = ref.watch(songsProvider);
+    final colors = context.colors;
 
     return OcariScaffold(
       title: 'Canciones',
       showBackButton: false,
       body: songsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => _ErrorView(
-          message: '$err',
-          onRetry: () => ref.read(songsProvider.notifier).refresh(),
+        error: (err, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.error_outline_rounded,
+                  size: _iconSizeLg,
+                  color: colors.error,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  'Error al cargar canciones',
+                  style: context.textTheme.titleMedium?.copyWith(
+                    color: colors.onBgLight,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  '$err',
+                  style: AppTextStyles.caption(colors.textSecondary),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                FilledButton.icon(
+                  onPressed: () =>
+                      ref.read(songsProvider.notifier).refresh(),
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: const Text('Reintentar'),
+                ),
+              ],
+            ),
+          ),
         ),
         data: (songs) {
           final filtered = _filteredSongs(songs);
+          final hasFilters = _searchController.text.isNotEmpty ||
+              _difficultyFilter != null;
 
           return Column(
             children: [
-              _Header(songCount: songs.length),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  AppSpacing.lg,
+                  AppSpacing.md,
+                  AppSpacing.xs,
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      'Canciones',
+                      style: context.textTheme.headlineMedium?.copyWith(
+                        color: colors.onBgLight,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${songs.length} ${songs.length == 1 ? 'canción' : 'canciones'}',
+                      style: AppTextStyles.body(colors.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
               _SearchField(
                 controller: _searchController,
                 onChanged: (_) => setState(() {}),
@@ -102,9 +161,28 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
               ),
               Expanded(
                 child: filtered.isEmpty
-                    ? _EmptyState(
-                        hasFilters: _searchController.text.isNotEmpty ||
-                            _difficultyFilter != null,
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              hasFilters
+                                  ? Icons.search_off_rounded
+                                  : Icons.music_note_rounded,
+                              size: _iconSizeLg,
+                              color: colors.textSecondary,
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            Text(
+                              hasFilters
+                                  ? 'No se encontraron canciones'
+                                  : 'No hay canciones disponibles',
+                              style: context.textTheme.titleMedium?.copyWith(
+                                color: colors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
                       )
                     : RefreshIndicator(
                         onRefresh: () =>
@@ -144,40 +222,6 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
             ],
           );
         },
-      ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  final int songCount;
-
-  const _Header({required this.songCount});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.xs,
-      ),
-      child: Row(
-        children: [
-          Text(
-            'Canciones',
-            style: context.textTheme.headlineMedium?.copyWith(
-              color: colors.onBgLight,
-            ),
-          ),
-          const Spacer(),
-          Text(
-            '$songCount ${songCount == 1 ? 'canción' : 'canciones'}',
-            style: AppTextStyles.body(colors.textSecondary),
-          ),
-        ],
       ),
     );
   }
@@ -247,6 +291,39 @@ class _DifficultyFilter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+
+    final chipData = <({
+      Difficulty? value,
+      String label,
+      Color selectedBg,
+      Color selectedFg,
+    })>[
+      (
+        value: null,
+        label: 'Todas',
+        selectedBg: colors.accent.withValues(alpha: 0.2),
+        selectedFg: colors.accent,
+      ),
+      (
+        value: Difficulty.easy,
+        label: 'Fácil',
+        selectedBg: colors.diffEasyBg,
+        selectedFg: colors.diffEasyText,
+      ),
+      (
+        value: Difficulty.medium,
+        label: 'Medio',
+        selectedBg: colors.diffMediumBg,
+        selectedFg: colors.diffMediumText,
+      ),
+      (
+        value: Difficulty.hard,
+        label: 'Difícil',
+        selectedBg: colors.diffHardBg,
+        selectedFg: colors.diffHardText,
+      ),
+    ];
+
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -255,161 +332,29 @@ class _DifficultyFilter extends StatelessWidget {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
-          children: [
-            _DifficultyChip(
-              label: 'Todas',
-              isSelected: selected == null,
-              backgroundColor: colors.surface,
-              selectedColor: colors.accent.withValues(alpha: 0.2),
-              textColor: colors.onBgLight,
-              selectedTextColor: colors.accent,
-              onSelected: (_) => onChanged(null),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            _DifficultyChip(
-              label: 'Fácil',
-              isSelected: selected == Difficulty.easy,
-              backgroundColor: colors.surface,
-              selectedColor: colors.diffEasyBg,
-              textColor: colors.onBgLight,
-              selectedTextColor: colors.diffEasyText,
-              onSelected: (_) => onChanged(Difficulty.easy),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            _DifficultyChip(
-              label: 'Medio',
-              isSelected: selected == Difficulty.medium,
-              backgroundColor: colors.surface,
-              selectedColor: colors.diffMediumBg,
-              textColor: colors.onBgLight,
-              selectedTextColor: colors.diffMediumText,
-              onSelected: (_) => onChanged(Difficulty.medium),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            _DifficultyChip(
-              label: 'Difícil',
-              isSelected: selected == Difficulty.hard,
-              backgroundColor: colors.surface,
-              selectedColor: colors.diffHardBg,
-              textColor: colors.onBgLight,
-              selectedTextColor: colors.diffHardText,
-              onSelected: (_) => onChanged(Difficulty.hard),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DifficultyChip extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final Color backgroundColor;
-  final Color selectedColor;
-  final Color textColor;
-  final Color selectedTextColor;
-  final ValueChanged<bool?> onSelected;
-
-  const _DifficultyChip({
-    required this.label,
-    required this.isSelected,
-    required this.backgroundColor,
-    required this.selectedColor,
-    required this.textColor,
-    required this.selectedTextColor,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      selectedColor: selectedColor,
-      backgroundColor: backgroundColor,
-      labelStyle: TextStyle(
-        color: isSelected ? selectedTextColor : textColor,
-        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-      ),
-      onSelected: onSelected,
-      side: BorderSide.none,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(100),
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _ErrorView({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error_outline_rounded, size: 48, color: colors.error),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'Error al cargar canciones',
-              style: context.textTheme.titleMedium?.copyWith(
-                color: colors.onBgLight,
+          children: chipData.map((c) {
+            final isSelected = selected == c.value;
+            return Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.sm),
+              child: ChoiceChip(
+                label: Text(c.label),
+                selected: isSelected,
+                selectedColor: c.selectedBg,
+                backgroundColor: colors.surface,
+                labelStyle: TextStyle(
+                  color: isSelected ? c.selectedFg : colors.onBgLight,
+                  fontWeight:
+                      isSelected ? FontWeight.w600 : FontWeight.w400,
+                ),
+                onSelected: (_) => onChanged(c.value),
+                side: BorderSide.none,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(100),
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              message,
-              style: AppTextStyles.caption(colors.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            FilledButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Reintentar'),
-            ),
-          ],
+            );
+          }).toList(),
         ),
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  final bool hasFilters;
-
-  const _EmptyState({required this.hasFilters});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            hasFilters ? Icons.search_off_rounded : Icons.music_note_rounded,
-            size: 48,
-            color: colors.textSecondary,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            hasFilters
-                ? 'No se encontraron canciones'
-                : 'No hay canciones disponibles',
-            style: context.textTheme.titleMedium?.copyWith(
-              color: colors.textSecondary,
-            ),
-          ),
-        ],
       ),
     );
   }

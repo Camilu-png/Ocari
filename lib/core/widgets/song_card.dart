@@ -4,6 +4,8 @@ import 'package:ocari/features/songs/domain/models/difficulty.dart';
 import 'difficulty_badge.dart';
 
 class SongCard extends StatelessWidget {
+  static const double _lockedOpacity = 0.5;
+
   final String title;
   final Difficulty difficulty;
   final int durationSeconds;
@@ -32,7 +34,7 @@ class SongCard extends StatelessWidget {
     final colors = context.colors;
 
     return Opacity(
-      opacity: isLocked ? 0.5 : 1,
+      opacity: isLocked ? _lockedOpacity : 1,
       child: InkWell(
         onTap: onTap,
         borderRadius: AppRadius.borderRadiusLg,
