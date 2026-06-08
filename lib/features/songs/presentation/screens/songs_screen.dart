@@ -39,8 +39,7 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
       }).toList();
     }
     if (_difficultyFilter != null) {
-      result =
-          result.where((s) => s.difficulty == _difficultyFilter).toList();
+      result = result.where((s) => s.difficulty == _difficultyFilter).toList();
     }
     return result;
   }
@@ -112,8 +111,7 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 FilledButton.icon(
-                  onPressed: () =>
-                      ref.read(songsProvider.notifier).refresh(),
+                  onPressed: () => ref.read(songsProvider.notifier).refresh(),
                   icon: const Icon(Icons.refresh_rounded),
                   label: const Text('Reintentar'),
                 ),
@@ -123,8 +121,8 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
         ),
         data: (songs) {
           final filtered = _filteredSongs(songs);
-          final hasFilters = _searchController.text.isNotEmpty ||
-              _difficultyFilter != null;
+          final hasFilters =
+              _searchController.text.isNotEmpty || _difficultyFilter != null;
 
           return Column(
             children: [
@@ -343,8 +341,7 @@ class _DifficultyFilter extends StatelessWidget {
                 backgroundColor: colors.surface,
                 labelStyle: TextStyle(
                   color: isSelected ? c.selectedFg : colors.onBgLight,
-                  fontWeight:
-                      isSelected ? FontWeight.w600 : FontWeight.w400,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
                 onSelected: (_) => onChanged(c.value),
                 side: BorderSide.none,
