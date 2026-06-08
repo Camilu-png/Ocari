@@ -34,7 +34,7 @@ class SongCard extends StatelessWidget {
     return Opacity(
       opacity: isLocked ? 0.5 : 1,
       child: InkWell(
-        onTap: isLocked ? null : onTap,
+        onTap: onTap,
         borderRadius: AppRadius.borderRadiusLg,
         child: Container(
           padding: const EdgeInsets.symmetric(

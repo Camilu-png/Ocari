@@ -119,7 +119,7 @@ git checkout -b feature/07-login-email
 
 ## Hoja de ruta
 
-### Sprint 0 — Fundación _(en progreso)_
+### Sprint 0 — Fundación
 
 - [x] Aplicación base Flutter inicializada
 - [x] Estructura de carpetas y arquitectura
@@ -129,7 +129,7 @@ git checkout -b feature/07-login-email
 - [x] Design system y componentes base
 - [x] CI/CD con GitHub Actions
 
-### Sprint 1 — Reproductor _(próximo)_
+### Sprint 1 — Reproductor _(en progreso)_
 
 - [x] Pantalla de lista de canciones
 - [ ] Reproductor con ocarina animada (CustomPainter)
