@@ -142,7 +142,7 @@ void main() {
       expect(tapped, isTrue);
     });
 
-    testWidgets('does not call onTap when isLocked is true', (tester) async {
+    testWidgets('calls onTap even when isLocked is true', (tester) async {
       bool tapped = false;
       await tester.pumpWidget(
         createWidgetUnderTest(
@@ -157,7 +157,7 @@ void main() {
       );
 
       await tester.tap(find.byType(SongCard));
-      expect(tapped, isFalse);
+      expect(tapped, isTrue);
     });
 
     testWidgets('shows difficulty badge for unlocked songs', (tester) async {
