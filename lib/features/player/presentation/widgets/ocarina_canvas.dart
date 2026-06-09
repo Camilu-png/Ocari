@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocari/core/theme/app_theme.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
 
+const double ocarinaSvgW = 286.0;
+const double ocarinaSvgH = 173.0;
+
 class OcarinaCanvas extends ConsumerStatefulWidget {
   final SongNote? note;
 
@@ -77,7 +80,7 @@ class _OcarinaCanvasState extends ConsumerState<OcarinaCanvas>
       mainAxisSize: MainAxisSize.min,
       children: [
         AspectRatio(
-          aspectRatio: 286 / 173,
+          aspectRatio: ocarinaSvgW / ocarinaSvgH,
           child: AnimatedBuilder(
             animation: _animation,
             builder: (context, _) {
@@ -124,8 +127,8 @@ class _OcarinaPainter extends CustomPainter {
   final Color holeBorderColor;
   final Color shadowColor;
 
-  static const double _svgW = 286.0;
-  static const double _svgH = 173.0;
+  static const double _svgW = ocarinaSvgW;
+  static const double _svgH = ocarinaSvgH;
 
   const _OcarinaPainter({
     required this.currentNote,
@@ -392,6 +395,10 @@ class _OcarinaPainter extends CustomPainter {
         oldDelegate.previousNote != previousNote ||
         oldDelegate.progress != progress ||
         oldDelegate.bodyColor != bodyColor ||
-        oldDelegate.pressedColor != pressedColor;
+        oldDelegate.bodyHighlight != bodyHighlight ||
+        oldDelegate.borderColor != borderColor ||
+        oldDelegate.pressedColor != pressedColor ||
+        oldDelegate.holeBorderColor != holeBorderColor ||
+        oldDelegate.shadowColor != shadowColor;
   }
 }
