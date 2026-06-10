@@ -31,6 +31,8 @@
 			</array>
 		</dict>
 	</array>
+	<key>GIDClientID</key>
+	<string>744538709104-04bk535m6a7u29l69tg96ssi2qgeb80e.apps.googleusercontent.com</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 	<key>NSHumanReadableCopyright</key>
