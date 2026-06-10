@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ocari/core/theme/app_theme.dart';
+import 'package:ocari/core/theme/note_colors.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
 
 const double ocarinaSvgW = 286.0;
@@ -69,7 +70,9 @@ class _OcarinaCanvasState extends ConsumerState<OcarinaCanvas>
     final borderColor = isDark
         ? colors.accent.withAlpha(80)
         : colors.textSecondary.withAlpha(120);
-    final pressedColor = colors.primary;
+    final pressedColor = note != null
+        ? NoteColors.forNote(note.note)
+        : colors.primary;
     final holeBorderColor = isDark
         ? colors.accent.withAlpha(70)
         : colors.textSecondary.withAlpha(100);
@@ -358,12 +361,11 @@ class _OcarinaPainter extends CustomPainter {
     Color pressedColor,
     Color borderColor,
   ) {
-    // Fondo del hoyo (siempre visible como hueco)
     canvas.drawCircle(
       center,
       radius,
       Paint()
-        ..color = borderColor.withAlpha(30)
+        ..color = Colors.white.withAlpha(15)
         ..style = PaintingStyle.fill,
     );
 
