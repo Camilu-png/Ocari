@@ -132,7 +132,7 @@ git checkout -b feature/07-login-email
 ### Sprint 1 — Reproductor _(en progreso)_
 
 - [x] Pantalla de lista de canciones
-- [ ] Reproductor con ocarina animada (CustomPainter)
+- [X] Reproductor con ocarina animada (CustomPainter)
 - [ ] Sincronización audio → nota → digitación
 - [ ] Control de velocidad de reproducción
 

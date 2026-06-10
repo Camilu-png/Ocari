@@ -8,7 +8,9 @@
 PRODUCT_NAME = ocari
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.ocari
+PRODUCT_BUNDLE_IDENTIFIER = com.abatista.ocari
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.
+
+MACOSX_DEPLOYMENT_TARGET = 10.15

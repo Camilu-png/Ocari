@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import 'app_theme.dart';
@@ -7,7 +11,9 @@ import 'package:ocari/core/widgets/ocari_button.dart';
 import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/core/widgets/ocari_text_field.dart';
 import 'package:ocari/core/widgets/song_card.dart';
+import 'package:ocari/features/player/presentation/widgets/ocarina_canvas.dart';
 import 'package:ocari/features/songs/domain/models/difficulty.dart';
+import 'package:ocari/features/songs/domain/models/song_note.dart';
 
 class DebugScreen extends StatelessWidget {
   const DebugScreen({super.key});
@@ -51,6 +57,8 @@ class DebugScreen extends StatelessWidget {
             _buildScaffoldSection(context),
             const SizedBox(height: 24),
             _buildSongCardsSection(),
+            const SizedBox(height: 24),
+            const _OcarinaPreviewSection(),
             const SizedBox(height: 40),
           ],
         ),
@@ -360,6 +368,95 @@ class _ColorChip extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(label, style: Theme.of(context).textTheme.labelSmall),
+      ],
+    );
+  }
+}
+
+class _OcarinaPreviewSection extends StatefulWidget {
+  const _OcarinaPreviewSection();
+
+  @override
+  State<_OcarinaPreviewSection> createState() => _OcarinaPreviewSectionState();
+}
+
+class _OcarinaPreviewSectionState extends State<_OcarinaPreviewSection> {
+  final _noteNames = <String>[
+    'A4', 'As4', 'B4', 'C5', 'Cs5', 'D5', 'Ds5', 'E5', 'F5', 'Fs5',
+    'G5', 'Gs5', 'A5', 'As5', 'B5', 'C6', 'Cs6', 'D6', 'Ds6', 'E6', 'F6',
+  ];
+
+  final Map<String, SongNote> _notes = {};
+  int _currentIndex = 0;
+  Timer? _timer;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final raw = await rootBundle.loadString('assets/data/fingerings.json');
+    final json = jsonDecode(raw) as Map<String, dynamic>;
+    final allNotes = json['notes'] as Map<String, dynamic>;
+
+    for (final name in _noteNames) {
+      final entry = allNotes[name] as Map<String, dynamic>;
+      _notes[name] = SongNote(
+        note: name,
+        top: (entry['top'] as List).cast<int>(),
+        bot: (entry['bot'] as List).cast<int>(),
+        sub: (entry['sub'] as List).cast<int>(),
+        middle: (entry['middle'] as List).cast<int>(),
+        timestampMs: 0,
+        durationMs: 500,
+        noteValue: 'quarter',
+      );
+    }
+
+    if (mounted) {
+      setState(() => _loaded = true);
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (mounted) {
+          setState(() => _currentIndex = (_currentIndex + 1) % _noteNames.length);
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Ocarina Canvas',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 16),
+        if (!_loaded)
+          const SizedBox(
+            height: 200,
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else ...[
+          Text(
+            'Cycling through ${_noteNames.length} notes',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).extension<AppColors>()!.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          OcarinaCanvas(note: _notes[_noteNames[_currentIndex]]),
+        ],
       ],
     );
   }
