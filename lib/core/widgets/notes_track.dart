@@ -5,6 +5,7 @@ import 'package:ocari/core/theme/note_colors.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
 
 const double pixelsPerMs = 0.08;
+const double blockGapPx = 2.0;
 const double separatorWidth = 8.0;
 const double horizontalPadding = 8.0;
 const double labelHeight = 20.0;
@@ -30,10 +31,21 @@ final List<_FingerGetter?> _columnGetters = [
 ];
 
 const List<String> _columnLabels = [
-  'T0', 'T1', 'T2', 'T3', '',
-  'M0', 'M1', '',
-  'B0', 'B1', 'B2', 'B3', '',
-  'S0', 'S1',
+  'T0',
+  'T1',
+  'T2',
+  'T3',
+  '',
+  'M0',
+  'M1',
+  '',
+  'B0',
+  'B1',
+  'B2',
+  'B3',
+  '',
+  'S0',
+  'S1',
 ];
 
 const int columnCount = 12;
@@ -60,7 +72,8 @@ class NotesTrack extends StatelessWidget {
         final lineY = trackHeight * 0.75;
 
         final double usableWidth = width - 2 * horizontalPadding;
-        final double columnsTotalWidth = usableWidth - separatorCount * separatorWidth;
+        final double columnsTotalWidth =
+            usableWidth - separatorCount * separatorWidth;
         final double colWidth = columnsTotalWidth / columnCount;
 
         final List<double> colStarts = [];
@@ -85,13 +98,22 @@ class NotesTrack extends StatelessWidget {
                 child: Stack(
                   children: [
                     ..._buildTimeGrid(
-                      trackHeight, lineY, posMs, width, lineColor,
+                      trackHeight,
+                      lineY,
+                      posMs,
+                      width,
+                      lineColor,
                     ),
                     ..._buildColumnBackgrounds(
-                      trackHeight, colStarts,
+                      trackHeight,
+                      colStarts,
                     ),
                     ..._buildBlocks(
-                      trackHeight, lineY, posMs, colWidth, colStarts,
+                      trackHeight,
+                      lineY,
+                      posMs,
+                      colWidth,
+                      colStarts,
                     ),
                     _buildHitLine(width, lineY, labelColor, lineColor),
                   ],
@@ -186,11 +208,12 @@ class NotesTrack extends StatelessWidget {
     final int firstIdx = _findFirstVisible(viewTop);
     final int lastIdx = _findLastVisible(viewBottom);
 
-        final widgets = <Widget>[];
+    final widgets = <Widget>[];
     for (int i = firstIdx; i <= lastIdx && i < notes.length; i++) {
       final note = notes[i];
-      final double blockEnd = (posMs - note.timestampMs - note.durationMs) * pixelsPerMs + lineY;
-      final double rawHeight = note.durationMs * pixelsPerMs;
+      final double blockEnd =
+          (posMs - note.timestampMs - note.durationMs) * pixelsPerMs + lineY;
+      final double rawHeight = note.durationMs * pixelsPerMs - blockGapPx;
       final double blockH = rawHeight.clamp(8.0, double.infinity);
       final double blockTop = blockEnd;
 
@@ -198,8 +221,10 @@ class NotesTrack extends StatelessWidget {
 
       final Color color = NoteColors.forNote(note.note);
       final hsl = HSLColor.fromColor(color);
-      final topColor = hsl.withLightness((hsl.lightness + 0.15).clamp(0.0, 1.0)).toColor();
-      final bottomColor = hsl.withLightness((hsl.lightness - 0.15).clamp(0.0, 1.0)).toColor();
+      final topColor =
+          hsl.withLightness((hsl.lightness + 0.15).clamp(0.0, 1.0)).toColor();
+      final bottomColor =
+          hsl.withLightness((hsl.lightness - 0.15).clamp(0.0, 1.0)).toColor();
 
       for (int ci = 0; ci < _columnGetters.length; ci++) {
         final getter = _columnGetters[ci];
@@ -233,8 +258,10 @@ class NotesTrack extends StatelessWidget {
                 borderRadius: BorderRadius.only(
                   topLeft: mergeLeft ? Radius.zero : const Radius.circular(3),
                   topRight: mergeRight ? Radius.zero : const Radius.circular(3),
-                  bottomLeft: mergeLeft ? Radius.zero : const Radius.circular(3),
-                  bottomRight: mergeRight ? Radius.zero : const Radius.circular(3),
+                  bottomLeft:
+                      mergeLeft ? Radius.zero : const Radius.circular(3),
+                  bottomRight:
+                      mergeRight ? Radius.zero : const Radius.circular(3),
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -286,7 +313,8 @@ class NotesTrack extends StatelessWidget {
     return lo - 1;
   }
 
-  Widget _buildHitLine(double width, double lineY, Color labelColor, Color lineColor) {
+  Widget _buildHitLine(
+      double width, double lineY, Color labelColor, Color lineColor) {
     return Positioned(
       left: 0,
       top: lineY,
@@ -317,7 +345,8 @@ class NotesTrack extends StatelessWidget {
     );
   }
 
-  Widget _buildLabels(double colWidth, List<double> colStarts, Color labelColor) {
+  Widget _buildLabels(
+      double colWidth, List<double> colStarts, Color labelColor) {
     return SizedBox(
       height: labelHeight,
       child: Stack(
