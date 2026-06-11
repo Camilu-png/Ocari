@@ -84,6 +84,9 @@ class NotesTrack extends StatelessWidget {
               child: ClipRect(
                 child: Stack(
                   children: [
+                    ..._buildTimeGrid(
+                      trackHeight, lineY, posMs, width, lineColor,
+                    ),
                     ..._buildColumnBackgrounds(
                       trackHeight, colStarts,
                     ),
@@ -126,6 +129,43 @@ class NotesTrack extends StatelessWidget {
           );
         }
       }
+    }
+    return widgets;
+  }
+
+  List<Widget> _buildTimeGrid(
+    double trackHeight,
+    double lineY,
+    double posMs,
+    double trackWidth,
+    Color baseColor,
+  ) {
+    const double minorMs = 1000.0;
+    const int majorStep = 4;
+
+    final double viewTop = posMs - 12000;
+    final double viewBottom = posMs + 12000;
+    final double startMs = (viewTop / minorMs).ceil() * minorMs;
+
+    final widgets = <Widget>[];
+    final int count = ((viewBottom - startMs) / minorMs).ceil() + 1;
+    for (int i = 0; i < count; i++) {
+      final double t = startMs + i * minorMs;
+      final double y = (posMs - t) * pixelsPerMs + lineY;
+      if (y < 0 || y > trackHeight) continue;
+
+      final bool isMajor = i % majorStep == 0;
+      widgets.add(
+        Positioned(
+          left: 0,
+          top: y,
+          width: trackWidth,
+          child: Container(
+            height: 1,
+            color: baseColor.withAlpha(isMajor ? 18 : 8),
+          ),
+        ),
+      );
     }
     return widgets;
   }

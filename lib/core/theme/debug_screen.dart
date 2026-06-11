@@ -536,14 +536,14 @@ class _NotesTrackPreviewSectionState
     });
   }
 
-  SongNote? _currentNote() {
+  SongNote? _activeNote() {
     final ms = _position.inMilliseconds;
-    SongNote? best;
     for (final note in _notes) {
-      if (note.timestampMs > ms) break;
-      best = note;
+      if (ms >= note.timestampMs && ms < note.timestampMs + note.durationMs) {
+        return note;
+      }
     }
-    return best;
+    return null;
   }
 
   @override
@@ -586,6 +586,13 @@ class _NotesTrackPreviewSectionState
             ),
           ),
           const SizedBox(height: 8),
+          Center(
+            child: SizedBox(
+              width: 220,
+              child: OcarinaCanvas(note: _activeNote()),
+            ),
+          ),
+          const SizedBox(height: 8),
           Row(
             children: [
               Text(
@@ -595,7 +602,7 @@ class _NotesTrackPreviewSectionState
               const Spacer(),
               Text(
                 () {
-                  final note = _currentNote();
+                  final note = _activeNote();
                   if (note == null) return '--';
                   final sec = note.durationMs / 1000;
                   return '${sec.toStringAsFixed(1)}s';
