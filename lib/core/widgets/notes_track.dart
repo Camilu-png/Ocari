@@ -5,7 +5,6 @@ import 'package:ocari/core/theme/note_colors.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
 
 const double pixelsPerMs = 0.08;
-const double blockGapPx = 2.0;
 const double separatorWidth = 8.0;
 const double horizontalPadding = 8.0;
 const double labelHeight = 20.0;
@@ -147,17 +146,20 @@ class NotesTrack extends StatelessWidget {
     final int firstIdx = _findFirstVisible(viewTop);
     final int lastIdx = _findLastVisible(viewBottom);
 
-    final widgets = <Widget>[];
+        final widgets = <Widget>[];
     for (int i = firstIdx; i <= lastIdx && i < notes.length; i++) {
       final note = notes[i];
       final double blockEnd = (posMs - note.timestampMs - note.durationMs) * pixelsPerMs + lineY;
-      final double rawHeight = note.durationMs * pixelsPerMs - blockGapPx;
+      final double rawHeight = note.durationMs * pixelsPerMs;
       final double blockH = rawHeight.clamp(8.0, double.infinity);
       final double blockTop = blockEnd;
 
       if (blockTop + blockH < 0 || blockTop > trackHeight) continue;
 
       final Color color = NoteColors.forNote(note.note);
+      final hsl = HSLColor.fromColor(color);
+      final topColor = hsl.withLightness((hsl.lightness + 0.15).clamp(0.0, 1.0)).toColor();
+      final bottomColor = hsl.withLightness((hsl.lightness - 0.15).clamp(0.0, 1.0)).toColor();
 
       for (int ci = 0; ci < _columnGetters.length; ci++) {
         final getter = _columnGetters[ci];
@@ -167,6 +169,13 @@ class NotesTrack extends StatelessWidget {
         final cx = colStarts[ci];
         if (cx < 0) continue;
 
+        final bool mergeLeft = ci > 0 &&
+            _columnGetters[ci - 1] != null &&
+            _columnGetters[ci - 1]!(note) == 1;
+        final bool mergeRight = ci < _columnGetters.length - 1 &&
+            _columnGetters[ci + 1] != null &&
+            _columnGetters[ci + 1]!(note) == 1;
+
         widgets.add(
           Positioned(
             left: cx,
@@ -175,8 +184,30 @@ class NotesTrack extends StatelessWidget {
             height: blockH,
             child: Container(
               decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(3),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [topColor, color, bottomColor],
+                  stops: const [0.0, 0.3, 1.0],
+                ),
+                borderRadius: BorderRadius.only(
+                  topLeft: mergeLeft ? Radius.zero : const Radius.circular(3),
+                  topRight: mergeRight ? Radius.zero : const Radius.circular(3),
+                  bottomLeft: mergeLeft ? Radius.zero : const Radius.circular(3),
+                  bottomRight: mergeRight ? Radius.zero : const Radius.circular(3),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withAlpha(100),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                  BoxShadow(
+                    color: color.withAlpha(40),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                  ),
+                ],
               ),
             ),
           ),

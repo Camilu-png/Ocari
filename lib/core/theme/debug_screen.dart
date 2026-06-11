@@ -480,8 +480,8 @@ class _NotesTrackPreviewSectionState
   bool _loaded = false;
   bool _playing = false;
   Timer? _timer;
-  int _speedIndex = 0;
-  final _speeds = [0.25, 0.5, 0.75, 1.0, 1.5, 2.0];
+  double _speed = 1.0;
+  static const _speeds = [0.25, 0.5, 0.75, 1.0, 1.5, 2.0];
 
   @override
   void initState() {
@@ -509,13 +509,11 @@ class _NotesTrackPreviewSectionState
     } else {
       final lastNote = _notes.last;
       final totalMs = lastNote.timestampMs + lastNote.durationMs;
-      final speed = _speeds[_speedIndex];
-      const interval = Duration(milliseconds: 16);
-      final stepMs = 16 * speed;
 
-      _timer = Timer.periodic(interval, (_) {
+      _timer = Timer.periodic(const Duration(milliseconds: 16), (_) {
         if (!mounted) return;
         setState(() {
+          final stepMs = 16 * _speed;
           final next = _position.inMilliseconds + stepMs;
           if (next >= totalMs) {
             _position = Duration(milliseconds: totalMs);
@@ -536,6 +534,16 @@ class _NotesTrackPreviewSectionState
       _position = Duration.zero;
       _playing = false;
     });
+  }
+
+  SongNote? _currentNote() {
+    final ms = _position.inMilliseconds;
+    SongNote? best;
+    for (final note in _notes) {
+      if (note.timestampMs > ms) break;
+      best = note;
+    }
+    return best;
   }
 
   @override
@@ -586,7 +594,12 @@ class _NotesTrackPreviewSectionState
               ),
               const Spacer(),
               Text(
-                '${_position.inMilliseconds ~/ 1000}s',
+                () {
+                  final note = _currentNote();
+                  if (note == null) return '--';
+                  final sec = note.durationMs / 1000;
+                  return '${sec.toStringAsFixed(1)}s';
+                }(),
                 style: TextStyle(color: colors.textSecondary, fontSize: 12),
               ),
             ],
@@ -607,23 +620,51 @@ class _NotesTrackPreviewSectionState
                 onPressed: _loaded ? _reset : null,
               ),
               const SizedBox(width: 12),
-              Text(
-                '${_speeds[_speedIndex]}×',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colors.accent,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(width: 4),
-              GestureDetector(
-                onTap: () {
-                  setState(() =>
-                      _speedIndex = (_speedIndex + 1) % _speeds.length);
-                },
-                child: Icon(
-                  Icons.speed_rounded,
-                  color: colors.accent,
-                  size: 20,
+              PopupMenuButton<double>(
+                initialValue: _speed,
+                onSelected: (s) => setState(() => _speed = s),
+                itemBuilder: (_) => _speeds
+                    .map((s) => PopupMenuItem(
+                          value: s,
+                          child: Text(
+                            '$s×',
+                            style: TextStyle(
+                              fontWeight: s == _speed
+                                  ? FontWeight.w700
+                                  : FontWeight.w400,
+                              color: s == _speed
+                                  ? colors.accent
+                                  : null,
+                            ),
+                          ),
+                        ))
+                    .toList(),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: colors.accent.withAlpha(25),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '$_speed×',
+                        style: TextStyle(
+                          color: colors.accent,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.arrow_drop_down_rounded,
+                        color: colors.accent,
+                        size: 18,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
