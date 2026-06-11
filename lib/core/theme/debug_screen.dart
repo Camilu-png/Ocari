@@ -11,8 +11,8 @@ import 'package:ocari/core/widgets/ocari_button.dart';
 import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/core/widgets/ocari_text_field.dart';
 import 'package:ocari/core/widgets/song_card.dart';
-import 'package:ocari/features/player/presentation/widgets/notes_track.dart';
-import 'package:ocari/features/player/presentation/widgets/ocarina_canvas.dart';
+import 'package:ocari/core/widgets/notes_track.dart';
+import 'package:ocari/core/widgets/ocarina_canvas.dart';
 import 'package:ocari/features/songs/domain/models/difficulty.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
 

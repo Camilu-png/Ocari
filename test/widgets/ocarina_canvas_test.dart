@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ocari/core/theme/app_theme.dart';
-import 'package:ocari/features/player/presentation/widgets/ocarina_canvas.dart';
+import 'package:ocari/core/widgets/ocarina_canvas.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
 
 Widget createLightWidget({SongNote? note}) {
