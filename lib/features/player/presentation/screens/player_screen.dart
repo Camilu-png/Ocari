@@ -13,6 +13,8 @@ import 'package:ocari/features/songs/domain/models/song.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
 import 'package:ocari/features/songs/presentation/providers/songs_provider.dart';
 
+enum _LoadStage { loading, ready, error }
+
 class PlayerScreen extends ConsumerStatefulWidget {
   final String songId;
 
@@ -24,6 +26,8 @@ class PlayerScreen extends ConsumerStatefulWidget {
 
 class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   bool _initialized = false;
+  _LoadStage _loadStage = _LoadStage.loading;
+  String? _errorMessage;
   List<SongNote> _parsedNotes = [];
 
   @override
@@ -45,17 +49,44 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       ),
       error: (err, _) => OcariScaffold(
         title: 'Player',
-        body: Center(child: Text('Failed to load song: $err')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.error_outline_rounded,
+                    size: 48, color: colors.error),
+                const SizedBox(height: 16),
+                Text('Error al cargar la canción',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: colors.onBgLight)),
+                const SizedBox(height: 8),
+                Text('$err',
+                    style: TextStyle(color: colors.textSecondary),
+                    textAlign: TextAlign.center),
+              ],
+            ),
+          ),
+        ),
       ),
       data: (song) {
         if (song == null) {
           return const OcariScaffold(
             title: 'Player',
-            body: Center(child: Text('Song not found')),
+            body: Center(
+              child: Text('Song not found'),
+            ),
           );
         }
 
         _initIfReady(song, notifier);
+
+        if (_loadStage == _LoadStage.error) {
+          return _buildError(colors);
+        }
 
         return _buildPlayer(colors, playerState);
       },
@@ -64,16 +95,66 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
   void _initIfReady(Song song, PlayerNotifier notifier) {
     if (_initialized) return;
-    if (song.notesJson == null) return;
-    if (song.id.isEmpty) return;
 
-    final notesList = song.notesJson!['notes'] as List<dynamic>? ?? [];
-    _parsedNotes = notesList
-        .map((n) => SongNote.fromJson(n as Map<String, dynamic>))
-        .toList();
+    if (song.id.isEmpty) {
+      _errorMessage = 'ID de canción inválido.';
+      _loadStage = _LoadStage.error;
+      return;
+    }
 
-    notifier.initialize(song, _parsedNotes);
+    if (song.notesJson == null) {
+      _errorMessage = 'Esta canción no tiene datos de notas.';
+      _loadStage = _LoadStage.error;
+      return;
+    }
+
+    final notesList = song.notesJson!['notes'] as List<dynamic>?;
+    if (notesList == null || notesList.isEmpty) {
+      _errorMessage = 'Esta canción no contiene notas.';
+      _loadStage = _LoadStage.error;
+      return;
+    }
+
+    try {
+      _parsedNotes = notesList
+          .map((n) => SongNote.fromJson(n as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      _errorMessage = 'Error al procesar las notas: $e';
+      _loadStage = _LoadStage.error;
+      return;
+    }
+
     _initialized = true;
+    _loadStage = _LoadStage.ready;
+    notifier.initialize(song, _parsedNotes);
+  }
+
+  Widget _buildError(AppColors colors) {
+    return OcariScaffold(
+      title: 'Player',
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline_rounded,
+                  size: 48, color: colors.error),
+              const SizedBox(height: 16),
+              Text(
+                _errorMessage ?? 'Error desconocido',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: colors.onBgLight,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildPlayer(AppColors colors, PlayerState state) {
@@ -184,44 +265,73 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
   Widget _buildTransportControls(AppColors colors, PlayerState state) {
     final notifier = ref.read(playerNotifierProvider.notifier);
+    final isAudioReady = state.isAudioReady;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Column(
         children: [
-          _transportButton(
-            Icons.skip_previous_rounded,
-            () => notifier.skipToStart(),
-            colors,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _transportButton(
+                Icons.skip_previous_rounded,
+                notifier.canPlay ? () => notifier.skipToStart() : null,
+                colors,
+              ),
+              const SizedBox(width: 8),
+              _transportButton(
+                Icons.fast_rewind_rounded,
+                notifier.canPlay ? () => notifier.stepBackward() : null,
+                colors,
+              ),
+              const SizedBox(width: 16),
+              _transportButton(
+                state.isPlaying
+                    ? Icons.pause_circle_filled_rounded
+                    : Icons.play_circle_filled_rounded,
+                isAudioReady ? () => notifier.togglePlay() : null,
+                colors,
+                size: 56,
+              ),
+              const SizedBox(width: 16),
+              _transportButton(
+                Icons.fast_forward_rounded,
+                notifier.canPlay ? () => notifier.stepForward() : null,
+                colors,
+              ),
+              const SizedBox(width: 8),
+              _transportButton(
+                Icons.skip_next_rounded,
+                notifier.canPlay ? () => notifier.skipToEnd() : null,
+                colors,
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          _transportButton(
-            Icons.fast_rewind_rounded,
-            () => notifier.stepBackward(),
-            colors,
-          ),
-          const SizedBox(width: 16),
-          _transportButton(
-            state.isPlaying
-                ? Icons.pause_circle_filled_rounded
-                : Icons.play_circle_filled_rounded,
-            () => notifier.togglePlay(),
-            colors,
-            size: 56,
-          ),
-          const SizedBox(width: 16),
-          _transportButton(
-            Icons.fast_forward_rounded,
-            () => notifier.stepForward(),
-            colors,
-          ),
-          const SizedBox(width: 8),
-          _transportButton(
-            Icons.skip_next_rounded,
-            () => notifier.skipToEnd(),
-            colors,
-          ),
+          if (!isAudioReady) ...[
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: colors.textSecondary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Cargando audio…',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: colors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -229,14 +339,15 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
   Widget _transportButton(
     IconData icon,
-    VoidCallback onPressed,
+    VoidCallback? onPressed,
     AppColors colors, {
     double size = 40,
   }) {
+    final enabled = onPressed != null;
     return IconButton(
       icon: Icon(icon),
       iconSize: size,
-      color: colors.accent,
+      color: enabled ? colors.accent : colors.accent.withAlpha(80),
       onPressed: onPressed,
     );
   }
@@ -310,7 +421,9 @@ class _SpeedChip extends ConsumerWidget {
                 for (final s in speeds)
                   ListTile(
                     leading: Icon(
-                      s == speed ? Icons.radio_button_checked : Icons.radio_button_off,
+                      s == speed
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_off,
                       color: colors.accent,
                     ),
                     title: Text(

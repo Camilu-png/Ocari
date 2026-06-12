@@ -12,6 +12,7 @@ _$PlayerStateImpl _$$PlayerStateImplFromJson(Map<String, dynamic> json) =>
       notes: (json['notes'] as List<dynamic>)
           .map((e) => SongNote.fromJson(e as Map<String, dynamic>))
           .toList(),
+      isAudioReady: json['isAudioReady'] as bool? ?? false,
       currentNoteIndex: (json['currentNoteIndex'] as num).toInt(),
       isPlaying: json['isPlaying'] as bool,
       speed: (json['speed'] as num).toDouble(),
@@ -22,6 +23,7 @@ Map<String, dynamic> _$$PlayerStateImplToJson(_$PlayerStateImpl instance) =>
     <String, dynamic>{
       'song': instance.song,
       'notes': instance.notes,
+      'isAudioReady': instance.isAudioReady,
       'currentNoteIndex': instance.currentNoteIndex,
       'isPlaying': instance.isPlaying,
       'speed': instance.speed,

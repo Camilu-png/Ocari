@@ -13,6 +13,7 @@ class PlayerState with _$PlayerState {
   const factory PlayerState({
     required Song song,
     required List<SongNote> notes,
+    @Default(false) bool isAudioReady,
     required int currentNoteIndex,
     required bool isPlaying,
     required double speed,

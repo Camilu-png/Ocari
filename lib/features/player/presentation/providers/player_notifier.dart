@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart' hide PlayerState;
 
@@ -18,6 +19,9 @@ class PlayerNotifier extends Notifier<PlayerState> {
   StreamSubscription? _positionSub;
   List<SongNote> _notes = [];
   bool _initialized = false;
+  bool _audioReady = false;
+
+  bool get isAudioReady => _audioReady;
 
   @override
   PlayerState build() {
@@ -33,6 +37,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
         durationSeconds: 0,
       ),
       notes: [],
+      isAudioReady: false,
       currentNoteIndex: 0,
       isPlaying: false,
       speed: 1.0,
@@ -40,7 +45,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
     );
   }
 
-  void initialize(Song song, List<SongNote> notes) {
+  Future<void> initialize(Song song, List<SongNote> notes) async {
     if (_initialized) return;
     _initialized = true;
     _notes = notes;
@@ -66,10 +71,34 @@ class PlayerNotifier extends Notifier<PlayerState> {
       speed: 1.0,
       position: Duration.zero,
     );
+
+    await _setupAudioSource(song);
+    _audioReady = true;
+    state = state.copyWith(isAudioReady: true);
   }
 
+  Future<void> _setupAudioSource(Song song) async {
+    final audioPath = song.audioPath;
+    if (audioPath == null || audioPath.isEmpty) return;
+
+    try {
+      if (_player!.audioSource == null) {
+        if (audioPath.startsWith('http://') ||
+            audioPath.startsWith('https://')) {
+          await _player!.setUrl(audioPath);
+        } else {
+          await _player!.setAsset(audioPath);
+        }
+      }
+    } catch (e) {
+      debugPrint('PlayerNotifier: failed to load audio for ${song.id}: $e');
+    }
+  }
+
+  bool get canPlay => _audioReady && _player != null;
+
   Future<void> togglePlay() async {
-    if (!_initialized || _player == null) return;
+    if (!canPlay) return;
     if (state.isPlaying) {
       await _player!.pause();
     } else {
@@ -83,12 +112,12 @@ class PlayerNotifier extends Notifier<PlayerState> {
   }
 
   Future<void> play() async {
-    if (!_initialized || _player == null) return;
+    if (!canPlay) return;
     await _player!.play();
   }
 
   Future<void> pause() async {
-    if (!_initialized || _player == null) return;
+    if (!canPlay) return;
     await _player!.pause();
   }
 
@@ -99,7 +128,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
   }
 
   Future<void> setSpeed(double speed) async {
-    if (!_initialized || _player == null) return;
+    if (!canPlay) return;
     await _player!.setSpeed(speed);
     state = state.copyWith(speed: speed);
   }
@@ -124,7 +153,11 @@ class PlayerNotifier extends Notifier<PlayerState> {
     if (!_initialized || _player == null) return;
     await _player!.seek(Duration.zero);
     await _player!.pause();
-    state = state.copyWith(position: Duration.zero, currentNoteIndex: 0, isPlaying: false);
+    state = state.copyWith(
+      position: Duration.zero,
+      currentNoteIndex: 0,
+      isPlaying: false,
+    );
   }
 
   Future<void> skipToEnd() async {

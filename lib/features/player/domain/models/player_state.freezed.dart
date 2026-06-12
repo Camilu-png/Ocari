@@ -22,6 +22,7 @@ PlayerState _$PlayerStateFromJson(Map<String, dynamic> json) {
 mixin _$PlayerState {
   Song get song => throw _privateConstructorUsedError;
   List<SongNote> get notes => throw _privateConstructorUsedError;
+  bool get isAudioReady => throw _privateConstructorUsedError;
   int get currentNoteIndex => throw _privateConstructorUsedError;
   bool get isPlaying => throw _privateConstructorUsedError;
   double get speed => throw _privateConstructorUsedError;
@@ -46,6 +47,7 @@ abstract class $PlayerStateCopyWith<$Res> {
   $Res call(
       {Song song,
       List<SongNote> notes,
+      bool isAudioReady,
       int currentNoteIndex,
       bool isPlaying,
       double speed,
@@ -71,6 +73,7 @@ class _$PlayerStateCopyWithImpl<$Res, $Val extends PlayerState>
   $Res call({
     Object? song = null,
     Object? notes = null,
+    Object? isAudioReady = null,
     Object? currentNoteIndex = null,
     Object? isPlaying = null,
     Object? speed = null,
@@ -85,6 +88,10 @@ class _$PlayerStateCopyWithImpl<$Res, $Val extends PlayerState>
           ? _value.notes
           : notes // ignore: cast_nullable_to_non_nullable
               as List<SongNote>,
+      isAudioReady: null == isAudioReady
+          ? _value.isAudioReady
+          : isAudioReady // ignore: cast_nullable_to_non_nullable
+              as bool,
       currentNoteIndex: null == currentNoteIndex
           ? _value.currentNoteIndex
           : currentNoteIndex // ignore: cast_nullable_to_non_nullable
@@ -126,6 +133,7 @@ abstract class _$$PlayerStateImplCopyWith<$Res>
   $Res call(
       {Song song,
       List<SongNote> notes,
+      bool isAudioReady,
       int currentNoteIndex,
       bool isPlaying,
       double speed,
@@ -150,6 +158,7 @@ class __$$PlayerStateImplCopyWithImpl<$Res>
   $Res call({
     Object? song = null,
     Object? notes = null,
+    Object? isAudioReady = null,
     Object? currentNoteIndex = null,
     Object? isPlaying = null,
     Object? speed = null,
@@ -164,6 +173,10 @@ class __$$PlayerStateImplCopyWithImpl<$Res>
           ? _value._notes
           : notes // ignore: cast_nullable_to_non_nullable
               as List<SongNote>,
+      isAudioReady: null == isAudioReady
+          ? _value.isAudioReady
+          : isAudioReady // ignore: cast_nullable_to_non_nullable
+              as bool,
       currentNoteIndex: null == currentNoteIndex
           ? _value.currentNoteIndex
           : currentNoteIndex // ignore: cast_nullable_to_non_nullable
@@ -190,6 +203,7 @@ class _$PlayerStateImpl implements _PlayerState {
   const _$PlayerStateImpl(
       {required this.song,
       required final List<SongNote> notes,
+      this.isAudioReady = false,
       required this.currentNoteIndex,
       required this.isPlaying,
       required this.speed,
@@ -210,6 +224,9 @@ class _$PlayerStateImpl implements _PlayerState {
   }
 
   @override
+  @JsonKey()
+  final bool isAudioReady;
+  @override
   final int currentNoteIndex;
   @override
   final bool isPlaying;
@@ -220,7 +237,7 @@ class _$PlayerStateImpl implements _PlayerState {
 
   @override
   String toString() {
-    return 'PlayerState(song: $song, notes: $notes, currentNoteIndex: $currentNoteIndex, isPlaying: $isPlaying, speed: $speed, position: $position)';
+    return 'PlayerState(song: $song, notes: $notes, isAudioReady: $isAudioReady, currentNoteIndex: $currentNoteIndex, isPlaying: $isPlaying, speed: $speed, position: $position)';
   }
 
   @override
@@ -230,6 +247,8 @@ class _$PlayerStateImpl implements _PlayerState {
             other is _$PlayerStateImpl &&
             (identical(other.song, song) || other.song == song) &&
             const DeepCollectionEquality().equals(other._notes, _notes) &&
+            (identical(other.isAudioReady, isAudioReady) ||
+                other.isAudioReady == isAudioReady) &&
             (identical(other.currentNoteIndex, currentNoteIndex) ||
                 other.currentNoteIndex == currentNoteIndex) &&
             (identical(other.isPlaying, isPlaying) ||
@@ -245,6 +264,7 @@ class _$PlayerStateImpl implements _PlayerState {
       runtimeType,
       song,
       const DeepCollectionEquality().hash(_notes),
+      isAudioReady,
       currentNoteIndex,
       isPlaying,
       speed,
@@ -270,6 +290,7 @@ abstract class _PlayerState implements PlayerState {
   const factory _PlayerState(
       {required final Song song,
       required final List<SongNote> notes,
+      final bool isAudioReady,
       required final int currentNoteIndex,
       required final bool isPlaying,
       required final double speed,
@@ -282,6 +303,8 @@ abstract class _PlayerState implements PlayerState {
   Song get song;
   @override
   List<SongNote> get notes;
+  @override
+  bool get isAudioReady;
   @override
   int get currentNoteIndex;
   @override
