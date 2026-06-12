@@ -29,13 +29,21 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   _LoadStage _loadStage = _LoadStage.loading;
   String? _errorMessage;
   List<SongNote> _parsedNotes = [];
+  PlayerNotifier? _notifier;
+
+  @override
+  void dispose() {
+    _notifier?.pausePlayback();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final songAsync = ref.watch(songByIdProvider(widget.songId));
     final playerState = ref.watch(playerNotifierProvider);
-    final notifier = ref.read(playerNotifierProvider.notifier);
+    _notifier ??= ref.read(playerNotifierProvider.notifier);
+    final notifier = _notifier!;
 
     ref.listen(songByIdProvider(widget.songId), (_, next) {
       final song = next.valueOrNull;
@@ -178,7 +186,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
         _SpeedChip(
           speed: state.speed,
           onSpeedChanged: (speed) {
-            ref.read(playerNotifierProvider.notifier).setSpeed(speed);
+            _notifier?.setSpeed(speed);
           },
         ),
       ],
@@ -273,7 +281,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   }
 
   Widget _buildTransportControls(AppColors colors, PlayerState state) {
-    final notifier = ref.read(playerNotifierProvider.notifier);
+    final notifier = _notifier!;
     final isAudioReady = state.isAudioReady;
 
     return Padding(

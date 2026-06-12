@@ -48,7 +48,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
       );
 
   Future<void> initialize(Song song, List<SongNote> notes) async {
-    if (_currentSongId == song.id) return;
+    if (_currentSongId == song.id && _audioReady) return;
     _currentSongId = song.id;
 
     _playerStateSub?.cancel();
@@ -92,11 +92,21 @@ class PlayerNotifier extends Notifier<PlayerState> {
       if (_player!.audioSource == null) {
         if (audioPath.startsWith('http://') ||
             audioPath.startsWith('https://')) {
-          await _player!.setUrl(audioPath);
+          await _player!.setUrl(audioPath).timeout(
+                const Duration(seconds: 10),
+                onTimeout: () =>
+                    throw TimeoutException('Audio URL load timed out'),
+              );
         } else {
-          await _player!.setAsset(audioPath);
+          await _player!.setAsset(audioPath).timeout(
+                const Duration(seconds: 10),
+                onTimeout: () =>
+                    throw TimeoutException('Audio asset load timed out'),
+              );
         }
       }
+    } on TimeoutException catch (e) {
+      debugPrint('PlayerNotifier: timeout loading audio for ${song.id}: $e');
     } catch (e) {
       debugPrint('PlayerNotifier: failed to load audio for ${song.id}: $e');
     }
@@ -126,6 +136,10 @@ class PlayerNotifier extends Notifier<PlayerState> {
   Future<void> pause() async {
     if (!canPlay) return;
     await _player!.pause();
+  }
+
+  Future<void> pausePlayback() async {
+    await _player?.pause();
   }
 
   Future<void> seekTo(Duration position) async {
