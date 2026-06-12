@@ -18,7 +18,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
   StreamSubscription? _playerStateSub;
   StreamSubscription? _positionSub;
   List<SongNote> _notes = [];
-  bool _initialized = false;
+  String? _currentSongId;
   bool _audioReady = false;
 
   bool get isAudioReady => _audioReady;
@@ -29,36 +29,43 @@ class PlayerNotifier extends Notifier<PlayerState> {
       _playerStateSub?.cancel();
       _positionSub?.cancel();
     });
-    return const PlayerState(
-      song: Song(
-        id: '',
-        title: '',
-        difficulty: Difficulty.easy,
-        durationSeconds: 0,
-      ),
-      notes: [],
-      isAudioReady: false,
-      currentNoteIndex: 0,
-      isPlaying: false,
-      speed: 1.0,
-      position: Duration.zero,
-    );
+    return _emptyState();
   }
 
-  Future<void> initialize(Song song, List<SongNote> notes) async {
-    if (_initialized) return;
-    _initialized = true;
-    _notes = notes;
+  PlayerState _emptyState() => const PlayerState(
+        song: Song(
+          id: '',
+          title: '',
+          difficulty: Difficulty.easy,
+          durationSeconds: 0,
+        ),
+        notes: [],
+        isAudioReady: false,
+        currentNoteIndex: 0,
+        isPlaying: false,
+        speed: 1.0,
+        position: Duration.zero,
+      );
 
+  Future<void> initialize(Song song, List<SongNote> notes) async {
+    if (_currentSongId == song.id) return;
+    _currentSongId = song.id;
+
+    _playerStateSub?.cancel();
+    _positionSub?.cancel();
+    _player?.stop();
+    _audioReady = false;
+
+    _notes = notes;
     _player = ref.read(playerCacheProvider).getOrCreate(song.id);
 
     _playerStateSub = _player!.playerStateStream.listen((ps) {
-      if (!_initialized) return;
+      if (_currentSongId != song.id) return;
       state = state.copyWith(isPlaying: ps.playing);
     });
 
     _positionSub = _player!.positionStream.listen((pos) {
-      if (!_initialized) return;
+      if (_currentSongId != song.id) return;
       final idx = _findCurrentNoteIndex(pos);
       state = state.copyWith(position: pos, currentNoteIndex: idx);
     });
@@ -122,7 +129,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
   }
 
   Future<void> seekTo(Duration position) async {
-    if (!_initialized || _player == null) return;
+    if (_player == null) return;
     await _player!.seek(position);
     state = state.copyWith(position: position);
   }
@@ -134,7 +141,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
   }
 
   Future<void> stepForward() async {
-    if (!_initialized || _notes.isEmpty) return;
+    if (_notes.isEmpty) return;
     final nextIdx = (state.currentNoteIndex + 1).clamp(0, _notes.length - 1);
     final nextNote = _notes[nextIdx];
     await seekTo(Duration(milliseconds: nextNote.timestampMs));
@@ -142,7 +149,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
   }
 
   Future<void> stepBackward() async {
-    if (!_initialized || _notes.isEmpty) return;
+    if (_notes.isEmpty) return;
     final prevIdx = (state.currentNoteIndex - 1).clamp(0, _notes.length - 1);
     final prevNote = _notes[prevIdx];
     await seekTo(Duration(milliseconds: prevNote.timestampMs));
@@ -150,7 +157,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
   }
 
   Future<void> skipToStart() async {
-    if (!_initialized || _player == null) return;
+    if (_player == null) return;
     await _player!.seek(Duration.zero);
     await _player!.pause();
     state = state.copyWith(
@@ -161,7 +168,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
   }
 
   Future<void> skipToEnd() async {
-    if (!_initialized || _player == null) return;
+    if (_player == null) return;
     final duration = _player!.duration ?? Duration.zero;
     await _player!.seek(duration);
     await _player!.pause();

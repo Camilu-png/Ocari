@@ -43,49 +43,17 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     });
 
     return songAsync.when(
-      loading: () => const OcariScaffold(
-        title: 'Player',
-        body: Center(child: CircularProgressIndicator()),
-      ),
-      error: (err, _) => OcariScaffold(
-        title: 'Player',
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.error_outline_rounded,
-                    size: 48, color: colors.error),
-                const SizedBox(height: 16),
-                Text('Error al cargar la canción',
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: colors.onBgLight)),
-                const SizedBox(height: 8),
-                Text('$err',
-                    style: TextStyle(color: colors.textSecondary),
-                    textAlign: TextAlign.center),
-              ],
-            ),
-          ),
-        ),
-      ),
+      loading: () => _buildLoading(colors, null),
+      error: (err, _) => _buildError(colors, null, 'Error al cargar la canción: $err'),
       data: (song) {
         if (song == null) {
-          return const OcariScaffold(
-            title: 'Player',
-            body: Center(
-              child: Text('Song not found'),
-            ),
-          );
+          return _buildError(colors, null, 'Canción no encontrada');
         }
 
         _initIfReady(song, notifier);
 
         if (_loadStage == _LoadStage.error) {
-          return _buildError(colors);
+          return _buildError(colors, song.title, _errorMessage);
         }
 
         return _buildPlayer(colors, playerState);
@@ -103,24 +71,29 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     }
 
     if (song.notesJson == null) {
+      debugPrint(
+        'PlayerScreen: notesJson is null for "${song.title}" (id=${song.id}). '
+        'Verify the Supabase "notes_json" column is populated.',
+      );
       _errorMessage = 'Esta canción no tiene datos de notas.';
       _loadStage = _LoadStage.error;
       return;
     }
 
-    final notesList = song.notesJson!['notes'] as List<dynamic>?;
-    if (notesList == null || notesList.isEmpty) {
-      _errorMessage = 'Esta canción no contiene notas.';
+    try {
+      _parsedNotes = _parseNotes(song.notesJson!);
+    } catch (e) {
+      debugPrint(
+        'PlayerScreen: failed to parse notes for "${song.title}": $e. '
+        'notesJson type=${song.notesJson.runtimeType}',
+      );
+      _errorMessage = 'Error al procesar las notas: $e';
       _loadStage = _LoadStage.error;
       return;
     }
 
-    try {
-      _parsedNotes = notesList
-          .map((n) => SongNote.fromJson(n as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      _errorMessage = 'Error al procesar las notas: $e';
+    if (_parsedNotes.isEmpty) {
+      _errorMessage = 'Esta canción no contiene notas.';
       _loadStage = _LoadStage.error;
       return;
     }
@@ -130,9 +103,45 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     notifier.initialize(song, _parsedNotes);
   }
 
-  Widget _buildError(AppColors colors) {
+  List<SongNote> _parseNotes(Map<String, dynamic> notesJson) {
+    final notesValue = notesJson['notes'];
+    if (notesValue is List) {
+      return notesValue
+          .map((n) => SongNote.fromJson(n as Map<String, dynamic>))
+          .toList();
+    }
+
+    final firstValue = notesJson.values.firstOrNull;
+    if (firstValue is List) {
+      return firstValue
+          .map((n) => SongNote.fromJson(n as Map<String, dynamic>))
+          .toList();
+    }
+
+    final noteList = notesJson.entries
+        .where((e) => e.value is List)
+        .map((e) => e.value as List)
+        .expand((l) => l)
+        .map((n) => SongNote.fromJson(n as Map<String, dynamic>))
+        .toList();
+    if (noteList.isNotEmpty) return noteList;
+
+    throw FormatException(
+      'No se encontró un array de notas en notesJson. '
+      'Claves disponibles: ${notesJson.keys.join(", ")}',
+    );
+  }
+
+  Widget _buildLoading(AppColors colors, String? songTitle) {
     return OcariScaffold(
-      title: 'Player',
+      title: songTitle ?? 'Player',
+      body: const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Widget _buildError(AppColors colors, String? songTitle, String? message) {
+    return OcariScaffold(
+      title: songTitle ?? 'Player',
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -143,7 +152,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                   size: 48, color: colors.error),
               const SizedBox(height: 16),
               Text(
-                _errorMessage ?? 'Error desconocido',
+                message ?? 'Error desconocido',
                 style: TextStyle(
                   fontSize: 16,
                   color: colors.onBgLight,
