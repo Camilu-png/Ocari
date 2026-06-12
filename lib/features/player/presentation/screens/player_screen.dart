@@ -1,13 +1,16 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_audio/just_audio.dart';
 
-import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/core/theme/app_theme.dart';
-import 'package:ocari/features/player/data/player_cache.dart';
+import 'package:ocari/core/theme/note_colors.dart';
+import 'package:ocari/core/widgets/notes_legend.dart';
+import 'package:ocari/core/widgets/notes_track.dart';
+import 'package:ocari/core/widgets/ocarina_canvas.dart';
+import 'package:ocari/core/widgets/ocari_scaffold.dart';
+import 'package:ocari/features/player/domain/models/player_state.dart';
+import 'package:ocari/features/player/presentation/providers/player_notifier.dart';
 import 'package:ocari/features/songs/domain/models/song.dart';
+import 'package:ocari/features/songs/domain/models/song_note.dart';
 import 'package:ocari/features/songs/presentation/providers/songs_provider.dart';
 
 class PlayerScreen extends ConsumerStatefulWidget {
@@ -20,90 +23,19 @@ class PlayerScreen extends ConsumerStatefulWidget {
 }
 
 class _PlayerScreenState extends ConsumerState<PlayerScreen> {
-  late final AudioPlayer _player;
-  StreamSubscription? _stateSub;
-  StreamSubscription? _positionSub;
-  StreamSubscription? _durationSub;
-  PlayerState? _playerState;
-  Duration _position = Duration.zero;
-  Duration _duration = Duration.zero;
-  bool _audioReady = false;
   bool _initialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _player = ref.read(playerCacheProvider).getOrCreate(widget.songId);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _initIfReady());
-  }
-
-  void _initIfReady() {
-    if (_initialized) return;
-    final song = ref.read(songByIdProvider(widget.songId)).valueOrNull;
-    if (song?.audioPath != null) {
-      _initPlayer(song!.audioPath!);
-    }
-  }
-
-  @override
-  void dispose() {
-    _stateSub?.cancel();
-    _positionSub?.cancel();
-    _durationSub?.cancel();
-    _player.stop();
-    super.dispose();
-  }
-
-  Future<void> _initPlayer(String audioUrl) async {
-    if (_initialized) return;
-    _initialized = true;
-
-    try {
-      if (_player.audioSource == null) {
-        if (audioUrl.startsWith('http://') || audioUrl.startsWith('https://')) {
-          await _player.setUrl(audioUrl);
-        } else {
-          await _player.setAsset(audioUrl);
-        }
-      } else {
-        await _player.seek(Duration.zero);
-        await _player.pause();
-      }
-
-      _stateSub = _player.playerStateStream.listen((state) {
-        if (mounted) setState(() => _playerState = state);
-      });
-      _positionSub = _player.positionStream.listen((p) {
-        if (mounted) setState(() => _position = p);
-      });
-      _durationSub = _player.durationStream.listen((d) {
-        if (mounted) setState(() => _duration = d ?? Duration.zero);
-      });
-
-      if (mounted) setState(() => _audioReady = true);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load audio: $e')),
-        );
-      }
-    }
-  }
-
-  String _fmt(Duration d) {
-    final m = d.inMinutes;
-    final s = d.inSeconds % 60;
-    return '$m:${s.toString().padLeft(2, '0')}';
-  }
+  List<SongNote> _parsedNotes = [];
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final songAsync = ref.watch(songByIdProvider(widget.songId));
-    final isPlaying = _playerState?.playing ?? false;
+    final playerState = ref.watch(playerNotifierProvider);
+    final notifier = ref.read(playerNotifierProvider.notifier);
 
     ref.listen(songByIdProvider(widget.songId), (_, next) {
-      _initIfReady();
+      final song = next.valueOrNull;
+      if (song != null) _initIfReady(song, notifier);
     });
 
     return songAsync.when(
@@ -123,82 +55,278 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
           );
         }
 
-        return _buildPlayer(colors, song, isPlaying);
+        _initIfReady(song, notifier);
+
+        return _buildPlayer(colors, playerState);
       },
     );
   }
 
-  Widget _buildPlayer(AppColors colors, Song song, bool isPlaying) {
+  void _initIfReady(Song song, PlayerNotifier notifier) {
+    if (_initialized) return;
+    if (song.notesJson == null) return;
+    if (song.id.isEmpty) return;
+
+    final notesList = song.notesJson!['notes'] as List<dynamic>? ?? [];
+    _parsedNotes = notesList
+        .map((n) => SongNote.fromJson(n as Map<String, dynamic>))
+        .toList();
+
+    notifier.initialize(song, _parsedNotes);
+    _initialized = true;
+  }
+
+  Widget _buildPlayer(AppColors colors, PlayerState state) {
+    final currentNote = state.notes.isNotEmpty &&
+            state.currentNoteIndex < state.notes.length
+        ? state.notes[state.currentNoteIndex]
+        : null;
+
     return OcariScaffold(
-      title: song.title,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.music_note_rounded, size: 80, color: colors.accent),
-            const SizedBox(height: 24),
-            Text(song.title, style: AppTextStyles.heading(colors.onBgLight)),
-            if (song.artist.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(song.artist,
-                  style: AppTextStyles.body(colors.textSecondary)),
-            ],
-            const SizedBox(height: 32),
-            if (_duration > Duration.zero)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 48),
-                child: Row(
-                  children: [
-                    Text(_fmt(_position),
-                        style: TextStyle(color: colors.textSecondary)),
-                    Expanded(
-                      child: SliderTheme(
-                        data: SliderThemeData(
-                          trackHeight: 4,
-                          thumbShape: const RoundSliderThumbShape(
-                              enabledThumbRadius: 8),
-                          overlayShape:
-                              const RoundSliderOverlayShape(overlayRadius: 16),
-                          activeTrackColor: colors.accent,
-                          inactiveTrackColor: colors.accent.withAlpha(64),
-                          thumbColor: colors.accent,
-                        ),
-                        child: Slider(
-                          value: _position.inMilliseconds
-                              .toDouble()
-                              .clamp(0, _duration.inMilliseconds.toDouble()),
-                          max: _duration.inMilliseconds.toDouble(),
-                          onChanged: (v) =>
-                              _player.seek(Duration(milliseconds: v.round())),
-                        ),
-                      ),
-                    ),
-                    Text(_fmt(_duration),
-                        style: TextStyle(color: colors.textSecondary)),
-                  ],
-                ),
+      title: state.song.title,
+      actions: [
+        _SpeedChip(
+          speed: state.speed,
+          onSpeedChanged: (speed) {
+            ref.read(playerNotifierProvider.notifier).setSpeed(speed);
+          },
+        ),
+      ],
+      body: Column(
+        children: [
+          NotesLegend(notes: state.notes),
+          const SizedBox(height: 4),
+          Expanded(
+            flex: 3,
+            child: ClipRect(
+              child: NotesTrack(
+                notes: state.notes,
+                position: state.position,
               ),
-            const SizedBox(height: 24),
-            if (!_audioReady && song.audioPath != null)
-              const CircularProgressIndicator()
-            else
-              IconButton(
-                iconSize: 64,
-                icon: Icon(isPlaying
-                    ? Icons.pause_circle_filled
-                    : Icons.play_circle_filled),
-                color: colors.accent,
-                onPressed: () {
-                  if (isPlaying) {
-                    _player.pause();
-                  } else {
-                    _player.play();
-                  }
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            currentNote?.note ?? '--',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: currentNote != null
+                  ? NoteColors.forNote(currentNote.note)
+                  : colors.textSecondary,
+              fontFamily: '.SF Pro Display',
+            ),
+          ),
+          const SizedBox(height: 4),
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.5,
+                child: OcarinaCanvas(note: currentNote),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          _buildProgressBar(colors, state),
+          const SizedBox(height: 8),
+          _buildTransportControls(colors, state),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressBar(AppColors colors, PlayerState state) {
+    final duration = state.song.durationSeconds * 1000;
+    final maxMs = duration > 0 ? duration.toDouble() : 1.0;
+    final posMs = state.position.inMilliseconds.toDouble();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Text(
+            _fmt(state.position),
+            style: TextStyle(color: colors.textSecondary, fontSize: 12),
+          ),
+          Expanded(
+            child: SliderTheme(
+              data: SliderThemeData(
+                trackHeight: 4,
+                thumbShape:
+                    const RoundSliderThumbShape(enabledThumbRadius: 6),
+                overlayShape:
+                    const RoundSliderOverlayShape(overlayRadius: 12),
+                activeTrackColor: colors.accent,
+                inactiveTrackColor: colors.accent.withAlpha(64),
+                thumbColor: colors.accent,
+              ),
+              child: Slider(
+                value: posMs.clamp(0, maxMs),
+                max: maxMs,
+                onChanged: (v) {
+                  ref
+                      .read(playerNotifierProvider.notifier)
+                      .seekTo(Duration(milliseconds: v.round()));
                 },
               ),
-          ],
+            ),
+          ),
+          Text(
+            _fmt(Duration(milliseconds: duration)),
+            style: TextStyle(color: colors.textSecondary, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTransportControls(AppColors colors, PlayerState state) {
+    final notifier = ref.read(playerNotifierProvider.notifier);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _transportButton(
+            Icons.skip_previous_rounded,
+            () => notifier.skipToStart(),
+            colors,
+          ),
+          const SizedBox(width: 8),
+          _transportButton(
+            Icons.fast_rewind_rounded,
+            () => notifier.stepBackward(),
+            colors,
+          ),
+          const SizedBox(width: 16),
+          _transportButton(
+            state.isPlaying
+                ? Icons.pause_circle_filled_rounded
+                : Icons.play_circle_filled_rounded,
+            () => notifier.togglePlay(),
+            colors,
+            size: 56,
+          ),
+          const SizedBox(width: 16),
+          _transportButton(
+            Icons.fast_forward_rounded,
+            () => notifier.stepForward(),
+            colors,
+          ),
+          const SizedBox(width: 8),
+          _transportButton(
+            Icons.skip_next_rounded,
+            () => notifier.skipToEnd(),
+            colors,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _transportButton(
+    IconData icon,
+    VoidCallback onPressed,
+    AppColors colors, {
+    double size = 40,
+  }) {
+    return IconButton(
+      icon: Icon(icon),
+      iconSize: size,
+      color: colors.accent,
+      onPressed: onPressed,
+    );
+  }
+
+  String _fmt(Duration d) {
+    final m = d.inMinutes;
+    final s = d.inSeconds % 60;
+    return '$m:${s.toString().padLeft(2, '0')}';
+  }
+}
+
+class _SpeedChip extends ConsumerWidget {
+  final double speed;
+  final ValueChanged<double> onSpeedChanged;
+
+  const _SpeedChip({
+    required this.speed,
+    required this.onSpeedChanged,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+
+    return GestureDetector(
+      onTap: () => _showSpeedSheet(context),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: colors.onAccent.withAlpha(30),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          '×${speed.toStringAsFixed(speed == speed.roundToDouble() ? 0 : 2)}',
+          style: TextStyle(
+            color: colors.onAccent,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
+    );
+  }
+
+  void _showSpeedSheet(BuildContext context) {
+    final colors = context.colors;
+    const speeds = [0.5, 0.75, 1.0];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: colors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Velocidad',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: colors.onBgLight,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                for (final s in speeds)
+                  ListTile(
+                    leading: Icon(
+                      s == speed ? Icons.radio_button_checked : Icons.radio_button_off,
+                      color: colors.accent,
+                    ),
+                    title: Text(
+                      '×${s.toStringAsFixed(s == s.roundToDouble() ? 0 : 2)}',
+                      style: TextStyle(color: colors.onBgLight),
+                    ),
+                    onTap: () {
+                      onSpeedChanged(s);
+                      Navigator.of(ctx).pop();
+                    },
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
