@@ -11,7 +11,8 @@ import 'package:ocari/core/widgets/ocari_button.dart';
 import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/core/widgets/ocari_text_field.dart';
 import 'package:ocari/core/widgets/song_card.dart';
-import 'package:ocari/features/player/presentation/widgets/ocarina_canvas.dart';
+import 'package:ocari/core/widgets/notes_track.dart';
+import 'package:ocari/core/widgets/ocarina_canvas.dart';
 import 'package:ocari/features/songs/domain/models/difficulty.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
 
@@ -59,6 +60,8 @@ class DebugScreen extends StatelessWidget {
             _buildSongCardsSection(),
             const SizedBox(height: 24),
             const _OcarinaPreviewSection(),
+            const SizedBox(height: 24),
+            const _NotesTrackPreviewSection(),
             const SizedBox(height: 40),
           ],
         ),
@@ -459,5 +462,228 @@ class _OcarinaPreviewSectionState extends State<_OcarinaPreviewSection> {
         ],
       ],
     );
+  }
+}
+
+class _NotesTrackPreviewSection extends StatefulWidget {
+  const _NotesTrackPreviewSection();
+
+  @override
+  State<_NotesTrackPreviewSection> createState() =>
+      _NotesTrackPreviewSectionState();
+}
+
+class _NotesTrackPreviewSectionState
+    extends State<_NotesTrackPreviewSection> {
+  List<SongNote> _notes = [];
+  Duration _position = Duration.zero;
+  bool _loaded = false;
+  bool _playing = false;
+  Timer? _timer;
+  double _speed = 1.0;
+  static const _speeds = [0.25, 0.5, 0.75, 1.0, 1.5, 2.0];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final raw =
+        await rootBundle.loadString('assets/data/songs/binks_sake.json');
+    final json = jsonDecode(raw) as Map<String, dynamic>;
+    final notesJson = json['notes_json'] as Map<String, dynamic>;
+    final notesList = notesJson['notes'] as List<dynamic>;
+
+    _notes = notesList
+        .map((n) => SongNote.fromJson(n as Map<String, dynamic>))
+        .toList();
+
+    if (mounted) setState(() => _loaded = true);
+  }
+
+  void _togglePlay() {
+    if (_playing) {
+      _timer?.cancel();
+    } else {
+      final lastNote = _notes.last;
+      final totalMs = lastNote.timestampMs + lastNote.durationMs;
+
+      _timer = Timer.periodic(const Duration(milliseconds: 16), (_) {
+        if (!mounted) return;
+        setState(() {
+          final stepMs = 16 * _speed;
+          final next = _position.inMilliseconds + stepMs;
+          if (next >= totalMs) {
+            _position = Duration(milliseconds: totalMs);
+            _timer?.cancel();
+            _playing = false;
+          } else {
+            _position = Duration(milliseconds: next.round());
+          }
+        });
+      });
+    }
+    setState(() => _playing = !_playing);
+  }
+
+  void _reset() {
+    _timer?.cancel();
+    setState(() {
+      _position = Duration.zero;
+      _playing = false;
+    });
+  }
+
+  SongNote? _activeNote() {
+    final ms = _position.inMilliseconds;
+    for (final note in _notes) {
+      if (ms >= note.timestampMs && ms < note.timestampMs + note.durationMs) {
+        return note;
+      }
+    }
+    return null;
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Notes Track',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 16),
+        if (!_loaded)
+          const SizedBox(
+            height: 300,
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else ...[
+          SizedBox(
+            height: 300,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF131326)
+                    : colors.surface,
+                child: NotesTrack(
+                  notes: _notes,
+                  position: _position,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: SizedBox(
+              width: 220,
+              child: OcarinaCanvas(note: _activeNote()),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Text(
+                _fmt(_position),
+                style: TextStyle(color: colors.textSecondary, fontSize: 12),
+              ),
+              const Spacer(),
+              Text(
+                () {
+                  final note = _activeNote();
+                  if (note == null) return '--';
+                  final sec = note.durationMs / 1000;
+                  return '${sec.toStringAsFixed(1)}s';
+                }(),
+                style: TextStyle(color: colors.textSecondary, fontSize: 12),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              OcariButton(
+                label: _playing ? 'Pause' : 'Play',
+                isFullWidth: false,
+                onPressed: _loaded ? _togglePlay : null,
+              ),
+              const SizedBox(width: 12),
+              OcariButton(
+                label: 'Reset',
+                isFullWidth: false,
+                onPressed: _loaded ? _reset : null,
+              ),
+              const SizedBox(width: 12),
+              PopupMenuButton<double>(
+                initialValue: _speed,
+                onSelected: (s) => setState(() => _speed = s),
+                itemBuilder: (_) => _speeds
+                    .map((s) => PopupMenuItem(
+                          value: s,
+                          child: Text(
+                            '$s×',
+                            style: TextStyle(
+                              fontWeight: s == _speed
+                                  ? FontWeight.w700
+                                  : FontWeight.w400,
+                              color: s == _speed
+                                  ? colors.accent
+                                  : null,
+                            ),
+                          ),
+                        ))
+                    .toList(),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: colors.accent.withAlpha(25),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '$_speed×',
+                        style: TextStyle(
+                          color: colors.accent,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.arrow_drop_down_rounded,
+                        color: colors.accent,
+                        size: 18,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  String _fmt(Duration d) {
+    final m = d.inMinutes;
+    final s = d.inSeconds % 60;
+    return '$m:${s.toString().padLeft(2, '0')}';
   }
 }
