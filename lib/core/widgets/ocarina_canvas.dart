@@ -110,7 +110,9 @@ class _OcarinaCanvasState extends ConsumerState<OcarinaCanvas>
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w600,
-            color: colors.accent,
+            color: note != null
+                ? NoteColors.forNote(note.note)
+                : colors.textSecondary,
             fontFamily: '.SF Pro Display',
           ),
         ),

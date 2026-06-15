@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:ocari/core/theme/app_theme.dart';
 import 'package:ocari/core/theme/note_colors.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
 
@@ -10,6 +11,7 @@ class NotesLegend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final uniqueNotes = <String>{};
     final legendItems = <MapEntry<String, Color>>[];
     for (final note in notes) {
@@ -40,7 +42,7 @@ class NotesLegend extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w500,
-                      color: Colors.white.withAlpha(120),
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
