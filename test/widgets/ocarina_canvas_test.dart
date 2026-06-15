@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ocari/core/theme/app_theme.dart';
+import 'package:ocari/core/theme/note_colors.dart';
 import 'package:ocari/core/widgets/ocarina_canvas.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
 
@@ -154,6 +155,35 @@ void main() {
 
       expect(customPaint, findsOneWidget);
       expect(label, findsOneWidget);
+    });
+
+    testWidgets('label color matches note color when note is provided',
+        (tester) async {
+      const note = SongNote(
+        note: 'D5',
+        top: [1, 1, 1, 0],
+        bot: [0, 0, 0, 0],
+        sub: [1, 1],
+        middle: [0, 0],
+        timestampMs: 0,
+        durationMs: 500,
+        noteValue: 'quarter',
+      );
+
+      await tester.pumpWidget(createLightWidget(note: note));
+
+      final textWidget = tester.widget<Text>(find.text('D5'));
+      final textStyle = textWidget.style;
+      expect(textStyle?.color, equals(NoteColors.forNote('D5')));
+    });
+
+    testWidgets('label uses neutral color when note is null',
+        (tester) async {
+      await tester.pumpWidget(createLightWidget());
+
+      final textWidget = tester.widget<Text>(find.text('--'));
+      final textStyle = textWidget.style;
+      expect(textStyle?.color, isNot(equals(NoteColors.forNote('D5'))));
     });
   });
 }

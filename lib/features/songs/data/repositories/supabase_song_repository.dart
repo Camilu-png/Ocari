@@ -21,11 +21,19 @@ class SupabaseSongRepository implements SongRepository {
 
     if (data['notes_json'] is String) {
       try {
-        data['notes_json'] =
-            jsonDecode(data['notes_json'] as String) as Map<String, dynamic>;
+        final decoded = jsonDecode(data['notes_json'] as String);
+        if (decoded is Map<String, dynamic>) {
+          data['notes_json'] = decoded;
+        } else if (decoded is List) {
+          data['notes_json'] = <String, dynamic>{'notes': decoded};
+        } else {
+          data['notes_json'] = null;
+        }
       } catch (_) {
         data['notes_json'] = null;
       }
+    } else if (data['notes_json'] is List) {
+      data['notes_json'] = <String, dynamic>{'notes': data['notes_json']};
     }
 
     return data;
@@ -99,6 +107,7 @@ class SupabaseSongRepository implements SongRepository {
       final jsonStr = await _bundle.loadString(path);
       final data = jsonDecode(jsonStr) as Map<String, dynamic>;
       data['id'] = id;
+      debugPrint('jsonStr: $jsonStr');
       return Song.fromJson(normalize(data));
     } catch (e) {
       debugPrint('Fallback: failed to load song $id: $e');

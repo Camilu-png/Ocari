@@ -52,7 +52,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
     return songAsync.when(
       loading: () => _buildLoading(colors, null),
-      error: (err, _) => _buildError(colors, null, 'Error al cargar la canción: $err'),
+      error: (err, _) =>
+          _buildError(colors, null, 'Error al cargar la canción: $err'),
       data: (song) {
         if (song == null) {
           return _buildError(colors, null, 'Canción no encontrada');
@@ -156,8 +157,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.error_outline_rounded,
-                  size: 48, color: colors.error),
+              Icon(Icons.error_outline_rounded, size: 48, color: colors.error),
               const SizedBox(height: 16),
               Text(
                 message ?? 'Error desconocido',
@@ -175,10 +175,10 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   }
 
   Widget _buildPlayer(AppColors colors, PlayerState state) {
-    final currentNote = state.notes.isNotEmpty &&
-            state.currentNoteIndex < state.notes.length
-        ? state.notes[state.currentNoteIndex]
-        : null;
+    final currentNote =
+        state.notes.isNotEmpty && state.currentNoteIndex < state.notes.length
+            ? state.notes[state.currentNoteIndex]
+            : null;
 
     return OcariScaffold(
       title: state.song.title,
@@ -252,10 +252,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
             child: SliderTheme(
               data: SliderThemeData(
                 trackHeight: 4,
-                thumbShape:
-                    const RoundSliderThumbShape(enabledThumbRadius: 6),
-                overlayShape:
-                    const RoundSliderOverlayShape(overlayRadius: 12),
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
                 activeTrackColor: colors.accent,
                 inactiveTrackColor: colors.accent.withAlpha(64),
                 thumbColor: colors.accent,
@@ -427,7 +425,7 @@ class _SpeedChip extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Velocidad',
+                  'Speed',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,

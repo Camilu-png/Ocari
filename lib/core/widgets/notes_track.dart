@@ -82,8 +82,9 @@ class NotesTrack extends StatelessWidget {
           }
         }
 
-        final labelColor = colors.textSecondary.withAlpha(120);
+        final labelColor = colors.textSecondary.withAlpha(180);
         final lineColor = colors.textSecondary.withAlpha(60);
+        final hitBgColor = colors.surface.withAlpha(200);
 
         return Column(
           children: [
@@ -109,7 +110,7 @@ class NotesTrack extends StatelessWidget {
                       colWidth,
                       colStarts,
                     ),
-                    _buildHitLine(width, lineY, labelColor, lineColor),
+                    _buildHitLine(width, lineY, labelColor, lineColor, hitBgColor),
                   ],
                 ),
               ),
@@ -307,8 +308,8 @@ class NotesTrack extends StatelessWidget {
     return lo - 1;
   }
 
-  Widget _buildHitLine(
-      double width, double lineY, Color labelColor, Color lineColor) {
+  Widget _buildHitLine(double width, double lineY, Color labelColor,
+      Color lineColor, Color bgColor) {
     return Positioned(
       left: 0,
       top: lineY,
@@ -317,13 +318,20 @@ class NotesTrack extends StatelessWidget {
       child: Row(
         children: [
           const SizedBox(width: 8),
-          Text(
-            'TOCA AHORA',
-            style: TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w600,
-              color: labelColor,
-              letterSpacing: 1.2,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(3),
+            ),
+            child: Text(
+              'TOCA AHORA',
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w600,
+                color: labelColor,
+                letterSpacing: 1.2,
+              ),
             ),
           ),
           const SizedBox(width: 8),
