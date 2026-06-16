@@ -25,7 +25,7 @@ void showSongCompletedSheet(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Cancion completada',
+                'Canción completada',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
@@ -44,8 +44,8 @@ void showSongCompletedSheet(
               const SizedBox(height: AppSpacing.md),
               Text(
                 playCount == 1
-                    ? 'Has tocado esta cancion 1 vez'
-                    : 'Has tocado esta cancion $playCount veces',
+                    ? 'Has tocado esta canción 1 vez'
+                    : 'Has tocado esta canción $playCount veces',
                 style: TextStyle(
                   fontSize: 14,
                   color: colors.textSecondary,
@@ -71,7 +71,7 @@ void showSongCompletedSheet(
                     onGoToCatalog();
                   },
                   child: Text(
-                    'Volver al catalogo',
+                    'Volver al catálogo',
                     style: TextStyle(color: colors.textSecondary),
                   ),
                 ),
