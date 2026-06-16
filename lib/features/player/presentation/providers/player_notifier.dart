@@ -2,10 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_audio/just_audio.dart' hide PlayerState;
 
+import 'package:ocari/core/services/audio_service.dart';
 import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart';
-import 'package:ocari/features/player/data/player_cache.dart';
 import 'package:ocari/features/player/domain/models/player_state.dart';
 import 'package:ocari/features/progress/presentation/providers/progress_providers.dart';
 import 'package:ocari/features/songs/domain/models/difficulty.dart';
@@ -16,9 +15,9 @@ final playerNotifierProvider =
     NotifierProvider<PlayerNotifier, PlayerState>(PlayerNotifier.new);
 
 class PlayerNotifier extends Notifier<PlayerState> {
-  AudioPlayer? _player;
   StreamSubscription? _playerStateSub;
   StreamSubscription? _positionSub;
+  StreamSubscription? _completionSub;
   List<SongNote> _notes = [];
   String? _currentSongId;
   bool _audioReady = false;
@@ -31,6 +30,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
     ref.onDispose(() {
       _playerStateSub?.cancel();
       _positionSub?.cancel();
+      _completionSub?.cancel();
     });
     return _emptyState();
   }
@@ -55,9 +55,10 @@ class PlayerNotifier extends Notifier<PlayerState> {
   Future<void> initialize(Song song, List<SongNote> notes) async {
     if (_currentSongId == song.id && _audioReady) {
       _completionHandled = false;
-      await _player!.seek(Duration.zero);
-      await _player!.pause();
-      await _player!.setSpeed(1.0);
+      final audioService = ref.read(audioServiceProvider);
+      await audioService.seek(Duration.zero);
+      await audioService.pause();
+      await audioService.setSpeed(1.0);
       state = state.copyWith(
         position: Duration.zero,
         currentNoteIndex: 0,
@@ -74,28 +75,29 @@ class PlayerNotifier extends Notifier<PlayerState> {
 
     _playerStateSub?.cancel();
     _positionSub?.cancel();
-    _player?.stop();
+    _completionSub?.cancel();
     _audioReady = false;
 
     _notes = notes;
-    _player = ref.read(playerCacheProvider).getOrCreate(song.id);
+    final audioService = ref.read(audioServiceProvider);
 
-    _playerStateSub = _player!.playerStateStream.listen((ps) {
+    _playerStateSub = audioService.playingStream.listen((playing) {
       if (_currentSongId != song.id) return;
-      state = state.copyWith(isPlaying: ps.playing);
-
-      if (ps.processingState == ProcessingState.completed &&
-          state.isAudioReady &&
-          !_completionHandled) {
-        _completionHandled = true;
-        _handleSongCompletion();
-      }
+      state = state.copyWith(isPlaying: playing);
     });
 
-    _positionSub = _player!.positionStream.listen((pos) {
+    _positionSub = audioService.positionStream.listen((pos) {
       if (_currentSongId != song.id) return;
       final idx = _findCurrentNoteIndex(pos);
       state = state.copyWith(position: pos, currentNoteIndex: idx);
+    });
+
+    _completionSub = audioService.completionStream.listen((_) {
+      if (_currentSongId != song.id) return;
+      if (state.isAudioReady && !_completionHandled) {
+        _completionHandled = true;
+        _handleSongCompletion();
+      }
     });
 
     state = PlayerState(
@@ -109,78 +111,50 @@ class PlayerNotifier extends Notifier<PlayerState> {
       playCount: 0,
     );
 
-    await _setupAudioSource(song);
+    await audioService.load(song.audioPath ?? '');
     _audioReady = true;
     state = state.copyWith(isAudioReady: true);
   }
 
-  Future<void> _setupAudioSource(Song song) async {
-    final audioPath = song.audioPath;
-    if (audioPath == null || audioPath.isEmpty) return;
-
-    try {
-      if (_player!.audioSource == null) {
-        if (audioPath.startsWith('http://') ||
-            audioPath.startsWith('https://')) {
-          await _player!.setUrl(audioPath).timeout(
-                const Duration(seconds: 10),
-                onTimeout: () =>
-                    throw TimeoutException('Audio URL load timed out'),
-              );
-        } else {
-          await _player!.setAsset(audioPath).timeout(
-                const Duration(seconds: 10),
-                onTimeout: () =>
-                    throw TimeoutException('Audio asset load timed out'),
-              );
-        }
-      }
-    } on TimeoutException catch (e) {
-      debugPrint('PlayerNotifier: timeout loading audio for ${song.id}: $e');
-    } catch (e) {
-      debugPrint('PlayerNotifier: failed to load audio for ${song.id}: $e');
-    }
-  }
-
-  bool get canPlay => _audioReady && _player != null;
+  bool get canPlay => _audioReady;
 
   Future<void> togglePlay() async {
     if (!canPlay) return;
+    final audioService = ref.read(audioServiceProvider);
     if (state.isPlaying) {
-      await _player!.pause();
+      await audioService.pause();
     } else {
       final pos = state.position;
-      final duration = _player!.duration ?? Duration.zero;
+      final duration = audioService.duration ?? Duration.zero;
       if (pos >= duration && duration > Duration.zero) {
-        await _player!.seek(Duration.zero);
+        await audioService.seek(Duration.zero);
       }
-      await _player!.play();
+      await audioService.play();
     }
   }
 
   Future<void> play() async {
     if (!canPlay) return;
-    await _player!.play();
+    await ref.read(audioServiceProvider).play();
   }
 
   Future<void> pause() async {
     if (!canPlay) return;
-    await _player!.pause();
+    await ref.read(audioServiceProvider).pause();
   }
 
   Future<void> pausePlayback() async {
-    await _player?.pause();
+    await ref.read(audioServiceProvider).pause();
   }
 
   Future<void> seekTo(Duration position) async {
-    if (_player == null) return;
-    await _player!.seek(position);
+    await ref.read(audioServiceProvider).seek(position);
     state = state.copyWith(position: position);
   }
 
   Future<void> setSpeed(double speed) async {
     if (!canPlay) return;
-    await _player!.setSpeed(speed);
+    await ref.read(audioServiceProvider).setSpeed(speed);
     state = state.copyWith(speed: speed);
   }
 
@@ -201,9 +175,9 @@ class PlayerNotifier extends Notifier<PlayerState> {
   }
 
   Future<void> skipToStart() async {
-    if (_player == null) return;
-    await _player!.seek(Duration.zero);
-    await _player!.pause();
+    final audioService = ref.read(audioServiceProvider);
+    await audioService.seek(Duration.zero);
+    await audioService.pause();
     state = state.copyWith(
       position: Duration.zero,
       currentNoteIndex: 0,
@@ -212,10 +186,10 @@ class PlayerNotifier extends Notifier<PlayerState> {
   }
 
   Future<void> skipToEnd() async {
-    if (_player == null) return;
-    final duration = _player!.duration ?? Duration.zero;
-    await _player!.seek(duration);
-    await _player!.pause();
+    final audioService = ref.read(audioServiceProvider);
+    final duration = audioService.duration ?? Duration.zero;
+    await audioService.seek(duration);
+    await audioService.pause();
     state = state.copyWith(position: duration, isPlaying: false);
     if (_notes.isNotEmpty) {
       state = state.copyWith(currentNoteIndex: _notes.length - 1);
@@ -225,8 +199,9 @@ class PlayerNotifier extends Notifier<PlayerState> {
   Future<void> restart() async {
     if (!canPlay) return;
     _completionHandled = false;
-    await _player!.seek(Duration.zero);
-    await _player!.play();
+    final audioService = ref.read(audioServiceProvider);
+    await audioService.seek(Duration.zero);
+    await audioService.play();
     state = state.copyWith(
       position: Duration.zero,
       currentNoteIndex: 0,
