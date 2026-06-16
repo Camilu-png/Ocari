@@ -53,7 +53,22 @@ class PlayerNotifier extends Notifier<PlayerState> {
       );
 
   Future<void> initialize(Song song, List<SongNote> notes) async {
-    if (_currentSongId == song.id && _audioReady) return;
+    if (_currentSongId == song.id && _audioReady) {
+      _completionHandled = false;
+      await _player!.seek(Duration.zero);
+      await _player!.pause();
+      await _player!.setSpeed(1.0);
+      state = state.copyWith(
+        position: Duration.zero,
+        currentNoteIndex: 0,
+        isPlaying: false,
+        speed: 1.0,
+        showCompletionSheet: false,
+        playCount: 0,
+        isAudioReady: true,
+      );
+      return;
+    }
     _currentSongId = song.id;
     _completionHandled = false;
 
