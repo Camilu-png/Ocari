@@ -41,8 +41,8 @@ void showSongCompletedSheet(
   final colors = context.colors;
   final msg = _completionMessage(playCount);
   final countText = playCount == 1
-      ? 'Has tocado esta canción 1 vez'
-      : 'Has tocado esta canción $playCount veces';
+      ? 'Has tocado esta canción 1 vez.'
+      : 'Has tocado esta canción $playCount veces.';
 
   showModalBottomSheet(
     context: context,
@@ -64,6 +64,7 @@ void showSongCompletedSheet(
                   fontWeight: FontWeight.w600,
                   color: colors.onBgLight,
                 ),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
@@ -73,6 +74,7 @@ void showSongCompletedSheet(
                   fontWeight: FontWeight.w500,
                   color: colors.accent,
                 ),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
@@ -91,6 +93,7 @@ void showSongCompletedSheet(
                   color: colors.textSecondary,
                   fontStyle: FontStyle.italic,
                 ),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.lg),
               SizedBox(
