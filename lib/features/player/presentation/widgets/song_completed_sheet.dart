@@ -2,6 +2,35 @@ import 'package:flutter/material.dart';
 
 import 'package:ocari/core/theme/app_theme.dart';
 
+({String title, String subtitle}) _completionMessage(int playCount) {
+  return switch (playCount) {
+    1 => (
+        title: '¡Primera interpretación!',
+        subtitle: 'Toda gran melodía comienza con una sola nota.',
+      ),
+    2 || 3 => (
+        title: 'Ya estás tomando ritmo',
+        subtitle: 'Cada repetición fortalece tu memoria musical.',
+      ),
+    4 || 5 || 6 => (
+        title: 'La melodía empieza a quedarse contigo',
+        subtitle: 'Los movimientos de tus dedos ya son más naturales.',
+      ),
+    7 || 8 || 9 => (
+        title: 'Casi un maestro',
+        subtitle: 'La práctica constante es el secreto de todo músico.',
+      ),
+    10 || 11 || 12 => (
+        title: 'Ya conoces esta canción bastante bien',
+        subtitle: 'Ahora puedes concentrarte en tu fluidez.',
+      ),
+    _ => (
+        title: 'Canción dominada',
+        subtitle: 'Esta melodía ya forma parte de tu repertorio.',
+      ),
+  };
+}
+
 void showSongCompletedSheet(
   BuildContext context, {
   required String songTitle,
@@ -10,6 +39,10 @@ void showSongCompletedSheet(
   required VoidCallback onGoToCatalog,
 }) {
   final colors = context.colors;
+  final msg = _completionMessage(playCount);
+  final countText = playCount == 1
+      ? 'Has tocado esta canción 1 vez'
+      : 'Has tocado esta canción $playCount veces';
 
   showModalBottomSheet(
     context: context,
@@ -25,7 +58,7 @@ void showSongCompletedSheet(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Canción completada',
+                msg.title,
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
@@ -41,14 +74,22 @@ void showSongCompletedSheet(
                   color: colors.accent,
                 ),
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.sm),
               Text(
-                playCount == 1
-                    ? 'Has tocado esta canción 1 vez'
-                    : 'Has tocado esta canción $playCount veces',
+                msg.subtitle,
                 style: TextStyle(
                   fontSize: 14,
                   color: colors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                countText,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: colors.textSecondary,
+                  fontStyle: FontStyle.italic,
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
