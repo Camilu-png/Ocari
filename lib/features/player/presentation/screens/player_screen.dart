@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:ocari/core/theme/app_theme.dart';
 import 'package:ocari/core/theme/note_colors.dart';
@@ -9,6 +10,7 @@ import 'package:ocari/core/widgets/ocarina_canvas.dart';
 import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/features/player/domain/models/player_state.dart';
 import 'package:ocari/features/player/presentation/providers/player_notifier.dart';
+import 'package:ocari/features/player/presentation/widgets/song_completed_sheet.dart';
 import 'package:ocari/features/songs/domain/models/song.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
 import 'package:ocari/features/songs/presentation/providers/songs_provider.dart';
@@ -48,6 +50,22 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     ref.listen(songByIdProvider(widget.songId), (_, next) {
       final song = next.valueOrNull;
       if (song != null) _initIfReady(song, notifier);
+    });
+
+    ref.listen(playerNotifierProvider, (prev, next) {
+      if (next.showCompletionSheet && !(prev?.showCompletionSheet ?? false)) {
+        showSongCompletedSheet(
+          context,
+          songTitle: next.song.title,
+          playCount: next.playCount,
+          onPlayAgain: () {
+            ref.read(playerNotifierProvider.notifier).restart();
+          },
+          onGoToCatalog: () {
+            context.pop();
+          },
+        );
+      }
     });
 
     return songAsync.when(
