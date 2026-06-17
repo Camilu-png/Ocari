@@ -215,9 +215,11 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
           Expanded(
             flex: 3,
             child: ClipRect(
-              child: NotesTrack(
-                notes: state.notes,
-                position: state.position,
+              child: RepaintBoundary(
+                child: NotesTrack(
+                  notes: state.notes,
+                  position: state.position,
+                ),
               ),
             ),
           ),
