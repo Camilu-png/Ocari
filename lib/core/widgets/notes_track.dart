@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import 'package:ocari/core/theme/app_theme.dart';
@@ -82,9 +84,10 @@ class NotesTrack extends StatelessWidget {
           }
         }
 
-        final labelColor = colors.textSecondary.withAlpha(180);
-        final lineColor = colors.textSecondary.withAlpha(60);
-        final hitBgColor = colors.surface.withAlpha(200);
+        final labelColor = colors.onBgLight;
+        final dividerColor = Theme.of(context).brightness == Brightness.dark
+            ? Colors.white.withAlpha(120)
+            : Colors.black.withAlpha(80);
 
         return Column(
           children: [
@@ -97,20 +100,21 @@ class NotesTrack extends StatelessWidget {
                       lineY,
                       posMs,
                       width,
-                      lineColor,
+                      colors.accent.withAlpha(120),
                     ),
                     ..._buildColumnBackgrounds(
                       trackHeight,
                       colStarts,
                     ),
                     ..._buildBlocks(
+                      context,
                       trackHeight,
                       lineY,
                       posMs,
                       colWidth,
                       colStarts,
                     ),
-                    _buildHitLine(width, lineY, labelColor, lineColor, hitBgColor),
+                    _buildDividerLine(width, lineY, dividerColor),
                   ],
                 ),
               ),
@@ -188,6 +192,7 @@ class NotesTrack extends StatelessWidget {
   }
 
   List<Widget> _buildBlocks(
+    BuildContext context,
     double trackHeight,
     double lineY,
     double posMs,
@@ -206,6 +211,7 @@ class NotesTrack extends StatelessWidget {
     final widgets = <Widget>[];
     for (int i = firstIdx; i <= lastIdx && i < notes.length; i++) {
       final note = notes[i];
+
       final double blockEnd =
           (posMs - note.timestampMs - note.durationMs) * pixelsPerMs + lineY;
       final double rawHeight = note.durationMs * pixelsPerMs - blockGapPx;
@@ -215,11 +221,23 @@ class NotesTrack extends StatelessWidget {
       if (blockTop + blockH < 0 || blockTop > trackHeight) continue;
 
       final Color color = NoteColors.forNote(note.note);
+      final bool isDark = Theme.of(context).brightness == Brightness.dark;
+      final Color dimOverlay = Colors.black.withOpacity(0.28);
       final hsl = HSLColor.fromColor(color);
-      final topColor =
-          hsl.withLightness((hsl.lightness + 0.15).clamp(0.0, 1.0)).toColor();
-      final bottomColor =
-          hsl.withLightness((hsl.lightness - 0.15).clamp(0.0, 1.0)).toColor();
+      final Color topColor =
+          hsl.withLightness((hsl.lightness + 0.18).clamp(0.0, 1.0)).toColor();
+      final Color bottomColor =
+          hsl.withLightness((hsl.lightness - 0.08).clamp(0.0, 1.0)).toColor();
+      final Color borderColor = isDark
+          ? Colors.white.withOpacity(0.12)
+          : Colors.black.withOpacity(0.1);
+      final Color shadowColor = isDark
+          ? Colors.black.withOpacity(0.32)
+          : Colors.black.withOpacity(0.16);
+      final bool hasDimArea = blockTop + blockH > lineY;
+      final double dimStart =
+          blockTop >= lineY ? 0.0 : max(0.0, lineY - blockTop);
+      final double dimHeight = hasDimArea ? max(0.0, blockH - dimStart) : 0.0;
 
       for (int ci = 0; ci < _columnGetters.length; ci++) {
         final getter = _columnGetters[ci];
@@ -242,35 +260,66 @@ class NotesTrack extends StatelessWidget {
             top: blockTop,
             width: colWidth,
             height: blockH,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [topColor, color, bottomColor],
-                  stops: const [0.0, 0.3, 1.0],
-                ),
-                borderRadius: BorderRadius.only(
-                  topLeft: mergeLeft ? Radius.zero : const Radius.circular(3),
-                  topRight: mergeRight ? Radius.zero : const Radius.circular(3),
-                  bottomLeft:
-                      mergeLeft ? Radius.zero : const Radius.circular(3),
-                  bottomRight:
-                      mergeRight ? Radius.zero : const Radius.circular(3),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withAlpha(100),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
+            child: Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [topColor, color, bottomColor],
+                    ),
+                    borderRadius: BorderRadius.only(
+                      topLeft:
+                          mergeLeft ? Radius.zero : const Radius.circular(3),
+                      topRight:
+                          mergeRight ? Radius.zero : const Radius.circular(3),
+                      bottomLeft:
+                          mergeLeft ? Radius.zero : const Radius.circular(3),
+                      bottomRight:
+                          mergeRight ? Radius.zero : const Radius.circular(3),
+                    ),
+                    border: Border.all(color: borderColor, width: 1),
+                    boxShadow: [
+                      BoxShadow(
+                        color: shadowColor,
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
                   ),
-                  BoxShadow(
-                    color: color.withAlpha(40),
-                    blurRadius: 12,
-                    spreadRadius: 1,
+                ),
+                if (dimHeight > 0)
+                  Positioned(
+                    left: 0,
+                    top: dimStart,
+                    width: colWidth,
+                    height: dimHeight,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: dimOverlay,
+                        borderRadius: BorderRadius.only(
+                          topLeft: dimStart == 0.0
+                              ? (mergeLeft
+                                  ? Radius.zero
+                                  : const Radius.circular(3))
+                              : Radius.zero,
+                          topRight: dimStart == 0.0
+                              ? (mergeRight
+                                  ? Radius.zero
+                                  : const Radius.circular(3))
+                              : Radius.zero,
+                          bottomLeft: mergeLeft
+                              ? Radius.zero
+                              : const Radius.circular(3),
+                          bottomRight: mergeRight
+                              ? Radius.zero
+                              : const Radius.circular(3),
+                        ),
+                      ),
+                    ),
                   ),
-                ],
-              ),
+              ],
             ),
           ),
         );
@@ -278,6 +327,18 @@ class NotesTrack extends StatelessWidget {
     }
 
     return widgets;
+  }
+
+  Widget _buildDividerLine(double width, double lineY, Color color) {
+    return Positioned(
+      left: 0,
+      top: lineY,
+      width: width,
+      height: 2,
+      child: IgnorePointer(
+        child: Container(color: color),
+      ),
+    );
   }
 
   int _findFirstVisible(double timestampMs) {
@@ -306,45 +367,6 @@ class NotesTrack extends StatelessWidget {
       }
     }
     return lo - 1;
-  }
-
-  Widget _buildHitLine(double width, double lineY, Color labelColor,
-      Color lineColor, Color bgColor) {
-    return Positioned(
-      left: 0,
-      top: lineY,
-      width: width,
-      height: 20,
-      child: Row(
-        children: [
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(3),
-            ),
-            child: Text(
-              'TOCA AHORA',
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w600,
-                color: labelColor,
-                letterSpacing: 1.2,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Container(
-              height: 2,
-              color: lineColor,
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-    );
   }
 
   Widget _buildLabels(
