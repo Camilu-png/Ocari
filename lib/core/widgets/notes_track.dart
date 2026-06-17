@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 import 'package:ocari/core/theme/app_theme.dart';
@@ -108,6 +106,7 @@ class NotesTrack extends StatelessWidget {
                     ),
                     ..._buildBlocks(
                       context,
+                      width,
                       trackHeight,
                       lineY,
                       posMs,
@@ -193,6 +192,7 @@ class NotesTrack extends StatelessWidget {
 
   List<Widget> _buildBlocks(
     BuildContext context,
+    double trackWidth,
     double trackHeight,
     double lineY,
     double posMs,
@@ -207,126 +207,24 @@ class NotesTrack extends StatelessWidget {
 
     final int firstIdx = _findFirstVisible(viewTop);
     final int lastIdx = _findLastVisible(viewBottom);
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final widgets = <Widget>[];
-    for (int i = firstIdx; i <= lastIdx && i < notes.length; i++) {
-      final note = notes[i];
-
-      final double blockEnd =
-          (posMs - note.timestampMs - note.durationMs) * pixelsPerMs + lineY;
-      final double rawHeight = note.durationMs * pixelsPerMs - blockGapPx;
-      final double blockH = rawHeight.clamp(8.0, double.infinity);
-      final double blockTop = blockEnd;
-
-      if (blockTop + blockH < 0 || blockTop > trackHeight) continue;
-
-      final Color color = NoteColors.forNote(note.note);
-      final bool isDark = Theme.of(context).brightness == Brightness.dark;
-      final Color dimOverlay = Colors.black.withOpacity(0.28);
-      final hsl = HSLColor.fromColor(color);
-      final Color topColor =
-          hsl.withLightness((hsl.lightness + 0.18).clamp(0.0, 1.0)).toColor();
-      final Color bottomColor =
-          hsl.withLightness((hsl.lightness - 0.08).clamp(0.0, 1.0)).toColor();
-      final Color borderColor = isDark
-          ? Colors.white.withOpacity(0.12)
-          : Colors.black.withOpacity(0.1);
-      final Color shadowColor = isDark
-          ? Colors.black.withOpacity(0.32)
-          : Colors.black.withOpacity(0.16);
-      final bool hasDimArea = blockTop + blockH > lineY;
-      final double dimStart =
-          blockTop >= lineY ? 0.0 : max(0.0, lineY - blockTop);
-      final double dimHeight = hasDimArea ? max(0.0, blockH - dimStart) : 0.0;
-
-      for (int ci = 0; ci < _columnGetters.length; ci++) {
-        final getter = _columnGetters[ci];
-        if (getter == null) continue;
-        if (getter(note) == 0) continue;
-
-        final cx = colStarts[ci];
-        if (cx < 0) continue;
-
-        final bool mergeLeft = ci > 0 &&
-            _columnGetters[ci - 1] != null &&
-            _columnGetters[ci - 1]!(note) == 1;
-        final bool mergeRight = ci < _columnGetters.length - 1 &&
-            _columnGetters[ci + 1] != null &&
-            _columnGetters[ci + 1]!(note) == 1;
-
-        widgets.add(
-          Positioned(
-            left: cx,
-            top: blockTop,
-            width: colWidth,
-            height: blockH,
-            child: Stack(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [topColor, color, bottomColor],
-                    ),
-                    borderRadius: BorderRadius.only(
-                      topLeft:
-                          mergeLeft ? Radius.zero : const Radius.circular(3),
-                      topRight:
-                          mergeRight ? Radius.zero : const Radius.circular(3),
-                      bottomLeft:
-                          mergeLeft ? Radius.zero : const Radius.circular(3),
-                      bottomRight:
-                          mergeRight ? Radius.zero : const Radius.circular(3),
-                    ),
-                    border: Border.all(color: borderColor, width: 1),
-                    boxShadow: [
-                      BoxShadow(
-                        color: shadowColor,
-                        blurRadius: 10,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                ),
-                if (dimHeight > 0)
-                  Positioned(
-                    left: 0,
-                    top: dimStart,
-                    width: colWidth,
-                    height: dimHeight,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: dimOverlay,
-                        borderRadius: BorderRadius.only(
-                          topLeft: dimStart == 0.0
-                              ? (mergeLeft
-                                  ? Radius.zero
-                                  : const Radius.circular(3))
-                              : Radius.zero,
-                          topRight: dimStart == 0.0
-                              ? (mergeRight
-                                  ? Radius.zero
-                                  : const Radius.circular(3))
-                              : Radius.zero,
-                          bottomLeft: mergeLeft
-                              ? Radius.zero
-                              : const Radius.circular(3),
-                          bottomRight: mergeRight
-                              ? Radius.zero
-                              : const Radius.circular(3),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        );
-      }
-    }
-
-    return widgets;
+    return [
+      CustomPaint(
+        size: Size(trackWidth, trackHeight),
+        painter: _NoteBlockPainter(
+          notes: notes,
+          firstIdx: firstIdx,
+          lastIdx: lastIdx,
+          posMs: posMs,
+          lineY: lineY,
+          colWidth: colWidth,
+          colStarts: colStarts,
+          trackHeight: trackHeight,
+          isDark: isDark,
+        ),
+      ),
+    ];
   }
 
   Widget _buildDividerLine(double width, double lineY, Color color) {
@@ -394,5 +292,141 @@ class NotesTrack extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _NoteBlockPainter extends CustomPainter {
+  _NoteBlockPainter({
+    required this.notes,
+    required this.firstIdx,
+    required this.lastIdx,
+    required this.posMs,
+    required this.lineY,
+    required this.colWidth,
+    required this.colStarts,
+    required this.trackHeight,
+    required this.isDark,
+  });
+
+  final List<SongNote> notes;
+  final int firstIdx;
+  final int lastIdx;
+  final double posMs;
+  final double lineY;
+  final double colWidth;
+  final List<double> colStarts;
+  final double trackHeight;
+  final bool isDark;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (int i = firstIdx; i <= lastIdx && i < notes.length; i++) {
+      final note = notes[i];
+
+      final double blockEnd =
+          (posMs - note.timestampMs - note.durationMs) * pixelsPerMs + lineY;
+      final double rawHeight = note.durationMs * pixelsPerMs - blockGapPx;
+      final double blockH = rawHeight.clamp(8.0, double.infinity);
+      final double blockTop = blockEnd;
+
+      if (blockTop + blockH < 0 || blockTop > trackHeight) continue;
+
+      final Color color = NoteColors.forNote(note.note);
+      final hsl = HSLColor.fromColor(color);
+      final Color topColor =
+          hsl.withLightness((hsl.lightness + 0.18).clamp(0.0, 1.0)).toColor();
+      final Color bottomColor =
+          hsl.withLightness((hsl.lightness - 0.08).clamp(0.0, 1.0)).toColor();
+
+      final Color borderColor = isDark
+          ? const Color(0x1FFFFFFF)
+          : const Color(0x1A000000);
+      final Color shadowColor = isDark
+          ? const Color(0x52000000)
+          : const Color(0x29000000);
+
+      final bool hasDimArea = blockTop + blockH > lineY;
+      final double dimStart = blockTop >= lineY
+          ? 0.0
+          : (lineY - blockTop).clamp(0.0, blockH);
+      final double dimHeight =
+          hasDimArea ? (blockH - dimStart).clamp(0.0, blockH) : 0.0;
+
+      for (int ci = 0; ci < _columnGetters.length; ci++) {
+        final getter = _columnGetters[ci];
+        if (getter == null) continue;
+        if (getter(note) == 0) continue;
+
+        final cx = colStarts[ci];
+        if (cx < 0) continue;
+
+        final bool mergeLeft = ci > 0 &&
+            _columnGetters[ci - 1] != null &&
+            _columnGetters[ci - 1]!(note) == 1;
+        final bool mergeRight = ci < _columnGetters.length - 1 &&
+            _columnGetters[ci + 1] != null &&
+            _columnGetters[ci + 1]!(note) == 1;
+
+        final Rect blockRect =
+            Rect.fromLTWH(cx, blockTop, colWidth, blockH);
+
+        final RRect rrect = RRect.fromRectAndCorners(
+          blockRect,
+          topLeft: mergeLeft ? Radius.zero : const Radius.circular(3),
+          topRight: mergeRight ? Radius.zero : const Radius.circular(3),
+          bottomLeft: mergeLeft ? Radius.zero : const Radius.circular(3),
+          bottomRight: mergeRight ? Radius.zero : const Radius.circular(3),
+        );
+
+        final Paint shadowPaint = Paint()
+          ..color = shadowColor
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+        canvas.drawRRect(rrect.shift(const Offset(0, 3)), shadowPaint);
+
+        final Gradient gradient = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [topColor, color, bottomColor],
+        );
+        final Paint fillPaint = Paint()..shader = gradient.createShader(blockRect);
+        canvas.drawRRect(rrect, fillPaint);
+
+        final Paint borderPaint = Paint()
+          ..color = borderColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1;
+        canvas.drawRRect(rrect, borderPaint);
+
+        if (dimHeight > 0) {
+          final Rect dimRect = Rect.fromLTWH(
+              cx, blockTop + dimStart, colWidth, dimHeight);
+          final RRect dimRrect = RRect.fromRectAndCorners(
+            dimRect,
+            topLeft: dimStart == 0.0
+                ? (mergeLeft ? Radius.zero : const Radius.circular(3))
+                : Radius.zero,
+            topRight: dimStart == 0.0
+                ? (mergeRight ? Radius.zero : const Radius.circular(3))
+                : Radius.zero,
+            bottomLeft:
+                mergeLeft ? Radius.zero : const Radius.circular(3),
+            bottomRight:
+                mergeRight ? Radius.zero : const Radius.circular(3),
+          );
+          final Paint dimPaint = Paint()..color = const Color(0x47000000);
+          canvas.drawRRect(dimRrect, dimPaint);
+        }
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_NoteBlockPainter oldDelegate) {
+    return oldDelegate.posMs != posMs ||
+        oldDelegate.firstIdx != firstIdx ||
+        oldDelegate.lastIdx != lastIdx ||
+        oldDelegate.trackHeight != trackHeight ||
+        oldDelegate.lineY != lineY ||
+        oldDelegate.isDark != isDark;
   }
 }
