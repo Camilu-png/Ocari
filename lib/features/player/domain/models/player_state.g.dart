@@ -17,6 +17,8 @@ _$PlayerStateImpl _$$PlayerStateImplFromJson(Map<String, dynamic> json) =>
       isPlaying: json['isPlaying'] as bool,
       speed: (json['speed'] as num).toDouble(),
       position: Duration(microseconds: (json['position'] as num).toInt()),
+      showCompletionSheet: json['showCompletionSheet'] as bool? ?? false,
+      playCount: (json['playCount'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$$PlayerStateImplToJson(_$PlayerStateImpl instance) =>
@@ -28,4 +30,6 @@ Map<String, dynamic> _$$PlayerStateImplToJson(_$PlayerStateImpl instance) =>
       'isPlaying': instance.isPlaying,
       'speed': instance.speed,
       'position': instance.position.inMicroseconds,
+      'showCompletionSheet': instance.showCompletionSheet,
+      'playCount': instance.playCount,
     };

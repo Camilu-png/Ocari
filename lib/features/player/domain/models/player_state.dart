@@ -18,6 +18,8 @@ class PlayerState with _$PlayerState {
     required bool isPlaying,
     required double speed,
     required Duration position,
+    @Default(false) bool showCompletionSheet,
+    @Default(0) int playCount,
   }) = _PlayerState;
 
   factory PlayerState.fromJson(Map<String, dynamic> json) =>

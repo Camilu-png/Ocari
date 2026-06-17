@@ -4,8 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart' hide PlayerState;
 
+import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:ocari/features/player/data/player_cache.dart';
 import 'package:ocari/features/player/domain/models/player_state.dart';
+import 'package:ocari/features/progress/presentation/providers/progress_providers.dart';
 import 'package:ocari/features/songs/domain/models/difficulty.dart';
 import 'package:ocari/features/songs/domain/models/song.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
@@ -20,6 +22,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
   List<SongNote> _notes = [];
   String? _currentSongId;
   bool _audioReady = false;
+  bool _completionHandled = false;
 
   bool get isAudioReady => _audioReady;
 
@@ -45,11 +48,29 @@ class PlayerNotifier extends Notifier<PlayerState> {
         isPlaying: false,
         speed: 1.0,
         position: Duration.zero,
+        showCompletionSheet: false,
+        playCount: 0,
       );
 
   Future<void> initialize(Song song, List<SongNote> notes) async {
-    if (_currentSongId == song.id && _audioReady) return;
+    if (_currentSongId == song.id && _audioReady) {
+      _completionHandled = false;
+      await _player!.seek(Duration.zero);
+      await _player!.pause();
+      await _player!.setSpeed(1.0);
+      state = state.copyWith(
+        position: Duration.zero,
+        currentNoteIndex: 0,
+        isPlaying: false,
+        speed: 1.0,
+        showCompletionSheet: false,
+        playCount: 0,
+        isAudioReady: true,
+      );
+      return;
+    }
     _currentSongId = song.id;
+    _completionHandled = false;
 
     _playerStateSub?.cancel();
     _positionSub?.cancel();
@@ -62,6 +83,13 @@ class PlayerNotifier extends Notifier<PlayerState> {
     _playerStateSub = _player!.playerStateStream.listen((ps) {
       if (_currentSongId != song.id) return;
       state = state.copyWith(isPlaying: ps.playing);
+
+      if (ps.processingState == ProcessingState.completed &&
+          state.isAudioReady &&
+          !_completionHandled) {
+        _completionHandled = true;
+        _handleSongCompletion();
+      }
     });
 
     _positionSub = _player!.positionStream.listen((pos) {
@@ -77,6 +105,8 @@ class PlayerNotifier extends Notifier<PlayerState> {
       isPlaying: false,
       speed: 1.0,
       position: Duration.zero,
+      showCompletionSheet: false,
+      playCount: 0,
     );
 
     await _setupAudioSource(song);
@@ -189,6 +219,39 @@ class PlayerNotifier extends Notifier<PlayerState> {
     state = state.copyWith(position: duration, isPlaying: false);
     if (_notes.isNotEmpty) {
       state = state.copyWith(currentNoteIndex: _notes.length - 1);
+    }
+  }
+
+  Future<void> restart() async {
+    if (!canPlay) return;
+    _completionHandled = false;
+    await _player!.seek(Duration.zero);
+    await _player!.play();
+    state = state.copyWith(
+      position: Duration.zero,
+      currentNoteIndex: 0,
+      isPlaying: true,
+      showCompletionSheet: false,
+    );
+  }
+
+  Future<void> _handleSongCompletion() async {
+    try {
+      final authState = ref.read(authProvider);
+      final userId = authState.user?.id;
+      if (userId == null) return;
+
+      final repo = ref.read(userSongProgressRepositoryProvider);
+      final progress = await repo.recordCompletion(
+        userId: userId,
+        songId: state.song.id,
+      );
+      state = state.copyWith(
+        playCount: progress.playCount,
+        showCompletionSheet: true,
+      );
+    } catch (e) {
+      debugPrint('PlayerNotifier: failed to record song completion: $e');
     }
   }
 

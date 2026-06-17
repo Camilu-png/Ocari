@@ -27,6 +27,8 @@ mixin _$PlayerState {
   bool get isPlaying => throw _privateConstructorUsedError;
   double get speed => throw _privateConstructorUsedError;
   Duration get position => throw _privateConstructorUsedError;
+  bool get showCompletionSheet => throw _privateConstructorUsedError;
+  int get playCount => throw _privateConstructorUsedError;
 
   /// Serializes this PlayerState to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -51,7 +53,9 @@ abstract class $PlayerStateCopyWith<$Res> {
       int currentNoteIndex,
       bool isPlaying,
       double speed,
-      Duration position});
+      Duration position,
+      bool showCompletionSheet,
+      int playCount});
 
   $SongCopyWith<$Res> get song;
 }
@@ -78,6 +82,8 @@ class _$PlayerStateCopyWithImpl<$Res, $Val extends PlayerState>
     Object? isPlaying = null,
     Object? speed = null,
     Object? position = null,
+    Object? showCompletionSheet = null,
+    Object? playCount = null,
   }) {
     return _then(_value.copyWith(
       song: null == song
@@ -108,6 +114,14 @@ class _$PlayerStateCopyWithImpl<$Res, $Val extends PlayerState>
           ? _value.position
           : position // ignore: cast_nullable_to_non_nullable
               as Duration,
+      showCompletionSheet: null == showCompletionSheet
+          ? _value.showCompletionSheet
+          : showCompletionSheet // ignore: cast_nullable_to_non_nullable
+              as bool,
+      playCount: null == playCount
+          ? _value.playCount
+          : playCount // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 
@@ -137,7 +151,9 @@ abstract class _$$PlayerStateImplCopyWith<$Res>
       int currentNoteIndex,
       bool isPlaying,
       double speed,
-      Duration position});
+      Duration position,
+      bool showCompletionSheet,
+      int playCount});
 
   @override
   $SongCopyWith<$Res> get song;
@@ -163,6 +179,8 @@ class __$$PlayerStateImplCopyWithImpl<$Res>
     Object? isPlaying = null,
     Object? speed = null,
     Object? position = null,
+    Object? showCompletionSheet = null,
+    Object? playCount = null,
   }) {
     return _then(_$PlayerStateImpl(
       song: null == song
@@ -193,6 +211,14 @@ class __$$PlayerStateImplCopyWithImpl<$Res>
           ? _value.position
           : position // ignore: cast_nullable_to_non_nullable
               as Duration,
+      showCompletionSheet: null == showCompletionSheet
+          ? _value.showCompletionSheet
+          : showCompletionSheet // ignore: cast_nullable_to_non_nullable
+              as bool,
+      playCount: null == playCount
+          ? _value.playCount
+          : playCount // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -207,7 +233,9 @@ class _$PlayerStateImpl implements _PlayerState {
       required this.currentNoteIndex,
       required this.isPlaying,
       required this.speed,
-      required this.position})
+      required this.position,
+      this.showCompletionSheet = false,
+      this.playCount = 0})
       : _notes = notes;
 
   factory _$PlayerStateImpl.fromJson(Map<String, dynamic> json) =>
@@ -234,10 +262,16 @@ class _$PlayerStateImpl implements _PlayerState {
   final double speed;
   @override
   final Duration position;
+  @override
+  @JsonKey()
+  final bool showCompletionSheet;
+  @override
+  @JsonKey()
+  final int playCount;
 
   @override
   String toString() {
-    return 'PlayerState(song: $song, notes: $notes, isAudioReady: $isAudioReady, currentNoteIndex: $currentNoteIndex, isPlaying: $isPlaying, speed: $speed, position: $position)';
+    return 'PlayerState(song: $song, notes: $notes, isAudioReady: $isAudioReady, currentNoteIndex: $currentNoteIndex, isPlaying: $isPlaying, speed: $speed, position: $position, showCompletionSheet: $showCompletionSheet, playCount: $playCount)';
   }
 
   @override
@@ -255,7 +289,11 @@ class _$PlayerStateImpl implements _PlayerState {
                 other.isPlaying == isPlaying) &&
             (identical(other.speed, speed) || other.speed == speed) &&
             (identical(other.position, position) ||
-                other.position == position));
+                other.position == position) &&
+            (identical(other.showCompletionSheet, showCompletionSheet) ||
+                other.showCompletionSheet == showCompletionSheet) &&
+            (identical(other.playCount, playCount) ||
+                other.playCount == playCount));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -268,7 +306,9 @@ class _$PlayerStateImpl implements _PlayerState {
       currentNoteIndex,
       isPlaying,
       speed,
-      position);
+      position,
+      showCompletionSheet,
+      playCount);
 
   /// Create a copy of PlayerState
   /// with the given fields replaced by the non-null parameter values.
@@ -294,7 +334,9 @@ abstract class _PlayerState implements PlayerState {
       required final int currentNoteIndex,
       required final bool isPlaying,
       required final double speed,
-      required final Duration position}) = _$PlayerStateImpl;
+      required final Duration position,
+      final bool showCompletionSheet,
+      final int playCount}) = _$PlayerStateImpl;
 
   factory _PlayerState.fromJson(Map<String, dynamic> json) =
       _$PlayerStateImpl.fromJson;
@@ -313,6 +355,10 @@ abstract class _PlayerState implements PlayerState {
   double get speed;
   @override
   Duration get position;
+  @override
+  bool get showCompletionSheet;
+  @override
+  int get playCount;
 
   /// Create a copy of PlayerState
   /// with the given fields replaced by the non-null parameter values.
