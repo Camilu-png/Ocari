@@ -90,9 +90,19 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
             child: Text('Cancelar', style: TextStyle(color: colors.textSecondary)),
           ),
           FilledButton(
-            onPressed: () {
+            onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
               Navigator.of(ctx).pop(true);
-              ref.read(authProvider.notifier).logout();
+              try {
+                await ref.read(authProvider.notifier).logout();
+              } catch (e) {
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text('Error al cerrar sesión: $e'),
+                    backgroundColor: colors.error,
+                  ),
+                );
+              }
             },
             child: const Text('Cerrar sesión'),
           ),
