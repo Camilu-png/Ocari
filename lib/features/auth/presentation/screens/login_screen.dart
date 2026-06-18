@@ -26,21 +26,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Email is required';
+      return 'El correo es obligatorio';
     }
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(value)) {
-      return 'Enter a valid email';
+      return 'Ingresa un correo válido';
     }
     return null;
   }
 
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Password is required';
+      return 'La contraseña es obligatoria';
     }
     if (value.length < 8) {
-      return 'Password must be at least 8 characters';
+      return 'La contraseña debe tener al menos 8 caracteres';
     }
     return null;
   }
@@ -65,7 +65,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            result.error ?? 'Login failed',
+            result.error ?? 'Error al iniciar sesión',
             style: TextStyle(color: context.colors.onError),
           ),
           backgroundColor: context.colors.error,
@@ -84,7 +84,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return OcariScaffold(
-      title: 'Sign in',
+      title: 'Iniciar sesión',
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         child: Form(
@@ -94,13 +94,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               const SizedBox(height: AppSpacing.xl),
               Text(
-                'Welcome Back',
+                'Bienvenido de nuevo',
                 style: context.textTheme.headlineMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Sign in to your account',
+                'Inicia sesión en tu cuenta',
                 style: context.textTheme.bodyLarge?.copyWith(
                   color: context.colors.onBgLight.withValues(alpha: 0.7),
                 ),
@@ -108,21 +108,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: AppSpacing.xl),
               OcariTextField(
-                label: 'Email',
+                label: 'Correo electrónico',
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 validator: _validateEmail,
               ),
               const SizedBox(height: AppSpacing.md),
               OcariTextField(
-                label: 'Password',
+                label: 'Contraseña',
                 controller: _passwordController,
                 obscureText: true,
                 validator: _validatePassword,
               ),
               const SizedBox(height: AppSpacing.xl),
               OcariButton(
-                label: 'Sign in',
+                label: 'Iniciar sesión',
                 isLoading: _isEmailLoading,
                 onPressed: _handleEmailLogin,
               ),
@@ -133,7 +133,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                     child: Text(
-                      'Or',
+                      'O',
                       style: context.textTheme.bodyMedium?.copyWith(
                         color: context.colors.onBgLight.withValues(alpha: 0.5),
                       ),
@@ -145,7 +145,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: AppSpacing.lg),
               Center(
                 child: Stack(
-                  clipBehavior: Clip.none,
                   children: [
                     AbsorbPointer(
                       absorbing: _isGoogleLoading,
@@ -162,7 +161,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           } else if (!result.success && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(result.error ?? 'Login failed'),
+                                content: Text(result.error ?? 'Error al iniciar sesión'),
                                 backgroundColor: context.colors.error,
                               ),
                             );
@@ -192,12 +191,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Don't have an account? ",
+                    '¿No tienes cuenta? ',
                     style: context.textTheme.bodyMedium,
                   ),
                   TextButton(
                     onPressed: () => context.go('/register'),
-                    child: const Text('Sign up'),
+                    child: const Text('Registrarse'),
                   ),
                 ],
               ),

@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:ocari/core/theme/app_theme.dart';
 import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/core/widgets/song_card.dart';
-import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart'
+    show authProvider;
 import 'package:ocari/features/songs/domain/models/difficulty.dart';
 import 'package:ocari/features/songs/domain/models/song.dart';
 import 'package:ocari/features/songs/presentation/providers/songs_provider.dart';
