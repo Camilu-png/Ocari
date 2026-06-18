@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:ocari/features/songs/domain/models/song.dart';
+import 'package:ocari/features/songs/domain/models/song_note.dart';
 import 'package:ocari/features/songs/domain/repositories/song_repository.dart';
 
 class SupabaseSongRepository implements SongRepository {
@@ -17,7 +18,6 @@ class SupabaseSongRepository implements SongRepository {
   @visibleForTesting
   static Map<String, dynamic> normalize(Map<String, dynamic> raw) {
     final data = Map<String, dynamic>.from(raw);
-    data['artist'] ??= 'Unknown';
 
     if (data['notes_json'] is String) {
       try {
@@ -37,6 +37,35 @@ class SupabaseSongRepository implements SongRepository {
     }
 
     return data;
+  }
+
+  static List<SongNote> parseNotes(Map<String, dynamic> notesJson) {
+    final notesValue = notesJson['notes'];
+    if (notesValue is List) {
+      return notesValue
+          .map((n) => SongNote.fromJson(n as Map<String, dynamic>))
+          .toList();
+    }
+
+    final firstValue = notesJson.values.firstOrNull;
+    if (firstValue is List) {
+      return firstValue
+          .map((n) => SongNote.fromJson(n as Map<String, dynamic>))
+          .toList();
+    }
+
+    final noteList = notesJson.entries
+        .where((e) => e.value is List)
+        .map((e) => e.value as List)
+        .expand((l) => l)
+        .map((n) => SongNote.fromJson(n as Map<String, dynamic>))
+        .toList();
+    if (noteList.isNotEmpty) return noteList;
+
+    throw FormatException(
+      'No notes array found in notesJson. '
+      'Available keys: ${notesJson.keys.join(", ")}',
+    );
   }
 
   @visibleForTesting

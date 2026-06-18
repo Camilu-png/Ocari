@@ -52,7 +52,7 @@ void main() {
   });
 
   group('normalize', () {
-    test('defaults artist to Unknown when missing', () {
+    test('passes through artist when absent (default handled by Song.fromJson)', () {
       final result = SupabaseSongRepository.normalize({
         'id': '1',
         'title': 'Test',
@@ -60,7 +60,7 @@ void main() {
         'duration_seconds': 30,
         'is_premium': false,
       });
-      expect(result['artist'], 'Unknown');
+      expect(result.containsKey('artist'), isFalse);
     });
 
     test('preserves artist when present', () {

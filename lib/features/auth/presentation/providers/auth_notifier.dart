@@ -124,8 +124,7 @@ class AuthNotifier extends Notifier<AppAuthState> {
       }
       return (success: false, error: 'Login failed');
     } on supabase.AuthException catch (e) {
-      final message = e.message.toLowerCase();
-      if (message.contains('invalid') || message.contains('credentials') || message.contains('grant')) {
+      if (e.statusCode == '400' || e.statusCode == '401') {
         return (success: false, error: 'Incorrect email or password.');
       }
       return (success: false, error: e.message);
@@ -176,17 +175,3 @@ class AuthNotifier extends Notifier<AppAuthState> {
 final authProvider = NotifierProvider<AuthNotifier, AppAuthState>(
   AuthNotifier.new,
 );
-
-final authStateStreamProvider = StreamProvider<AppAuthState>((ref) {
-  final authClient = ref.watch(supabaseAuthClientProvider);
-  return authClient.onAuthStateChange.map((event) {
-    final session = authClient.currentSession;
-    if (session != null) {
-      return AppAuthState(
-        status: AuthStatus.authenticated,
-        user: session.user,
-      );
-    }
-    return const AppAuthState(status: AuthStatus.unauthenticated);
-  });
-});

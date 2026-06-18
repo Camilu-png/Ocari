@@ -24,10 +24,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
   StreamSubscription? _completionSub;
   List<SongNote> _notes = [];
   String? _currentSongId;
-  bool _audioReady = false;
   bool _completionHandled = false;
-
-  bool get isAudioReady => _audioReady;
 
   @override
   PlayerState build() {
@@ -57,7 +54,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
       );
 
   Future<void> initialize(Song song, List<SongNote> notes) async {
-    if (_currentSongId == song.id && _audioReady) {
+    if (_currentSongId == song.id && state.isAudioReady) {
       _completionHandled = false;
       final audioService = ref.read(audioServiceProvider);
       await audioService.seek(Duration.zero);
@@ -80,7 +77,8 @@ class PlayerNotifier extends Notifier<PlayerState> {
     _playerStateSub?.cancel();
     _positionSub?.cancel();
     _completionSub?.cancel();
-    _audioReady = false;
+
+    state = state.copyWith(isAudioReady: false);
 
     _notes = notes;
     final audioService = ref.read(audioServiceProvider);
@@ -115,11 +113,10 @@ class PlayerNotifier extends Notifier<PlayerState> {
     );
 
     await audioService.load(song.audioPath ?? '');
-    _audioReady = true;
     state = state.copyWith(isAudioReady: true);
   }
 
-  bool get canPlay => _audioReady;
+  bool get canPlay => state.isAudioReady;
 
   void onAudioPosition(int ms) {
     final pos = Duration(milliseconds: ms);
@@ -153,6 +150,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
   }
 
   Future<void> pausePlayback() async {
+    if (!canPlay) return;
     await ref.read(audioServiceProvider).pause();
   }
 
@@ -219,6 +217,10 @@ class PlayerNotifier extends Notifier<PlayerState> {
     );
   }
 
+  void dismissCompletionSheet() {
+    state = state.copyWith(showCompletionSheet: false);
+  }
+
   Future<void> _handleSongCompletion() async {
     try {
       final authState = ref.read(authProvider);
@@ -236,6 +238,10 @@ class PlayerNotifier extends Notifier<PlayerState> {
       );
     } catch (e) {
       debugPrint('PlayerNotifier: failed to record song completion: $e');
+      state = state.copyWith(
+        playCount: state.playCount + 1,
+        showCompletionSheet: true,
+      );
     }
   }
 

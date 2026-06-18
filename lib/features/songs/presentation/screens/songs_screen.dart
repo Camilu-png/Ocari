@@ -60,7 +60,7 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
             Text('Coming Soon', style: context.textTheme.titleLarge),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'This song will be available soon. The developer is working hard on it.',
+              'This song will be available soon. The developer is working hard on it and slowly descending into madness.',
               style: context.textTheme.bodyMedium?.copyWith(
                 color: colors.textSecondary,
               ),
@@ -88,7 +88,8 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Cancel', style: TextStyle(color: colors.textSecondary)),
+            child:
+                Text('Cancel', style: TextStyle(color: colors.textSecondary)),
           ),
           FilledButton(
             onPressed: () async {

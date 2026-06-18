@@ -11,6 +11,7 @@ import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/features/player/domain/models/player_state.dart';
 import 'package:ocari/features/player/presentation/providers/player_notifier.dart';
 import 'package:ocari/features/player/presentation/widgets/song_completed_sheet.dart';
+import 'package:ocari/features/songs/data/repositories/supabase_song_repository.dart';
 import 'package:ocari/features/songs/domain/models/song.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
 import 'package:ocari/features/songs/presentation/providers/songs_provider.dart';
@@ -54,14 +55,17 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
     ref.listen(playerNotifierProvider, (prev, next) {
       if (next.showCompletionSheet && !(prev?.showCompletionSheet ?? false)) {
+        final notifier = ref.read(playerNotifierProvider.notifier);
         showSongCompletedSheet(
           context,
           songTitle: next.song.title,
           playCount: next.playCount,
           onPlayAgain: () {
-            ref.read(playerNotifierProvider.notifier).restart();
+            notifier.dismissCompletionSheet();
+            notifier.restart();
           },
           onGoToCatalog: () {
+            notifier.dismissCompletionSheet();
             context.pop();
           },
         );
@@ -108,7 +112,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     }
 
     try {
-      _parsedNotes = _parseNotes(song.notesJson!);
+      _parsedNotes = SupabaseSongRepository.parseNotes(song.notesJson!);
     } catch (e) {
       debugPrint(
         'PlayerScreen: failed to parse notes for "${song.title}": $e. '
@@ -128,35 +132,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     _initialized = true;
     _loadStage = _LoadStage.ready;
     notifier.initialize(song, _parsedNotes);
-  }
-
-  List<SongNote> _parseNotes(Map<String, dynamic> notesJson) {
-    final notesValue = notesJson['notes'];
-    if (notesValue is List) {
-      return notesValue
-          .map((n) => SongNote.fromJson(n as Map<String, dynamic>))
-          .toList();
-    }
-
-    final firstValue = notesJson.values.firstOrNull;
-    if (firstValue is List) {
-      return firstValue
-          .map((n) => SongNote.fromJson(n as Map<String, dynamic>))
-          .toList();
-    }
-
-    final noteList = notesJson.entries
-        .where((e) => e.value is List)
-        .map((e) => e.value as List)
-        .expand((l) => l)
-        .map((n) => SongNote.fromJson(n as Map<String, dynamic>))
-        .toList();
-    if (noteList.isNotEmpty) return noteList;
-
-    throw FormatException(
-      'No notes array found in notesJson. '
-      'Available keys: ${notesJson.keys.join(", ")}',
-    );
   }
 
   Widget _buildLoading(AppColors colors, String? songTitle) {
@@ -394,7 +369,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   }
 }
 
-class _SpeedChip extends ConsumerWidget {
+class _SpeedChip extends StatelessWidget {
   final double speed;
   final ValueChanged<double> onSpeedChanged;
 
@@ -404,7 +379,7 @@ class _SpeedChip extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final colors = context.colors;
 
     return GestureDetector(

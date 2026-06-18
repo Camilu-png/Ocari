@@ -21,7 +21,7 @@ class DebugScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
+    final colors = context.colors;
 
     return Scaffold(
       appBar: AppBar(
@@ -454,7 +454,7 @@ class _OcarinaPreviewSectionState extends State<_OcarinaPreviewSection> {
           Text(
             'Cycling through ${_noteNames.length} notes',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).extension<AppColors>()!.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
