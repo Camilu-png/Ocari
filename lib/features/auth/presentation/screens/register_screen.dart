@@ -6,7 +6,8 @@ import 'package:ocari/core/theme/app_theme.dart';
 import 'package:ocari/core/widgets/ocari_button.dart';
 import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/core/widgets/ocari_text_field.dart';
-import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart'
+    show authProvider;
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
