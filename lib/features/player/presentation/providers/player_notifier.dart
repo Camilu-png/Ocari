@@ -11,6 +11,10 @@ import 'package:ocari/features/songs/domain/models/difficulty.dart';
 import 'package:ocari/features/songs/domain/models/song.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
 
+final audioPositionProvider = StreamProvider<int>((ref) {
+  return ref.watch(audioServiceProvider).positionStream.map((d) => d.inMilliseconds);
+});
+
 final playerNotifierProvider =
     NotifierProvider<PlayerNotifier, PlayerState>(PlayerNotifier.new);
 
@@ -88,8 +92,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
 
     _positionSub = audioService.positionStream.listen((pos) {
       if (_currentSongId != song.id) return;
-      final idx = _findCurrentNoteIndex(pos);
-      state = state.copyWith(position: pos, currentNoteIndex: idx);
+      onAudioPosition(pos.inMilliseconds);
     });
 
     _completionSub = audioService.completionStream.listen((_) {
@@ -117,6 +120,12 @@ class PlayerNotifier extends Notifier<PlayerState> {
   }
 
   bool get canPlay => _audioReady;
+
+  void onAudioPosition(int ms) {
+    final pos = Duration(milliseconds: ms);
+    final idx = _findCurrentNoteIndex(pos);
+    state = state.copyWith(position: pos, currentNoteIndex: idx);
+  }
 
   Future<void> togglePlay() async {
     if (!canPlay) return;
