@@ -78,6 +78,8 @@ class AuthNotifier extends Notifier<AppAuthState> {
   }
 
   Future<void> logout() async {
+    final googleSignIn = ref.read(googleSignInProvider);
+    await googleSignIn.signOut();
     final authClient = ref.read(supabaseAuthClientProvider);
     await authClient.signOut();
     state = const AppAuthState(status: AuthStatus.unauthenticated);

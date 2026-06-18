@@ -21,7 +21,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
+  bool _isEmailLoading = false;
+  bool _isGoogleLoading = false;
 
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
@@ -48,7 +49,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final form = _formKey.currentState;
     if (form == null || !form.validate()) return;
 
-    setState(() => _isLoading = true);
+    setState(() => _isEmailLoading = true);
 
     final result = await ref.read(authProvider.notifier).signInWithEmailAndPassword(
           email: _emailController.text.trim(),
@@ -56,7 +57,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         );
 
     if (!mounted) return;
-    setState(() => _isLoading = false);
+    setState(() => _isEmailLoading = false);
 
     if (result.success) {
       context.go('/songs');
@@ -122,7 +123,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: AppSpacing.xl),
               OcariButton(
                 label: 'Sign in',
-                isLoading: _isLoading,
+                isLoading: _isEmailLoading,
                 onPressed: _handleEmailLogin,
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -143,16 +144,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
               Center(
-                child: SignInButton(
-                  Buttons.Google,
-                  onPressed: _isLoading
-                      ? null
-                      : () async {
-                          setState(() => _isLoading = true);
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    AbsorbPointer(
+                      absorbing: _isGoogleLoading,
+                      child: SignInButton(
+                        Buttons.Google,
+                        onPressed: () async {
+                          setState(() => _isGoogleLoading = true);
                           final result = await ref
                               .read(authProvider.notifier)
                               .signInWithGoogle();
-                          setState(() => _isLoading = false);
+                          setState(() => _isGoogleLoading = false);
                           if (result.success && context.mounted) {
                             context.go('/songs');
                           } else if (!result.success && context.mounted) {
@@ -164,7 +168,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             );
                           }
                         },
-                  text: 'Google',
+                        text: 'Google',
+                      ),
+                    ),
+                    if (_isGoogleLoading)
+                      const Positioned(
+                        right: AppSpacing.sm,
+                        top: 0,
+                        bottom: 0,
+                        child: Center(
+                          child: SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
