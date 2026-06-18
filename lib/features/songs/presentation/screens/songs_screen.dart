@@ -57,10 +57,10 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
           children: [
             Icon(Icons.lock_rounded, size: _iconSizeLg, color: colors.accent),
             const SizedBox(height: AppSpacing.md),
-            Text('Próximamente', style: context.textTheme.titleLarge),
+            Text('Coming Soon', style: context.textTheme.titleLarge),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Esta canción estará disponible pronto, la desarrolladora está a un paso de la locura.',
+              'This song will be available soon. The developer is working hard on it.',
               style: context.textTheme.bodyMedium?.copyWith(
                 color: colors.textSecondary,
               ),
@@ -69,7 +69,7 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
             const SizedBox(height: AppSpacing.lg),
             FilledButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Entendido'),
+              child: const Text('Got it'),
             ),
           ],
         ),
@@ -83,12 +83,12 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: colors.surface,
-        title: Text('Cerrar sesión', style: context.textTheme.titleLarge),
-        content: const Text('¿Estás seguro de que deseas cerrar sesión?'),
+        title: Text('Log out', style: context.textTheme.titleLarge),
+        content: const Text('Are you sure you want to log out?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Cancelar', style: TextStyle(color: colors.textSecondary)),
+            child: Text('Cancel', style: TextStyle(color: colors.textSecondary)),
           ),
           FilledButton(
             onPressed: () async {
@@ -99,13 +99,13 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
               } catch (e) {
                 messenger.showSnackBar(
                   SnackBar(
-                    content: Text('Error al cerrar sesión: $e'),
+                    content: Text('Error logging out: $e'),
                     backgroundColor: colors.error,
                   ),
                 );
               }
             },
-            child: const Text('Cerrar sesión'),
+            child: const Text('Log out'),
           ),
         ],
       ),
@@ -118,12 +118,12 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
     final colors = context.colors;
 
     return OcariScaffold(
-      title: 'Canciones',
+      title: 'Songs',
       showBackButton: false,
       actions: [
         IconButton(
           icon: const Icon(Icons.logout_rounded),
-          tooltip: 'Cerrar sesión',
+          tooltip: 'Log out',
           onPressed: () => _confirmLogout(),
         ),
       ],
@@ -142,7 +142,7 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  'Error al cargar canciones',
+                  'Error loading songs',
                   style: context.textTheme.titleMedium?.copyWith(
                     color: colors.onBgLight,
                   ),
@@ -157,7 +157,7 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
                 FilledButton.icon(
                   onPressed: () => ref.read(songsProvider.notifier).refresh(),
                   icon: const Icon(Icons.refresh_rounded),
-                  label: const Text('Reintentar'),
+                  label: const Text('Try again'),
                 ),
               ],
             ),
@@ -180,14 +180,14 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
                 child: Row(
                   children: [
                     Text(
-                      'Canciones',
+                      'Songs',
                       style: context.textTheme.headlineMedium?.copyWith(
                         color: colors.onBgLight,
                       ),
                     ),
                     const Spacer(),
                     Text(
-                      '${songs.length} ${songs.length == 1 ? 'canción' : 'canciones'}',
+                      '${songs.length} ${songs.length == 1 ? 'song' : 'songs'}',
                       style: AppTextStyles.body(colors.textSecondary),
                     ),
                   ],
@@ -217,8 +217,8 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
                             const SizedBox(height: AppSpacing.md),
                             Text(
                               hasFilters
-                                  ? 'No se encontraron canciones'
-                                  : 'No hay canciones disponibles',
+                                  ? 'No songs found'
+                                  : 'No songs available',
                               style: context.textTheme.titleMedium?.copyWith(
                                 color: colors.textSecondary,
                               ),
@@ -288,7 +288,7 @@ class _SearchField extends StatelessWidget {
         onChanged: onChanged,
         style: AppTextStyles.body(colors.onBgLight),
         decoration: InputDecoration(
-          hintText: 'Buscar canciones...',
+          hintText: 'Search songs...',
           hintStyle: AppTextStyles.body(colors.textSecondary),
           prefixIcon: Icon(Icons.search_rounded, color: colors.textSecondary),
           suffixIcon: controller.text.isNotEmpty
@@ -342,25 +342,25 @@ class _DifficultyFilter extends StatelessWidget {
     })>[
       (
         value: null,
-        label: 'Todas',
+        label: 'All',
         selectedBg: colors.accent.withValues(alpha: 0.2),
         selectedFg: colors.accent,
       ),
       (
         value: Difficulty.easy,
-        label: 'Fácil',
+        label: 'Easy',
         selectedBg: colors.diffEasyBg,
         selectedFg: colors.diffEasyText,
       ),
       (
         value: Difficulty.medium,
-        label: 'Medio',
+        label: 'Medium',
         selectedBg: colors.diffMediumBg,
         selectedFg: colors.diffMediumText,
       ),
       (
         value: Difficulty.hard,
-        label: 'Difícil',
+        label: 'Hard',
         selectedBg: colors.diffHardBg,
         selectedFg: colors.diffHardText,
       ),

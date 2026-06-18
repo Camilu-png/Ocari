@@ -4,29 +4,29 @@ import 'package:ocari/core/theme/app_theme.dart';
 
 ({String title, String subtitle}) _completionMessage(int playCount) {
   return switch (playCount) {
-    1 => (
-        title: '¡Primera interpretación!',
-        subtitle: 'Toda gran melodía comienza con una sola nota.',
+     1 => (
+        title: 'First performance!',
+        subtitle: 'Every great melody starts with a single note.',
       ),
     2 || 3 => (
-        title: 'Ya estás tomando ritmo',
-        subtitle: 'Cada repetición fortalece tu memoria musical.',
+        title: 'Finding the rhythm',
+        subtitle: 'Each repetition strengthens your musical memory.',
       ),
     4 || 5 || 6 => (
-        title: 'La melodía empieza a quedarse contigo',
-        subtitle: 'Los movimientos de tus dedos ya son más naturales.',
+        title: 'The melody is sticking with you',
+        subtitle: 'Your finger movements are becoming more natural.',
       ),
     7 || 8 || 9 => (
-        title: 'Casi un maestro',
-        subtitle: 'La práctica constante es el secreto de todo músico.',
+        title: 'Almost a master',
+        subtitle: 'Consistent practice is the secret of every musician.',
       ),
     10 || 11 || 12 => (
-        title: 'Ya conoces esta canción bastante bien',
-        subtitle: 'Ahora puedes concentrarte en tu fluidez.',
+        title: 'You know this song well now',
+        subtitle: 'Now you can focus on your fluency.',
       ),
     _ => (
-        title: 'Canción dominada',
-        subtitle: 'Esta melodía ya forma parte de tu repertorio.',
+        title: 'Song mastered',
+        subtitle: 'This melody is now part of your repertoire.',
       ),
   };
 }
@@ -41,8 +41,8 @@ void showSongCompletedSheet(
   final colors = context.colors;
   final msg = _completionMessage(playCount);
   final countText = playCount == 1
-      ? 'Has tocado esta canción 1 vez.'
-      : 'Has tocado esta canción $playCount veces.';
+      ? 'You have played this song 1 time.'
+      : 'You have played this song $playCount times.';
 
   showModalBottomSheet(
     context: context,
@@ -103,7 +103,7 @@ void showSongCompletedSheet(
                     Navigator.of(ctx).pop();
                     onPlayAgain();
                   },
-                  child: const Text('Tocar de nuevo'),
+                  child: const Text('Play again'),
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -115,7 +115,7 @@ void showSongCompletedSheet(
                     onGoToCatalog();
                   },
                   child: Text(
-                    'Volver al catálogo',
+                    'Back to catalog',
                     style: TextStyle(color: colors.textSecondary),
                   ),
                 ),

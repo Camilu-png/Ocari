@@ -71,10 +71,10 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     return songAsync.when(
       loading: () => _buildLoading(colors, null),
       error: (err, _) =>
-          _buildError(colors, null, 'Error al cargar la canción: $err'),
+          _buildError(colors, null, 'Error loading song: $err'),
       data: (song) {
         if (song == null) {
-          return _buildError(colors, null, 'Canción no encontrada');
+          return _buildError(colors, null, 'Song not found');
         }
 
         _initIfReady(song, notifier);
@@ -92,7 +92,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     if (_initialized) return;
 
     if (song.id.isEmpty) {
-      _errorMessage = 'ID de canción inválido.';
+      _errorMessage = 'Invalid song ID.';
       _loadStage = _LoadStage.error;
       return;
     }
@@ -102,7 +102,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
         'PlayerScreen: notesJson is null for "${song.title}" (id=${song.id}). '
         'Verify the Supabase "notes_json" column is populated.',
       );
-      _errorMessage = 'Esta canción no tiene datos de notas.';
+      _errorMessage = 'This song has no note data.';
       _loadStage = _LoadStage.error;
       return;
     }
@@ -114,13 +114,13 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
         'PlayerScreen: failed to parse notes for "${song.title}": $e. '
         'notesJson type=${song.notesJson.runtimeType}',
       );
-      _errorMessage = 'Error al procesar las notas: $e';
+      _errorMessage = 'Error processing notes: $e';
       _loadStage = _LoadStage.error;
       return;
     }
 
     if (_parsedNotes.isEmpty) {
-      _errorMessage = 'Esta canción no contiene notas.';
+      _errorMessage = 'This song contains no notes.';
       _loadStage = _LoadStage.error;
       return;
     }
@@ -154,8 +154,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     if (noteList.isNotEmpty) return noteList;
 
     throw FormatException(
-      'No se encontró un array de notas en notesJson. '
-      'Claves disponibles: ${notesJson.keys.join(", ")}',
+      'No notes array found in notesJson. '
+      'Available keys: ${notesJson.keys.join(", ")}',
     );
   }
 
@@ -178,7 +178,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
               Icon(Icons.error_outline_rounded, size: 48, color: colors.error),
               const SizedBox(height: 16),
               Text(
-                message ?? 'Error desconocido',
+                message ?? 'Unknown error',
                 style: TextStyle(
                   fontSize: 16,
                   color: colors.onBgLight,
@@ -358,7 +358,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Cargando audio…',
+                  'Loading audio…',
                   style: TextStyle(
                     fontSize: 12,
                     color: colors.textSecondary,
