@@ -185,5 +185,38 @@ void main() {
       final textStyle = textWidget.style;
       expect(textStyle?.color, isNot(equals(NoteColors.forNote('D5'))));
     });
+
+    testWidgets('displays updated note name when note changes', (tester) async {
+      const noteA5 = SongNote(
+        note: 'A5',
+        top: [0, 0, 0, 0],
+        bot: [0, 0, 0, 0],
+        sub: [0, 0],
+        middle: [0, 0],
+        timestampMs: 0,
+        durationMs: 500,
+        noteValue: 'quarter',
+      );
+      const noteD5 = SongNote(
+        note: 'D5',
+        top: [1, 1, 1, 0],
+        bot: [0, 0, 0, 0],
+        sub: [1, 1],
+        middle: [0, 0],
+        timestampMs: 1000,
+        durationMs: 500,
+        noteValue: 'quarter',
+      );
+
+      await tester.pumpWidget(createLightWidget(note: noteA5));
+      expect(find.text('A5'), findsOneWidget);
+      expect(find.text('D5'), findsNothing);
+
+      await tester.pumpWidget(createLightWidget(note: noteD5));
+      await tester.pumpAndSettle();
+
+      expect(find.text('D5'), findsOneWidget);
+      expect(find.text('A5'), findsNothing);
+    });
   });
 }
