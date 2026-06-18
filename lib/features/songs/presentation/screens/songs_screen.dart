@@ -79,7 +79,7 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
 
   void _confirmLogout() {
     final colors = context.colors;
-    showDialog<bool>(
+    showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: colors.surface,
