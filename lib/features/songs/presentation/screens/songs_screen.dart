@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ocari/core/theme/app_theme.dart';
 import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/core/widgets/song_card.dart';
+import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:ocari/features/songs/domain/models/difficulty.dart';
 import 'package:ocari/features/songs/domain/models/song.dart';
 import 'package:ocari/features/songs/presentation/providers/songs_provider.dart';
@@ -75,6 +76,31 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
     );
   }
 
+  void _confirmLogout() {
+    final colors = context.colors;
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: colors.surface,
+        title: Text('Cerrar sesión', style: context.textTheme.titleLarge),
+        content: const Text('¿Estás seguro de que deseas cerrar sesión?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('Cancelar', style: TextStyle(color: colors.textSecondary)),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(ctx).pop(true);
+              ref.read(authProvider.notifier).logout();
+            },
+            child: const Text('Cerrar sesión'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final songsAsync = ref.watch(songsProvider);
@@ -83,6 +109,13 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
     return OcariScaffold(
       title: 'Canciones',
       showBackButton: false,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.logout_rounded),
+          tooltip: 'Cerrar sesión',
+          onPressed: () => _confirmLogout(),
+        ),
+      ],
       body: songsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(
