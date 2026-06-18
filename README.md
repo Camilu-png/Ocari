@@ -35,6 +35,7 @@ Ocari es una aplicación móvil diseñada para músicos y entusiastas que desean
 lib/
 ├── core/
 │   ├── theme/          # AppTheme, AppColors, AppTextStyles
+│   ├── services/       # AudioService
 │   ├── router/         # go_router — rutas y redirects
 │   └── widgets/        # Componentes reutilizables
 ├── features/
@@ -43,6 +44,7 @@ lib/
 │   │   ├── domain/
 │   │   └── presentation/
 │   ├── songs/          # Lista y detalle de canciones
+│   ├── progress/       # Progreso por canción del usuario
 │   └── player/         # Reproductor + ocarina animada
 └── main.dart
 ```
@@ -133,8 +135,8 @@ git checkout -b feature/07-login-email
 
 - [x] Pantalla de lista de canciones
 - [X] Reproductor con ocarina animada (CustomPainter)
-- [ ] Sincronización audio → nota → digitación
-- [ ] Control de velocidad de reproducción
+- [X] Sincronización audio → nota → digitación
+- [X] Control de velocidad de reproducción
 
 ### Sprint 2 — Pulido y lanzamiento
 
