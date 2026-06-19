@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:go_router/go_router.dart';
 
-import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/core/theme/app_theme.dart';
+import 'package:ocari/core/theme/note_colors.dart';
+import 'package:ocari/core/widgets/notes_legend.dart';
+import 'package:ocari/core/widgets/notes_track.dart';
+import 'package:ocari/core/widgets/ocarina_canvas.dart';
+import 'package:ocari/core/widgets/ocari_scaffold.dart';
+import 'package:ocari/features/player/domain/models/player_state.dart';
+import 'package:ocari/features/player/presentation/providers/player_notifier.dart';
+import 'package:ocari/features/player/presentation/widgets/song_completed_sheet.dart';
+import 'package:ocari/features/songs/data/repositories/supabase_song_repository.dart';
+import 'package:ocari/features/songs/domain/models/song.dart';
+import 'package:ocari/features/songs/domain/models/song_note.dart';
+import 'package:ocari/features/songs/presentation/providers/songs_provider.dart';
 
-final _songTitles = <String, String>{
-  'zeldas_lullaby': "Zelda's Lullaby",
-};
+enum _LoadStage { loading, ready, error }
 
 class PlayerScreen extends ConsumerStatefulWidget {
   final String songId;
@@ -19,43 +28,338 @@ class PlayerScreen extends ConsumerStatefulWidget {
 }
 
 class _PlayerScreenState extends ConsumerState<PlayerScreen> {
-  final _player = AudioPlayer();
-  PlayerState? _playerState;
-  Duration _position = Duration.zero;
-  Duration _duration = Duration.zero;
-
-  @override
-  void initState() {
-    super.initState();
-    _initPlayer();
-  }
-
-  Future<void> _initPlayer() async {
-    final path = 'assets/audio/${widget.songId}.mp3';
-    try {
-      await _player.setAsset(path);
-      _player.playerStateStream.listen((state) {
-        if (mounted) setState(() => _playerState = state);
-      });
-      _player.positionStream.listen((p) {
-        if (mounted) setState(() => _position = p);
-      });
-      _player.durationStream.listen((d) {
-        if (mounted) setState(() => _duration = d ?? Duration.zero);
-      });
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load audio: $e')),
-        );
-      }
-    }
-  }
+  bool _initialized = false;
+  _LoadStage _loadStage = _LoadStage.loading;
+  String? _errorMessage;
+  List<SongNote> _parsedNotes = [];
+  PlayerNotifier? _notifier;
 
   @override
   void dispose() {
-    _player.dispose();
+    _notifier?.pausePlayback();
     super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final songAsync = ref.watch(songByIdProvider(widget.songId));
+    final playerState = ref.watch(playerNotifierProvider);
+    _notifier ??= ref.read(playerNotifierProvider.notifier);
+    final notifier = _notifier!;
+
+    ref.listen(songByIdProvider(widget.songId), (_, next) {
+      final song = next.valueOrNull;
+      if (song != null) _initIfReady(song, notifier);
+    });
+
+    ref.listen(playerNotifierProvider, (prev, next) {
+      if (next.showCompletionSheet && !(prev?.showCompletionSheet ?? false)) {
+        final notifier = ref.read(playerNotifierProvider.notifier);
+        showSongCompletedSheet(
+          context,
+          songTitle: next.song.title,
+          playCount: next.playCount,
+          onPlayAgain: () {
+            notifier.dismissCompletionSheet();
+            notifier.restart();
+          },
+          onGoToCatalog: () {
+            notifier.dismissCompletionSheet();
+            context.pop();
+          },
+        );
+      }
+    });
+
+    return songAsync.when(
+      loading: () => _buildLoading(colors, null),
+      error: (err, _) =>
+          _buildError(colors, null, 'Error loading song: $err'),
+      data: (song) {
+        if (song == null) {
+          return _buildError(colors, null, 'Song not found');
+        }
+
+        _initIfReady(song, notifier);
+
+        if (_loadStage == _LoadStage.error) {
+          return _buildError(colors, song.title, _errorMessage);
+        }
+
+        return _buildPlayer(colors, playerState);
+      },
+    );
+  }
+
+  void _initIfReady(Song song, PlayerNotifier notifier) {
+    if (_initialized) return;
+
+    if (song.id.isEmpty) {
+      _errorMessage = 'Invalid song ID.';
+      _loadStage = _LoadStage.error;
+      return;
+    }
+
+    if (song.notesJson == null) {
+      debugPrint(
+        'PlayerScreen: notesJson is null for "${song.title}" (id=${song.id}). '
+        'Verify the Supabase "notes_json" column is populated.',
+      );
+      _errorMessage = 'This song has no note data.';
+      _loadStage = _LoadStage.error;
+      return;
+    }
+
+    try {
+      _parsedNotes = SupabaseSongRepository.parseNotes(song.notesJson!);
+    } catch (e) {
+      debugPrint(
+        'PlayerScreen: failed to parse notes for "${song.title}": $e. '
+        'notesJson type=${song.notesJson.runtimeType}',
+      );
+      _errorMessage = 'Error processing notes: $e';
+      _loadStage = _LoadStage.error;
+      return;
+    }
+
+    if (_parsedNotes.isEmpty) {
+      _errorMessage = 'This song contains no notes.';
+      _loadStage = _LoadStage.error;
+      return;
+    }
+
+    _initialized = true;
+    _loadStage = _LoadStage.ready;
+    notifier.initialize(song, _parsedNotes);
+  }
+
+  Widget _buildLoading(AppColors colors, String? songTitle) {
+    return OcariScaffold(
+      title: songTitle ?? 'Player',
+      body: const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Widget _buildError(AppColors colors, String? songTitle, String? message) {
+    return OcariScaffold(
+      title: songTitle ?? 'Player',
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline_rounded, size: 48, color: colors.error),
+              const SizedBox(height: 16),
+              Text(
+                message ?? 'Unknown error',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: colors.onBgLight,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlayer(AppColors colors, PlayerState state) {
+    final currentNote =
+        state.notes.isNotEmpty && state.currentNoteIndex < state.notes.length
+            ? state.notes[state.currentNoteIndex]
+            : null;
+
+    return OcariScaffold(
+      title: state.song.title,
+      actions: [
+        _SpeedChip(
+          speed: state.speed,
+          onSpeedChanged: (speed) {
+            _notifier?.setSpeed(speed);
+          },
+        ),
+      ],
+      body: Column(
+        children: [
+          NotesLegend(notes: state.notes),
+          const SizedBox(height: 4),
+          Expanded(
+            flex: 3,
+            child: ClipRect(
+              child: RepaintBoundary(
+                child: NotesTrack(
+                  notes: state.notes,
+                  position: state.position,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            currentNote?.note ?? '--',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: currentNote != null
+                  ? NoteColors.forNote(currentNote.note)
+                  : colors.textSecondary,
+              fontFamily: '.SF Pro Display',
+            ),
+          ),
+          const SizedBox(height: 4),
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.5,
+                child: OcarinaCanvas(note: currentNote),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          _buildProgressBar(colors, state),
+          const SizedBox(height: 8),
+          _buildTransportControls(colors, state),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressBar(AppColors colors, PlayerState state) {
+    final duration = state.song.durationSeconds * 1000;
+    final maxMs = duration > 0 ? duration.toDouble() : 1.0;
+    final posMs = state.position.inMilliseconds.toDouble();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Text(
+            _fmt(state.position),
+            style: TextStyle(color: colors.textSecondary, fontSize: 12),
+          ),
+          Expanded(
+            child: SliderTheme(
+              data: SliderThemeData(
+                trackHeight: 4,
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+                activeTrackColor: colors.accent,
+                inactiveTrackColor: colors.accent.withAlpha(64),
+                thumbColor: colors.accent,
+              ),
+              child: Slider(
+                value: posMs.clamp(0, maxMs),
+                max: maxMs,
+                onChanged: (v) {
+                  ref
+                      .read(playerNotifierProvider.notifier)
+                      .seekTo(Duration(milliseconds: v.round()));
+                },
+              ),
+            ),
+          ),
+          Text(
+            _fmt(Duration(milliseconds: duration)),
+            style: TextStyle(color: colors.textSecondary, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTransportControls(AppColors colors, PlayerState state) {
+    final notifier = _notifier!;
+    final isAudioReady = state.isAudioReady;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _transportButton(
+                Icons.skip_previous_rounded,
+                notifier.canPlay ? () => notifier.skipToStart() : null,
+                colors,
+              ),
+              const SizedBox(width: 8),
+              _transportButton(
+                Icons.fast_rewind_rounded,
+                notifier.canPlay ? () => notifier.stepBackward() : null,
+                colors,
+              ),
+              const SizedBox(width: 16),
+              _transportButton(
+                state.isPlaying
+                    ? Icons.pause_circle_filled_rounded
+                    : Icons.play_circle_filled_rounded,
+                isAudioReady ? () => notifier.togglePlay() : null,
+                colors,
+                size: 56,
+              ),
+              const SizedBox(width: 16),
+              _transportButton(
+                Icons.fast_forward_rounded,
+                notifier.canPlay ? () => notifier.stepForward() : null,
+                colors,
+              ),
+              const SizedBox(width: 8),
+              _transportButton(
+                Icons.skip_next_rounded,
+                notifier.canPlay ? () => notifier.skipToEnd() : null,
+                colors,
+              ),
+            ],
+          ),
+          if (!isAudioReady) ...[
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: colors.textSecondary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Loading audio…',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: colors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _transportButton(
+    IconData icon,
+    VoidCallback? onPressed,
+    AppColors colors, {
+    double size = 40,
+  }) {
+    final enabled = onPressed != null;
+    return IconButton(
+      icon: Icon(icon),
+      iconSize: size,
+      color: enabled ? colors.accent : colors.accent.withAlpha(80),
+      onPressed: onPressed,
+    );
   }
 
   String _fmt(Duration d) {
@@ -63,75 +367,89 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     final s = d.inSeconds % 60;
     return '$m:${s.toString().padLeft(2, '0')}';
   }
+}
+
+class _SpeedChip extends StatelessWidget {
+  final double speed;
+  final ValueChanged<double> onSpeedChanged;
+
+  const _SpeedChip({
+    required this.speed,
+    required this.onSpeedChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final title = _songTitles[widget.songId] ?? widget.songId;
-    final isPlaying = _playerState?.playing ?? false;
 
-    return OcariScaffold(
-      title: title,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.music_note_rounded, size: 80, color: colors.accent),
-            const SizedBox(height: 24),
-            Text(title, style: AppTextStyles.heading(colors.onBgLight)),
-            const SizedBox(height: 32),
-            if (_duration > Duration.zero)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 48),
-                child: Row(
-                  children: [
-                    Text(_fmt(_position),
-                        style: TextStyle(color: colors.textSecondary)),
-                    Expanded(
-                      child: SliderTheme(
-                        data: SliderThemeData(
-                          trackHeight: 4,
-                          thumbShape: const RoundSliderThumbShape(
-                              enabledThumbRadius: 8),
-                          overlayShape:
-                              const RoundSliderOverlayShape(overlayRadius: 16),
-                          activeTrackColor: colors.accent,
-                          inactiveTrackColor: colors.accent.withAlpha(64),
-                          thumbColor: colors.accent,
-                        ),
-                        child: Slider(
-                          value: _position.inMilliseconds
-                              .toDouble()
-                              .clamp(0, _duration.inMilliseconds.toDouble()),
-                          max: _duration.inMilliseconds.toDouble(),
-                          onChanged: (v) =>
-                              _player.seek(Duration(milliseconds: v.round())),
-                        ),
-                      ),
-                    ),
-                    Text(_fmt(_duration),
-                        style: TextStyle(color: colors.textSecondary)),
-                  ],
-                ),
-              ),
-            const SizedBox(height: 24),
-            IconButton(
-              iconSize: 64,
-              icon: Icon(isPlaying
-                  ? Icons.pause_circle_filled
-                  : Icons.play_circle_filled),
-              color: colors.accent,
-              onPressed: () {
-                if (isPlaying) {
-                  _player.pause();
-                } else {
-                  _player.play();
-                }
-              },
-            ),
-          ],
+    return GestureDetector(
+      onTap: () => _showSpeedSheet(context),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: colors.onAccent.withAlpha(30),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          '×${speed.toStringAsFixed(speed == speed.roundToDouble() ? 0 : 2)}',
+          style: TextStyle(
+            color: colors.onAccent,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
+    );
+  }
+
+  void _showSpeedSheet(BuildContext context) {
+    final colors = context.colors;
+    const speeds = [0.5, 0.75, 1.0];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: colors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Speed',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: colors.onBgLight,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                for (final s in speeds)
+                  ListTile(
+                    leading: Icon(
+                      s == speed
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_off,
+                      color: colors.accent,
+                    ),
+                    title: Text(
+                      '×${s.toStringAsFixed(s == s.roundToDouble() ? 0 : 2)}',
+                      style: TextStyle(color: colors.onBgLight),
+                    ),
+                    onTap: () {
+                      onSpeedChanged(s);
+                      Navigator.of(ctx).pop();
+                    },
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

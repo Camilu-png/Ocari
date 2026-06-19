@@ -35,6 +35,7 @@ Ocari es una aplicación móvil diseñada para músicos y entusiastas que desean
 lib/
 ├── core/
 │   ├── theme/          # AppTheme, AppColors, AppTextStyles
+│   ├── services/       # AudioService
 │   ├── router/         # go_router — rutas y redirects
 │   └── widgets/        # Componentes reutilizables
 ├── features/
@@ -43,6 +44,7 @@ lib/
 │   │   ├── domain/
 │   │   └── presentation/
 │   ├── songs/          # Lista y detalle de canciones
+│   ├── progress/       # Progreso por canción del usuario
 │   └── player/         # Reproductor + ocarina animada
 └── main.dart
 ```
@@ -119,22 +121,22 @@ git checkout -b feature/07-login-email
 
 ## Hoja de ruta
 
-### Sprint 0 — Fundación _(en progreso)_
+### Sprint 0 — Fundación
 
 - [x] Aplicación base Flutter inicializada
-- [ ] Estructura de carpetas y arquitectura
-- [ ] Configuración de Supabase
-- [ ] Navegación base con go_router
-- [ ] Auth (login, registro, Google Sign-In)
-- [ ] Design system y componentes base
-- [ ] CI/CD con GitHub Actions
+- [x] Estructura de carpetas y arquitectura
+- [x] Configuración de Supabase
+- [x] Navegación base con go_router
+- [x] Auth (login, registro, Google Sign-In)
+- [x] Design system y componentes base
+- [x] CI/CD con GitHub Actions
 
-### Sprint 1 — Reproductor _(próximo)_
+### Sprint 1 — Reproductor _(en progreso)_
 
-- [ ] Pantalla de lista de canciones
-- [ ] Reproductor con ocarina animada (CustomPainter)
-- [ ] Sincronización audio → nota → digitación
-- [ ] Control de velocidad de reproducción
+- [x] Pantalla de lista de canciones
+- [X] Reproductor con ocarina animada (CustomPainter)
+- [X] Sincronización audio → nota → digitación
+- [X] Control de velocidad de reproducción
 
 ### Sprint 2 — Pulido y lanzamiento
 

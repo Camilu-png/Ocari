@@ -1,19 +1,24 @@
-import 'package:ocari/core/difficulty.dart';
+// ignore_for_file: invalid_annotation_target
 
-class Song {
-  final String id;
-  final String title;
-  final Difficulty difficulty;
-  final int durationSeconds;
-  final String? artist;
-  final bool isLocked;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  const Song({
-    required this.id,
-    required this.title,
-    this.difficulty = Difficulty.easy,
-    this.durationSeconds = 0,
-    this.artist,
-    this.isLocked = false,
-  });
+import 'difficulty.dart';
+
+part 'song.freezed.dart';
+part 'song.g.dart';
+
+@freezed
+class Song with _$Song {
+  const factory Song({
+    required String id,
+    required String title,
+    @Default('Unknown') String artist,
+    required Difficulty difficulty,
+    @JsonKey(name: 'duration_seconds') required int durationSeconds,
+    @Default(false) @JsonKey(name: 'is_premium') bool isPremium,
+    @JsonKey(name: 'audio_url') String? audioPath,
+    @JsonKey(name: 'notes_json') Map<String, dynamic>? notesJson,
+  }) = _Song;
+
+  factory Song.fromJson(Map<String, dynamic> json) => _$SongFromJson(json);
 }

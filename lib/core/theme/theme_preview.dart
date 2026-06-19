@@ -80,7 +80,7 @@ class ThemePreview extends StatelessWidget {
   }
 
   void _showDialog(BuildContext context, AppColors colors) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('ThemePreview'),
