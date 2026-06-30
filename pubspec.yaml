@@ -28,6 +28,7 @@ dependencies:
   # — Modelos inmutables
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -52,3 +53,12 @@ flutter:
     - assets/data/songs_index.json
     - assets/data/songs/
     - assets/audio/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  min_sdk_android: 21
+  adaptative_icon_background: "#7F77DD"
+  adaptative_icon_foreground: "assets/icon/icon_foreground.png"
+  remove_alpha_ios: true
