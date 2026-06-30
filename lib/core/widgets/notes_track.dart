@@ -66,8 +66,7 @@ class NotesTrack extends StatelessWidget {
         final lineY = trackHeight * 0.75;
 
         final double usableWidth = width - 2 * horizontalPadding;
-        final double columnsTotalWidth =
-            usableWidth - separatorCount * separatorWidth;
+        final double columnsTotalWidth = usableWidth;
         final double colWidth = columnsTotalWidth / columnCount;
 
         final List<double> colStarts = [];
