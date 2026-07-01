@@ -46,6 +46,7 @@ void showSongCompletedSheet(
 
   showModalBottomSheet(
     context: context,
+    isScrollControlled: true,
     backgroundColor: colors.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
@@ -54,9 +55,10 @@ void showSongCompletedSheet(
       return SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
               Text(
                 msg.title,
                 style: TextStyle(
@@ -120,7 +122,8 @@ void showSongCompletedSheet(
                   ),
                 ),
               ),
-            ],
+              ],
+            ),
           ),
         ),
       );
