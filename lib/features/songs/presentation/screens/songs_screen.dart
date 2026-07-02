@@ -118,6 +118,14 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
     final songsAsync = ref.watch(songsProvider);
     final colors = context.colors;
 
+    final countWidget = songsAsync.maybeWhen(
+      data: (songs) => Text(
+        '${songs.length} ${songs.length == 1 ? 'song' : 'songs'}',
+        style: AppTextStyles.body(colors.textSecondary),
+      ),
+      orElse: () => const SizedBox.shrink(),
+    );
+
     return OcariScaffold(
       title: 'Songs',
       showBackButton: false,
@@ -128,100 +136,99 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
           onPressed: () => _confirmLogout(),
         ),
       ],
-      body: songsAsync.when(
-        loading: () => const SongCardShimmer(),
-        error: (err, _) => ErrorStateWidget(
-          title: 'Connection error',
-          message: 'Could not load songs. Please check your connection.',
-          details: '$err',
-          onRetry: () => ref.read(songsProvider.notifier).refresh(),
-        ),
-        data: (songs) {
-          final filtered = _filteredSongs(songs);
-          final hasFilters =
-              _searchController.text.isNotEmpty || _difficultyFilter != null;
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.xs,
+            ),
+            child: Row(
+              children: [
+                Text(
+                  'Songs',
+                  style: context.textTheme.headlineMedium?.copyWith(
+                    color: colors.onBgLight,
+                  ),
+                ),
+                const Spacer(),
+                countWidget,
+              ],
+            ),
+          ),
+          _SearchField(
+            controller: _searchController,
+            onChanged: (_) => setState(() {}),
+          ),
+          _DifficultyFilter(
+            selected: _difficultyFilter,
+            onChanged: (v) => setState(() => _difficultyFilter = v),
+          ),
+          Expanded(
+            child: songsAsync.when(
+              loading: () => const SongCardShimmer(),
+              error: (err, _) => ErrorStateWidget(
+                title: 'Connection error',
+                message: 'Could not load songs. Please check your connection.',
+                details: '$err',
+                onRetry: () => ref.read(songsProvider.notifier).refresh(),
+              ),
+              data: (songs) {
+                final filtered = _filteredSongs(songs);
+                final hasFilters = _searchController.text.isNotEmpty ||
+                    _difficultyFilter != null;
 
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.md,
-                  AppSpacing.lg,
-                  AppSpacing.md,
-                  AppSpacing.xs,
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      'Songs',
-                      style: context.textTheme.headlineMedium?.copyWith(
-                        color: colors.onBgLight,
-                      ),
+                if (filtered.isEmpty) {
+                  return EmptyStateWidget(
+                    icon: hasFilters
+                        ? Icons.search_off_rounded
+                        : Icons.music_note_rounded,
+                    message: hasFilters
+                        ? 'No songs with that name were found'
+                        : 'There are no songs available',
+                  );
+                }
+
+                return RefreshIndicator(
+                  onRefresh: () =>
+                      ref.read(songsProvider.notifier).refresh(),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(
+                      left: AppSpacing.md,
+                      right: AppSpacing.md,
+                      bottom: AppSpacing.md,
                     ),
-                    const Spacer(),
-                    Text(
-                      '${songs.length} ${songs.length == 1 ? 'song' : 'songs'}',
-                      style: AppTextStyles.body(colors.textSecondary),
-                    ),
-                  ],
-                ),
-              ),
-              _SearchField(
-                controller: _searchController,
-                onChanged: (_) => setState(() {}),
-              ),
-              _DifficultyFilter(
-                selected: _difficultyFilter,
-                onChanged: (v) => setState(() => _difficultyFilter = v),
-              ),
-              Expanded(
-                child: filtered.isEmpty
-                    ? EmptyStateWidget(
-                        icon: hasFilters
-                            ? Icons.search_off_rounded
-                            : Icons.music_note_rounded,
-                        message: hasFilters
-                            ? 'No songs with that name were found'
-                            : 'There are no songs available',
-                      )
-                    : RefreshIndicator(
-                        onRefresh: () =>
-                            ref.read(songsProvider.notifier).refresh(),
-                        child: ListView.builder(
-                          padding: const EdgeInsets.only(
-                            left: AppSpacing.md,
-                            right: AppSpacing.md,
-                            bottom: AppSpacing.md,
-                          ),
-                          itemCount: filtered.length,
-                          itemBuilder: (context, index) {
-                            final song = filtered[index];
-                            return Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: AppSpacing.sm,
-                              ),
-                              child: SongCard(
-                                title: song.title,
-                                artist: song.artist,
-                                difficulty: song.difficulty,
-                                durationSeconds: song.durationSeconds,
-                                isLocked: song.isPremium,
-                                onTap: () {
-                                  if (song.isPremium) {
-                                    _showPremiumComingSoon();
-                                  } else {
-                                    context.push('/player/${song.id}');
-                                  }
-                                },
-                              ),
-                            );
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) {
+                      final song = filtered[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(
+                          bottom: AppSpacing.sm,
+                        ),
+                        child: SongCard(
+                          title: song.title,
+                          artist: song.artist,
+                          difficulty: song.difficulty,
+                          durationSeconds: song.durationSeconds,
+                          isLocked: song.isPremium,
+                          onTap: () {
+                            if (song.isPremium) {
+                              _showPremiumComingSoon();
+                            } else {
+                              context.push('/player/${song.id}');
+                            }
                           },
                         ),
-                      ),
-              ),
-            ],
-          );
-        },
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
