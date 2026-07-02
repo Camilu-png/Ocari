@@ -9,8 +9,13 @@ const double ocarinaSvgH = 173.0;
 
 class OcarinaCanvas extends ConsumerStatefulWidget {
   final SongNote? note;
+  final bool showNoteLabel;
 
-  const OcarinaCanvas({super.key, required this.note});
+  const OcarinaCanvas({
+    super.key,
+    required this.note,
+    this.showNoteLabel = true,
+  });
 
   @override
   ConsumerState<OcarinaCanvas> createState() => _OcarinaCanvasState();
@@ -104,18 +109,20 @@ class _OcarinaCanvasState extends ConsumerState<OcarinaCanvas>
             },
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          note?.note ?? '--',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w600,
-            color: note != null
-                ? NoteColors.forNote(note.note)
-                : colors.textSecondary,
-            fontFamily: '.SF Pro Display',
+        if (widget.showNoteLabel) ...[
+          const SizedBox(height: 8),
+          Text(
+            note?.note ?? '--',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+              color: note != null
+                  ? NoteColors.forNote(note.note)
+                  : colors.textSecondary,
+              fontFamily: '.SF Pro Display',
+            ),
           ),
-        ),
+        ],
       ],
     );
   }

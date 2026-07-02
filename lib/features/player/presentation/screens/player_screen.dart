@@ -173,6 +173,18 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
             ? state.notes[state.currentNoteIndex]
             : null;
 
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        if (orientation == Orientation.landscape) {
+          return _buildLandscapeLayout(colors, state, currentNote);
+        }
+        return _buildPortraitLayout(colors, state, currentNote);
+      },
+    );
+  }
+
+  Widget _buildPortraitLayout(
+      AppColors colors, PlayerState state, SongNote? currentNote) {
     return OcariScaffold(
       title: state.song.title,
       actions: [
@@ -216,7 +228,10 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
             child: Center(
               child: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.5,
-                child: OcarinaCanvas(note: currentNote),
+                child: OcarinaCanvas(
+                  note: currentNote,
+                  showNoteLabel: false,
+                ),
               ),
             ),
           ),
@@ -225,6 +240,174 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
           const SizedBox(height: 8),
           _buildTransportControls(colors, state),
           const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLandscapeLayout(
+      AppColors colors, PlayerState state, SongNote? currentNote) {
+    return OcariScaffold(
+      title: state.song.title,
+      actions: [
+        _SpeedChip(
+          speed: state.speed,
+          onSpeedChanged: (speed) {
+            _notifier?.setSpeed(speed);
+          },
+        ),
+      ],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          const overheadHeight = 116.0;
+          final availableHeight = constraints.maxHeight;
+          final trackAreaHeight =
+              (availableHeight - overheadHeight).clamp(150.0, availableHeight);
+
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                NotesLegend(notes: state.notes),
+                SizedBox(
+                  height: trackAreaHeight,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ClipRect(
+                          child: RepaintBoundary(
+                            child: NotesTrack(
+                              notes: state.notes,
+                              position: state.position,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final canvasHeight =
+                              (constraints.maxHeight - 30).clamp(60.0, constraints.maxHeight);
+                          const aspectRatio = ocarinaSvgW / ocarinaSvgH;
+                          return SizedBox(
+                            width: canvasHeight * aspectRatio,
+                            child: OcarinaCanvas(
+                              note: currentNote,
+                              showNoteLabel: false,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  currentNote?.note ?? '--',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: currentNote != null
+                        ? NoteColors.forNote(currentNote.note)
+                        : colors.textSecondary,
+                    fontFamily: '.SF Pro Display',
+                  ),
+                ),
+                const SizedBox(height: 4),
+                _buildCompactControls(colors, state),
+                const SizedBox(height: 8),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildCompactControls(AppColors colors, PlayerState state) {
+    final notifier = _notifier!;
+    final isAudioReady = state.isAudioReady;
+    final duration = state.song.durationSeconds * 1000;
+    final maxMs = duration > 0 ? duration.toDouble() : 1.0;
+    final posMs = state.position.inMilliseconds.toDouble();
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 12, right: 4),
+      child: Row(
+        children: [
+          Text(
+            _fmt(state.position),
+            style: TextStyle(color: colors.textSecondary, fontSize: 11),
+          ),
+          Expanded(
+            child: SliderTheme(
+              data: SliderThemeData(
+                trackHeight: 3,
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 4),
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 8),
+                activeTrackColor: colors.accent,
+                inactiveTrackColor: colors.accent.withAlpha(64),
+                thumbColor: colors.accent,
+              ),
+              child: Slider(
+                value: posMs.clamp(0, maxMs),
+                max: maxMs,
+                onChanged: (v) {
+                  ref
+                      .read(playerNotifierProvider.notifier)
+                      .seekTo(Duration(milliseconds: v.round()));
+                },
+              ),
+            ),
+          ),
+          Text(
+            _fmt(Duration(milliseconds: duration)),
+            style: TextStyle(color: colors.textSecondary, fontSize: 11),
+          ),
+          const SizedBox(width: 4),
+          _transportButton(
+            Icons.skip_previous_rounded,
+            notifier.canPlay ? () => notifier.skipToStart() : null,
+            colors,
+            size: 28,
+          ),
+          _transportButton(
+            Icons.fast_rewind_rounded,
+            notifier.canPlay ? () => notifier.stepBackward() : null,
+            colors,
+            size: 28,
+          ),
+          _transportButton(
+            state.isPlaying
+                ? Icons.pause_circle_filled_rounded
+                : Icons.play_circle_filled_rounded,
+            isAudioReady ? () => notifier.togglePlay() : null,
+            colors,
+            size: 36,
+          ),
+          _transportButton(
+            Icons.fast_forward_rounded,
+            notifier.canPlay ? () => notifier.stepForward() : null,
+            colors,
+            size: 28,
+          ),
+          _transportButton(
+            Icons.skip_next_rounded,
+            notifier.canPlay ? () => notifier.skipToEnd() : null,
+            colors,
+            size: 28,
+          ),
+          if (!isAudioReady)
+            Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: SizedBox(
+                width: 12,
+                height: 12,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: colors.textSecondary,
+                ),
+              ),
+            ),
         ],
       ),
     );
