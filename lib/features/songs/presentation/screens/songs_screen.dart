@@ -9,6 +9,8 @@ import 'package:ocari/core/widgets/song_card.dart';
 import 'package:ocari/core/widgets/state_widgets.dart';
 import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart'
     show authProvider;
+import 'package:ocari/features/onboarding/presentation/providers/onboarding_provider.dart';
+import 'package:ocari/features/onboarding/presentation/screens/onboarding_dialog.dart';
 import 'package:ocari/features/songs/domain/models/difficulty.dart';
 import 'package:ocari/features/songs/domain/models/song.dart';
 import 'package:ocari/features/songs/presentation/providers/songs_provider.dart';
@@ -23,11 +25,20 @@ class SongsScreen extends ConsumerStatefulWidget {
 class _SongsScreenState extends ConsumerState<SongsScreen> {
   final _searchController = TextEditingController();
   Difficulty? _difficultyFilter;
+  bool _onboardingShown = false;
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _showOnboarding() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const OnboardingDialog(),
+    );
   }
 
   List<Song> _filteredSongs(List<Song> songs) {
@@ -126,14 +137,38 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
       orElse: () => const SizedBox.shrink(),
     );
 
+    ref.listen<AsyncValue<bool>>(onboardingProvider, (prev, next) {
+      next.whenOrNull(data: (completed) {
+        if (!completed && !_onboardingShown) {
+          _onboardingShown = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _showOnboarding();
+          });
+        }
+      });
+    });
+
     return OcariScaffold(
       title: 'Songs',
       showBackButton: false,
       actions: [
-        IconButton(
-          icon: const Icon(Icons.logout_rounded),
-          tooltip: 'Log out',
-          onPressed: () => _confirmLogout(),
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert_rounded),
+          tooltip: 'Menu',
+          onSelected: (value) {
+            if (value == 'onboarding') _showOnboarding();
+            if (value == 'logout') _confirmLogout();
+          },
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 'onboarding',
+              child: Text('Ver onboarding'),
+            ),
+            const PopupMenuItem(
+              value: 'logout',
+              child: Text('Cerrar sesión'),
+            ),
+          ],
         ),
       ],
       body: Column(

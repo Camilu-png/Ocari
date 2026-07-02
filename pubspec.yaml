@@ -28,6 +28,9 @@ dependencies:
   # — Shimmer / Skeleton
   shimmer: ^3.0.0
 
+  # — Almacenamiento local
+  shared_preferences: ^2.3.0
+
   # — Modelos inmutables
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0

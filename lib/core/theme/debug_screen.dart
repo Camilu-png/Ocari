@@ -13,6 +13,7 @@ import 'package:ocari/core/widgets/ocari_text_field.dart';
 import 'package:ocari/core/widgets/song_card.dart';
 import 'package:ocari/core/widgets/notes_track.dart';
 import 'package:ocari/core/widgets/ocarina_canvas.dart';
+import 'package:ocari/features/onboarding/presentation/screens/onboarding_dialog.dart';
 import 'package:ocari/features/songs/domain/models/difficulty.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
 
@@ -58,6 +59,8 @@ class DebugScreen extends StatelessWidget {
             _buildScaffoldSection(context),
             const SizedBox(height: 24),
             _buildSongCardsSection(),
+            const SizedBox(height: 24),
+            const _OnboardingSection(),
             const SizedBox(height: 24),
             const _OcarinaPreviewSection(),
             const SizedBox(height: 24),
@@ -258,6 +261,32 @@ class DebugScreen extends StatelessWidget {
           durationSeconds: 180,
           isLocked: true,
           onTap: () {},
+        ),
+      ],
+    );
+  }
+}
+
+class _OnboardingSection extends StatelessWidget {
+  const _OnboardingSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Onboarding', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 16),
+        OcariButton(
+          label: 'Mostrar Onboarding',
+          onPressed: () {
+            showDialog<void>(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => const OnboardingDialog(),
+            );
+          },
+          isFullWidth: false,
         ),
       ],
     );
