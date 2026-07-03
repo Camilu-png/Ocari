@@ -59,6 +59,7 @@ flutter:
     - assets/data/songs_index.json
     - assets/data/songs/
     - assets/audio/
+    - assets/audio/notes/
 
 flutter_launcher_icons:
   android: true
