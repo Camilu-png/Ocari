@@ -16,6 +16,7 @@ Closes #
 
 ## Checklist
 
+- [ ] PR targets the `develop` branch (not `main`)
 - [ ] Code compiles without errors (`flutter build`)
 - [ ] No warnings in `flutter analyze`
 - [ ] All tests pass (`flutter test`)

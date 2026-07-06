@@ -8,9 +8,9 @@ Ocari follows a **Feature-first with Clean Layers** architecture, combining orga
 lib/
 ├── core/                        # Shared code across the app
 │   ├── theme/                   # AppTheme, AppColors, AppTextStyles
+│   ├── services/                # AudioService and other services
 │   ├── router/                  # go_router configuration
-│   ├── widgets/                 # Reusable components (OcariButton, etc.)
-│   └── utils/                   # Helpers, extensions, constants
+│   └── widgets/                 # Reusable components (OcariButton, etc.)
 │
 ├── features/                    # Each feature is a self-contained module
 │   ├── auth/                    # Authentication and session
@@ -34,14 +34,22 @@ lib/
 │   │       ├── widgets/         # SongCard, DifficultyBadge
 │   │       └── providers/
 │   │
-│   └── player/                  # Player with animated ocarina
+│   ├── player/                  # Player with animated ocarina
+│   │   ├── data/
+│   │   ├── domain/
+│   │   │   └── models/          # PlayerState, Note, FingeringMap
+│   │   └── presentation/
+│   │       ├── screens/         # PlayerScreen
+│   │       ├── widgets/         # OcarinaCanvas, NotesTrack, TransportBar
+│   │       └── providers/       # playerProvider, audioProvider
+│   │
+│   └── progress/                # Per-song user progress
 │       ├── data/
 │       ├── domain/
-│       │   └── models/          # PlayerState, Note, FingeringMap
+│       │   └── models/          # UserProgress, SessionStats
 │       └── presentation/
-│           ├── screens/         # PlayerScreen
-│           ├── widgets/         # OcarinaCanvas, NotesTrack, TransportBar
-│           └── providers/       # playerProvider, audioProvider
+│           ├── screens/         # ProgressScreen
+│           └── providers/       # progressProvider
 │
 └── main.dart
 ```

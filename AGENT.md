@@ -20,14 +20,18 @@ Stack: Flutter · Dart · Riverpod · go_router · Supabase · just_audio
 lib/
 ├── core/
 │   ├── theme/        # AppTheme, AppColors, AppTextStyles
+│   ├── services/     # AudioService and other services
 │   ├── router/       # go_router — routes and redirects
 │   └── widgets/      # Reusable components (OcariButton, etc.)
 ├── features/
 │   ├── auth/         # Login, registration, session (Supabase Auth)
 │   ├── songs/        # Song list and detail
-│   └── player/       # Player + animated ocarina (CustomPainter)
+│   ├── player/       # Player + animated ocarina (CustomPainter)
+│   └── progress/     # Per-song user progress
 └── main.dart
 ```
+
+> **Note:** The canonical, detailed folder structure with sub-layers is documented in [`lib/README.md`](lib/README.md). The diagram above is a simplified overview; refer to `lib/README.md` for the full architecture.
 
 Each feature follows three layers: `data/` → `domain/` → `presentation/`.
 Dependencies always flow inward. `presentation` knows `domain`,

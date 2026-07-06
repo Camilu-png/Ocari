@@ -49,6 +49,8 @@ lib/
 └── main.dart
 ```
 
+> **Note:** The canonical, detailed architecture documentation with sub-layer structure lives in [`lib/README.md`](lib/README.md).
+
 ---
 
 ## Running the Project Locally
@@ -139,7 +141,7 @@ git checkout -b feature/07-login-email
 - [X] Playback speed control
 
 ### Sprint 2 — Tutorials and content _(in progress)_
-- [X] Fix: centred and responsive note track in landscape mode
+- [X] Centred and responsive note track in landscape mode
 - [ ] Onboarding system — explanation of colours and how to read the track
 - [ ] Interactive step-by-step tutorial within the player
 - [ ] Practice mode — short exercises by colour/note before playing songs
