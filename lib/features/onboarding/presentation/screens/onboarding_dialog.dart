@@ -421,6 +421,16 @@ class _NotesTrackDemoPageState extends State<_NotesTrackDemoPage>
   }
 }
 
+int _noteSortKey(String note) {
+  final m = RegExp(r'^([A-G])([sf]?)(\d+)$').firstMatch(note);
+  if (m == null) return 0;
+  const chromatic = {'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11};
+  var pitch = chromatic[m.group(1)!]!;
+  if (m.group(2) == 's') pitch++;
+  if (m.group(2) == 'f') pitch--;
+  return int.parse(m.group(3)!) * 12 + pitch;
+}
+
 class _ColorPalettePage extends StatelessWidget {
   final NotePlayer notePlayer;
 
@@ -431,7 +441,7 @@ class _ColorPalettePage extends StatelessWidget {
     final colors = context.colors;
 
     final paletteEntries = NoteColors.palette.entries.toList()
-      ..sort((a, b) => a.key.compareTo(b.key));
+      ..sort((a, b) => _noteSortKey(a.key).compareTo(_noteSortKey(b.key)));
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32),
