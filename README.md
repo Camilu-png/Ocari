@@ -139,7 +139,7 @@ git checkout -b feature/07-login-email
 - [X] Playback speed control
 
 ### Sprint 2 — Tutorials and content _(in progress)_
-- [ ] Fix: centred and responsive note track in landscape mode
+- [X] Fix: centred and responsive note track in landscape mode
 - [ ] Onboarding system — explanation of colours and how to read the track
 - [ ] Interactive step-by-step tutorial within the player
 - [ ] Practice mode — short exercises by colour/note before playing songs
