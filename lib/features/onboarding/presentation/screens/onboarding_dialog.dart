@@ -145,7 +145,7 @@ class _OnboardingDialogState extends ConsumerState<OnboardingDialog> {
                   totalMs: _demoTotalMs,
                   notePlayer: _notePlayer,
                 ),
-                _ColorPalettePage(),
+                _ColorPalettePage(notePlayer: _notePlayer),
                 _OcarinaDemoPage(
                   notes: _demoNotes,
                   totalMs: _demoTotalMs,
@@ -422,6 +422,10 @@ class _NotesTrackDemoPageState extends State<_NotesTrackDemoPage>
 }
 
 class _ColorPalettePage extends StatelessWidget {
+  final NotePlayer notePlayer;
+
+  const _ColorPalettePage({required this.notePlayer});
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -463,31 +467,13 @@ class _ColorPalettePage extends StatelessWidget {
                   alignment: WrapAlignment.center,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: paletteEntries.map((entry) {
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: entry.value,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color:
-                                  colors.textSecondary.withValues(alpha: 0.2),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          entry.key,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                            color: colors.textSecondary,
-                          ),
-                        ),
-                      ],
+                    return _InteractiveSwatch(
+                      noteName: entry.key,
+                      color: entry.value,
+                      borderColor: colors.textSecondary.withValues(alpha: 0.2),
+                      textColor: colors.textSecondary,
+                      onPlay: () => notePlayer.play(entry.key),
+                      onStop: () => notePlayer.stop(),
                     );
                   }).toList(),
                 ),
@@ -496,6 +482,99 @@ class _ColorPalettePage extends StatelessWidget {
           ),
           const Spacer(),
         ],
+      ),
+    );
+  }
+}
+
+class _InteractiveSwatch extends StatefulWidget {
+  final String noteName;
+  final Color color;
+  final Color borderColor;
+  final Color textColor;
+  final VoidCallback onPlay;
+  final VoidCallback onStop;
+
+  const _InteractiveSwatch({
+    required this.noteName,
+    required this.color,
+    required this.borderColor,
+    required this.textColor,
+    required this.onPlay,
+    required this.onStop,
+  });
+
+  @override
+  State<_InteractiveSwatch> createState() => _InteractiveSwatchState();
+}
+
+class _InteractiveSwatchState extends State<_InteractiveSwatch>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+    );
+    _scale = Tween<double>(begin: 1.0, end: 1.15).animate(
+      CurvedAnimation(parent: _animController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) {
+        _animController.forward();
+        widget.onPlay();
+      },
+      onTapUp: (_) {
+        _animController.reverse();
+        widget.onStop();
+      },
+      onTapCancel: () {
+        _animController.reverse();
+        widget.onStop();
+      },
+      child: AnimatedBuilder(
+        animation: _scale,
+        builder: (context, child) => Transform.scale(
+          scale: _scale.value,
+          child: child,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: widget.color,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: widget.borderColor),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              widget.noteName,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: widget.textColor,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -522,6 +601,8 @@ class _OcarinaDemoPageState extends State<_OcarinaDemoPage>
   late Animation<double> _positionMs;
   SongNote? _activeNote;
   int _lastPlayedIndex = -1;
+  bool _playSound = true;
+  bool _loopMode = false;
 
   @override
   void initState() {
@@ -539,7 +620,19 @@ class _OcarinaDemoPageState extends State<_OcarinaDemoPage>
     ));
 
     _controller.addListener(_onUpdate);
+    _controller.addStatusListener(_onStatus);
     _controller.forward();
+  }
+
+  void _onStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed && _playSound) {
+      _playSound = false;
+      _loopMode = true;
+      widget.notePlayer.stop();
+      _lastPlayedIndex = -1;
+      setState(() {});
+      _controller.repeat();
+    }
   }
 
   void _onUpdate() {
@@ -554,7 +647,7 @@ class _OcarinaDemoPageState extends State<_OcarinaDemoPage>
         break;
       }
     }
-    if (foundIndex != -1 && foundIndex != _lastPlayedIndex) {
+    if (_playSound && foundIndex != -1 && foundIndex != _lastPlayedIndex) {
       _lastPlayedIndex = foundIndex;
       widget.notePlayer.play(
         found!.note,
@@ -562,7 +655,9 @@ class _OcarinaDemoPageState extends State<_OcarinaDemoPage>
       );
     } else if (foundIndex == -1 && _lastPlayedIndex != -1) {
       _lastPlayedIndex = -1;
-      widget.notePlayer.stop();
+      if (_playSound) {
+        widget.notePlayer.stop();
+      }
     }
     if (found != _activeNote && mounted) {
       setState(() => _activeNote = found);
@@ -597,7 +692,7 @@ class _OcarinaDemoPageState extends State<_OcarinaDemoPage>
           const SizedBox(height: 8),
           Text(
             'Los hoyos se iluminan del color de la nota activa. '
-            'Solo tapa los hoyos que se encienden.',
+            'Solo tapa los hoyos que se enciendan.',
             textAlign: TextAlign.center,
             style: context.textTheme.bodyMedium?.copyWith(
               color: colors.textSecondary,
@@ -609,6 +704,17 @@ class _OcarinaDemoPageState extends State<_OcarinaDemoPage>
             width: 260,
             child: OcarinaCanvas(note: _activeNote),
           ),
+          if (_loopMode) ...[
+            const SizedBox(height: 16),
+            Text(
+              'Ahora te toca a ti practicar',
+              textAlign: TextAlign.center,
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: colors.accent,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
           const Spacer(),
         ],
       ),
