@@ -1,106 +1,106 @@
 # Ocari 🎵
 
-> Aprende a tocar la ocarina de 12 hoyos de forma visual y sencilla.
+> Learn to play the 12-hole ocarina visually and intuitively.
 
-Ocari es una aplicación móvil diseñada para músicos y entusiastas que desean dominar la ocarina de 12 hoyos. A través de una interfaz intuitiva, la app muestra las posiciones exactas de los dedos en tiempo real para cada nota de tus canciones favoritas — inspirada en la experiencia de Simply Piano, adaptada al mundo de la ocarina.
-
----
-
-## Características principales
-
-- **Guía visual en tiempo real** — Visualización interactiva de la posición de los dedos para ocarinas de 12 hoyos, fiel al estilo de digitación estándar.
-- **Biblioteca de canciones** — Incluye temas icónicos de videojuegos, anime y música clásica.
-- **Control de velocidad** — Ajusta el tempo de reproducción para practicar a tu propio ritmo (×0.5, ×0.75, ×1).
-- **Modo próximas notas** — Anticipa los cambios de posición con una línea de tiempo de notas futuras.
-- **Progreso personal** — Historial de canciones practicadas y estadísticas de sesión.
+Ocari is a mobile app designed for musicians and enthusiasts who want to master the 12-hole ocarina. Through an intuitive interface, it displays exact real-time finger positions for every note in your favorite songs — inspired by the Simply Piano experience, adapted for the ocarina.
 
 ---
 
-## Stack tecnológico
+## Key Features
 
-| Capa           | Tecnología     |
-| -------------- | -------------- |
-| Mobile         | Flutter (Dart) |
-| Estado         | Riverpod       |
-| Navegación     | go_router      |
-| Backend / Auth | Supabase       |
-| Audio          | just_audio     |
-| CI/CD          | GitHub Actions |
+- **Real-Time Visual Guide** — Interactive finger position visualization for 12-hole ocarinas, faithful to standard fingering conventions.
+- **Song Library** — Includes iconic tracks from video games, anime, and classical music.
+- **Speed Control** — Adjust playback tempo to practice at your own pace (×0.5, ×0.75, ×1).
+- **Upcoming Notes Mode** — Anticipate position changes with a timeline of upcoming notes.
+- **Personal Progress** — Track practiced songs and session statistics.
 
 ---
 
-## Estructura del proyecto
+## Tech Stack
+
+| Layer            | Technology    |
+| ---------------- | ------------- |
+| Mobile           | Flutter (Dart)|
+| State Management | Riverpod      |
+| Navigation       | go_router     |
+| Backend / Auth   | Supabase      |
+| Audio            | just_audio    |
+| CI/CD            | GitHub Actions|
+
+---
+
+## Project Structure
 
 ```
 lib/
 ├── core/
 │   ├── theme/          # AppTheme, AppColors, AppTextStyles
 │   ├── services/       # AudioService
-│   ├── router/         # go_router — rutas y redirects
-│   └── widgets/        # Componentes reutilizables
+│   ├── router/         # go_router — routes and redirects
+│   └── widgets/        # Reusable components
 ├── features/
-│   ├── auth/           # Login, registro, sesión
+│   ├── auth/           # Login, registration, session
 │   │   ├── data/
 │   │   ├── domain/
 │   │   └── presentation/
-│   ├── songs/          # Lista y detalle de canciones
-│   ├── progress/       # Progreso por canción del usuario
-│   └── player/         # Reproductor + ocarina animada
+│   ├── songs/          # Song list and details
+│   ├── progress/       # Per-song user progress
+│   └── player/         # Player + animated ocarina
 └── main.dart
 ```
 
 ---
 
-## Cómo correr el proyecto localmente
+## Running the Project Locally
 
-### Requisitos previos
+### Prerequisites
 
 - Flutter SDK `>=3.18.0`
 - Dart `>=3.3.0 <4.0.0`
-- Una cuenta en [Supabase](https://supabase.com) (free tier)
+- A [Supabase](https://supabase.com) account (free tier)
 
-### Instalación
+### Installation
 
 ```bash
-# 1. Clonar el repositorio
-git clone https://github.com/tu-usuario/ocari.git
+# 1. Clone the repository
+git clone https://github.com/your-username/ocari.git
 cd ocari
 
-# 2. Instalar dependencias
+# 2. Install dependencies
 flutter pub get
 
-# 3. Configurar variables de entorno
+# 3. Configure environment variables
 cp .env.example .env
-# Editar .env con tus credenciales de Supabase
+# Edit .env with your Supabase credentials
 
-# 4. Correr la app
+# 4. Run the app
 flutter run --dart-define-from-file=.env
 ```
 
-### Variables de entorno
+### Environment Variables
 
-Crea un archivo `.env` en la raíz del proyecto (nunca lo subas al repo):
+Create a `.env` file in the project root (never commit it to the repository):
 
 ```env
-SUPABASE_URL=https://tu-proyecto.supabase.co
-SUPABASE_ANON_KEY=tu-anon-key
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
 ```
 
 ---
 
-## Flujo de desarrollo
+## Development Workflow
 
-Este proyecto usa la siguiente estrategia de branching:
+This project follows the branching strategy below:
 
 ```
-main        ← producción (solo merge desde develop via PR)
-develop     ← integración (rama base para features)
-feature/*   ← una rama por issue
+main        ← production (merge only from develop via PR)
+develop     ← integration (base branch for features)
+feature/*   ← one branch per issue
 ```
 
-### Convención de commits
+### Commit Convention
 
-Seguimos [Conventional Commits](https://www.conventionalcommits.org/):
+Comments must comply with the following rules [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
 feat(player): add hole animation for D4 note
@@ -109,7 +109,7 @@ chore(ci): update Flutter version in GitHub Actions
 docs(readme): add installation instructions
 ```
 
-### Crear una rama de feature
+### Creating a Feature Branch
 
 ```bash
 git checkout develop
@@ -119,33 +119,39 @@ git checkout -b feature/07-login-email
 
 ---
 
-## Hoja de ruta
+## Roadmap
 
-### Sprint 0 — Fundación
+### Sprint 0 — Foundation
 
-- [x] Aplicación base Flutter inicializada
-- [x] Estructura de carpetas y arquitectura
-- [x] Configuración de Supabase
-- [x] Navegación base con go_router
-- [x] Auth (login, registro, Google Sign-In)
-- [x] Design system y componentes base
-- [x] CI/CD con GitHub Actions
+- [x] Initialize base Flutter application
+- [x] Folder structure and architecture
+- [x] Supabase configuration
+- [x] Base navigation with go_router
+- [x] Auth (login, registration, Google Sign-In)
+- [x] Design system and base components
+- [x] CI/CD with GitHub Actions
 
-### Sprint 1 — Reproductor _(en progreso)_
+### Sprint 1 — Player
 
-- [x] Pantalla de lista de canciones
-- [X] Reproductor con ocarina animada (CustomPainter)
-- [X] Sincronización audio → nota → digitación
-- [X] Control de velocidad de reproducción
+- [x] Song list screen
+- [X] Player with animated ocarina (CustomPainter)
+- [X] Audio → note → fingering synchronization
+- [X] Playback speed control
 
-### Sprint 2 — Pulido y lanzamiento
+### Sprint 2 — Tutorials and content _(in progress)_
+- [ ] Fix: centred and responsive note track in landscape mode
+- [ ] Onboarding system — explanation of colours and how to read the track
+- [ ] Interactive step-by-step tutorial within the player
+- [ ] Practice mode — short exercises by colour/note before playing songs
+- [ ] Import sheet music
 
-- [ ] Modelo freemium (canciones gratuitas / premium)
-- [ ] Progreso y estadísticas del usuario
-- [ ] Preparación para App Store y Google Play
+### Sprint 3 — Polish and Launch
+
+- [ ] User progress and statistics
+- [ ] App Store and Google Play preparation
 
 ---
 
-## Licencia
+## License
 
 MIT © 2025 — Ocari

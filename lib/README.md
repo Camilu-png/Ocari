@@ -1,31 +1,31 @@
-# Arquitectura de Ocari
+# Ocari Architecture
 
-Ocari sigue una arquitectura **Feature-first con Clean Layers**, combinando la organización por funcionalidad con la separación de responsabilidades en capas.
+Ocari follows a **Feature-first with Clean Layers** architecture, combining organization by functionality with separation of concerns across layers.
 
-## Estructura de carpetas
+## Folder Structure
 
 ```
 lib/
-├── core/                        # Código compartido por toda la app
+├── core/                        # Shared code across the app
 │   ├── theme/                   # AppTheme, AppColors, AppTextStyles
-│   ├── router/                  # Configuración de go_router
-│   ├── widgets/                 # Componentes reutilizables (OcariButton, etc.)
-│   └── utils/                   # Helpers, extensiones, constantes
+│   ├── router/                  # go_router configuration
+│   ├── widgets/                 # Reusable components (OcariButton, etc.)
+│   └── utils/                   # Helpers, extensions, constants
 │
-├── features/                    # Cada feature es un módulo autónomo
-│   ├── auth/                    # Autenticación y sesión
+├── features/                    # Each feature is a self-contained module
+│   ├── auth/                    # Authentication and session
 │   │   ├── data/
-│   │   │   ├── repositories/    # Implementación concreta (Supabase)
-│   │   │   └── datasources/     # Llamadas directas a la API
+│   │   │   ├── repositories/    # Concrete implementation (Supabase)
+│   │   │   └── datasources/     # Direct API calls
 │   │   ├── domain/
-│   │   │   ├── models/          # Entidades del negocio (User, etc.)
-│   │   │   └── repositories/    # Interfaces (contratos abstractos)
+│   │   │   ├── models/          # Business entities (User, etc.)
+│   │   │   └── repositories/    # Interfaces (abstract contracts)
 │   │   └── presentation/
 │   │       ├── screens/         # LoginScreen, RegisterScreen
-│   │       ├── widgets/         # Widgets propios de auth
-│   │       └── providers/       # Riverpod providers de esta feature
+│   │       ├── widgets/         # Auth-specific widgets
+│   │       └── providers/       # Riverpod providers for this feature
 │   │
-│   ├── songs/                   # Biblioteca de canciones
+│   ├── songs/                   # Song library
 │   │   ├── data/
 │   │   ├── domain/
 │   │   │   └── models/          # Song, Difficulty, Fingering
@@ -34,7 +34,7 @@ lib/
 │   │       ├── widgets/         # SongCard, DifficultyBadge
 │   │       └── providers/
 │   │
-│   └── player/                  # Reproductor con ocarina animada
+│   └── player/                  # Player with animated ocarina
 │       ├── data/
 │       ├── domain/
 │       │   └── models/          # PlayerState, Note, FingeringMap
@@ -46,24 +46,24 @@ lib/
 └── main.dart
 ```
 
-## Las tres capas de cada feature
+## The Three Layers of Each Feature
 
-### `presentation/` — UI y estado local
-Todo lo que el usuario ve e interactúa. Los **providers de Riverpod** viven aquí y son el puente entre la UI y el dominio. Las pantallas y widgets solo consumen providers — nunca llaman repositorios directamente.
+### `presentation/` — UI and Local State
+Everything the user sees and interacts with. **Riverpod providers** live here and bridge the UI with the domain. Screens and widgets only consume providers — they never call repositories directly.
 
-### `domain/` — Reglas del negocio
-El corazón de la feature. Contiene los **modelos** (entidades puras en Dart, sin dependencia de Flutter ni de Supabase) y las **interfaces de repositorio** (contratos abstractos). Esta capa no sabe nada de la base de datos ni de la UI.
+### `domain/` — Business Rules
+The core of the feature. Contains **models** (pure Dart entities, no Flutter or Supabase dependency) and **repository interfaces** (abstract contracts). This layer knows nothing about the database or the UI.
 
-### `data/` — Acceso a datos
-Implementa los contratos definidos en `domain/`. Aquí viven las llamadas reales a Supabase, la lectura de archivos JSON de digitación, y el manejo de caché local.
+### `data/` — Data Access
+Implements the contracts defined in `domain/`. Contains actual Supabase calls, JSON fingering file reads, and local cache management.
 
-## Gestor de estado — Riverpod
+## State Management — Riverpod
 
-Ver [`core/STATE_MANAGEMENT.md`](./core/STATE_MANAGEMENT.md) para la decisión completa y ejemplos de uso.
+See [`core/STATE_MANAGEMENT.md`](./core/STATE_MANAGEMENT.md) for the full decision record and usage examples.
 
-## Reglas de oro
+## Golden Rules
 
-1. **La dependencia siempre fluye hacia adentro:** `presentation` puede conocer `domain`, pero `domain` nunca conoce `presentation` ni `data`.
-2. **Un provider por responsabilidad** — evitar providers que hacen demasiado.
-3. **Sin lógica de negocio en los widgets** — toda lógica va en el provider o en el dominio.
-4. **Modelos inmutables** — usar `freezed` para todas las entidades de dominio.
+1. **Dependencies always flow inward:** `presentation` may know `domain`, but `domain` never knows `presentation` or `data`.
+2. **One provider per responsibility** — avoid providers that do too much.
+3. **No business logic in widgets** — all logic goes in the provider or the domain layer.
+4. **Immutable models** — use `freezed` for all domain entities.

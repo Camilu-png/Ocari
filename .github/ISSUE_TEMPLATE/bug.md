@@ -1,24 +1,24 @@
 ---
-name: "Bug"
-about: "Reportar un error en la app"
+name: "Bug Report"
+about: "Report a bug in the app"
 labels: ["bug"]
 ---
 
-## Descripción del bug
-<!-- Qué ocurre vs qué debería ocurrir -->
+## Bug Description
+<!-- What happens vs what should happen -->
 
-## Pasos para reproducirlo
-1. 
-2. 
-3. 
+## Steps to Reproduce
+1.
+2.
+3.
 
-## Comportamiento esperado
-
-
-## Comportamiento actual
+## Expected Behavior
 
 
-## Entorno
-- Dispositivo: 
-- OS: 
-- Versión de la app:
+## Actual Behavior
+
+
+## Environment
+- Device:
+- OS:
+- App version:

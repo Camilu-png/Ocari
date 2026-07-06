@@ -1,6 +1,6 @@
 #!/bin/bash
-# Ejecuta este script desde la raíz de tu proyecto Ocari
-# cd /ruta/a/tu/proyecto/Ocari && bash fix_gitignore.sh
+# Run this script from the root of your Ocari project
+# cd /path/to/your/Ocari/project && bash fix_gitignore.sh
 
 cat > .gitignore << 'GITIGNORE'
 # Miscellaneous
@@ -78,17 +78,17 @@ windows/flutter/generated_plugins.cmake
 lib/generated_plugin_registrant.dart
 GITIGNORE
 
-echo "✓ .gitignore reescrito correctamente"
+echo "✓ .gitignore rewritten successfully"
 
-# Limpiar caché de git y re-agregar solo lo que corresponde
+# Clean git cache and re-add only what is needed
 git rm -r --cached .
 git add .
 
 echo ""
-echo "Archivos que quedarán en el commit:"
+echo "Files that will be in the commit:"
 git status --short
 
 echo ""
-echo "Listo. Revisá que no aparezcan archivos generados arriba."
-echo "Si todo se ve bien, ejecutá:"
-echo "  git commit -m 'chore(repo): corregir .gitignore y limpiar archivos generados'"
+echo "Done. Check that no generated files appear above."
+echo "If everything looks good, run:"
+echo "  git commit -m 'chore(repo): fix .gitignore and clean generated files'"
