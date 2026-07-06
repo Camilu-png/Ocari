@@ -6,6 +6,7 @@ import 'package:ocari/core/theme/note_colors.dart';
 import 'package:ocari/core/widgets/notes_track.dart';
 import 'package:ocari/core/widgets/ocarina_canvas.dart';
 import 'package:ocari/features/onboarding/presentation/providers/onboarding_provider.dart';
+import 'package:ocari/features/onboarding/presentation/services/note_player.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
 
 const List<SongNote> _demoNotes = [
@@ -71,8 +72,7 @@ const List<SongNote> _demoNotes = [
   ),
 ];
 
-final _demoTotalMs =
-    _demoNotes.last.timestampMs + _demoNotes.last.durationMs;
+final _demoTotalMs = _demoNotes.last.timestampMs + _demoNotes.last.durationMs;
 
 final _animDuration = Duration(milliseconds: _demoTotalMs * 2);
 
@@ -84,6 +84,7 @@ class OnboardingDialog extends ConsumerStatefulWidget {
 }
 
 class _OnboardingDialogState extends ConsumerState<OnboardingDialog> {
+  final NotePlayer _notePlayer = NotePlayer();
   late PageController _pageController;
   int _currentPage = 0;
 
@@ -95,6 +96,7 @@ class _OnboardingDialogState extends ConsumerState<OnboardingDialog> {
 
   @override
   void dispose() {
+    _notePlayer.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -138,13 +140,20 @@ class _OnboardingDialogState extends ConsumerState<OnboardingDialog> {
               onPageChanged: (page) => setState(() => _currentPage = page),
               children: [
                 _WelcomePage(onNext: _onNext),
-                _NotesTrackDemoPage(notes: _demoNotes, totalMs: _demoTotalMs),
+                _NotesTrackDemoPage(
+                  notes: _demoNotes,
+                  totalMs: _demoTotalMs,
+                  notePlayer: _notePlayer,
+                ),
                 _ColorPalettePage(),
-                _OcarinaDemoPage(notes: _demoNotes, totalMs: _demoTotalMs),
+                _OcarinaDemoPage(
+                  notes: _demoNotes,
+                  totalMs: _demoTotalMs,
+                  notePlayer: _notePlayer,
+                ),
                 _ReadyPage(onFinish: _onFinish),
               ],
             ),
-
             if (_currentPage < 4)
               Positioned(
                 top: 8,
@@ -157,7 +166,6 @@ class _OnboardingDialogState extends ConsumerState<OnboardingDialog> {
                   ),
                 ),
               ),
-
             Positioned(
               left: 0,
               right: 0,
@@ -215,9 +223,7 @@ class _BottomBar extends StatelessWidget {
             )
           else
             const SizedBox(width: 80),
-
           const Spacer(),
-
           Row(
             mainAxisSize: MainAxisSize.min,
             children: List.generate(totalPages, (i) {
@@ -234,9 +240,7 @@ class _BottomBar extends StatelessWidget {
               );
             }),
           ),
-
           const Spacer(),
-
           if (isLastPage)
             FilledButton(
               onPressed: onFinish,
@@ -297,10 +301,12 @@ class _WelcomePage extends StatelessWidget {
 class _NotesTrackDemoPage extends StatefulWidget {
   final List<SongNote> notes;
   final int totalMs;
+  final NotePlayer notePlayer;
 
   const _NotesTrackDemoPage({
     required this.notes,
     required this.totalMs,
+    required this.notePlayer,
   });
 
   @override
@@ -312,6 +318,7 @@ class _NotesTrackDemoPageState extends State<_NotesTrackDemoPage>
   late AnimationController _controller;
   late Animation<double> _positionMs;
   Duration _position = Duration.zero;
+  int _lastPlayedIndex = -1;
 
   @override
   void initState() {
@@ -328,19 +335,40 @@ class _NotesTrackDemoPageState extends State<_NotesTrackDemoPage>
       curve: Curves.linear,
     ));
 
-    _controller.addListener(() {
-      if (mounted) {
-        setState(() {
-          _position = Duration(milliseconds: _positionMs.value.round());
-        });
-      }
-    });
-
+    _controller.addListener(_onUpdate);
     _controller.forward();
+  }
+
+  void _onUpdate() {
+    final ms = _positionMs.value.round();
+    int activeIndex = -1;
+    for (int i = 0; i < widget.notes.length; i++) {
+      if (ms >= widget.notes[i].timestampMs &&
+          ms < widget.notes[i].timestampMs + widget.notes[i].durationMs) {
+        activeIndex = i;
+        break;
+      }
+    }
+    if (activeIndex != -1 && activeIndex != _lastPlayedIndex) {
+      _lastPlayedIndex = activeIndex;
+      widget.notePlayer.play(
+        widget.notes[activeIndex].note,
+        duration: Duration(milliseconds: widget.notes[activeIndex].durationMs),
+      );
+    } else if (activeIndex == -1 && _lastPlayedIndex != -1) {
+      _lastPlayedIndex = -1;
+      widget.notePlayer.stop();
+    }
+    if (mounted) {
+      setState(() {
+        _position = Duration(milliseconds: ms);
+      });
+    }
   }
 
   @override
   void dispose() {
+    widget.notePlayer.stop();
     _controller.dispose();
     super.dispose();
   }
@@ -476,10 +504,12 @@ class _ColorPalettePage extends StatelessWidget {
 class _OcarinaDemoPage extends StatefulWidget {
   final List<SongNote> notes;
   final int totalMs;
+  final NotePlayer notePlayer;
 
   const _OcarinaDemoPage({
     required this.notes,
     required this.totalMs,
+    required this.notePlayer,
   });
 
   @override
@@ -491,6 +521,7 @@ class _OcarinaDemoPageState extends State<_OcarinaDemoPage>
   late AnimationController _controller;
   late Animation<double> _positionMs;
   SongNote? _activeNote;
+  int _lastPlayedIndex = -1;
 
   @override
   void initState() {
@@ -507,18 +538,31 @@ class _OcarinaDemoPageState extends State<_OcarinaDemoPage>
       curve: Curves.linear,
     ));
 
-    _controller.addListener(_updateNote);
+    _controller.addListener(_onUpdate);
     _controller.forward();
   }
 
-  void _updateNote() {
+  void _onUpdate() {
     final ms = _positionMs.value.round();
     SongNote? found;
-    for (final note in widget.notes) {
-      if (ms >= note.timestampMs && ms < note.timestampMs + note.durationMs) {
-        found = note;
+    int foundIndex = -1;
+    for (int i = 0; i < widget.notes.length; i++) {
+      if (ms >= widget.notes[i].timestampMs &&
+          ms < widget.notes[i].timestampMs + widget.notes[i].durationMs) {
+        found = widget.notes[i];
+        foundIndex = i;
         break;
       }
+    }
+    if (foundIndex != -1 && foundIndex != _lastPlayedIndex) {
+      _lastPlayedIndex = foundIndex;
+      widget.notePlayer.play(
+        found!.note,
+        duration: Duration(milliseconds: found.durationMs),
+      );
+    } else if (foundIndex == -1 && _lastPlayedIndex != -1) {
+      _lastPlayedIndex = -1;
+      widget.notePlayer.stop();
     }
     if (found != _activeNote && mounted) {
       setState(() => _activeNote = found);
@@ -527,6 +571,7 @@ class _OcarinaDemoPageState extends State<_OcarinaDemoPage>
 
   @override
   void dispose() {
+    widget.notePlayer.stop();
     _controller.dispose();
     super.dispose();
   }
