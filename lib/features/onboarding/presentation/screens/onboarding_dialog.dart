@@ -77,7 +77,9 @@ final _demoTotalMs = _demoNotes.last.timestampMs + _demoNotes.last.durationMs;
 final _animDuration = Duration(milliseconds: _demoTotalMs * 2);
 
 class OnboardingDialog extends ConsumerStatefulWidget {
-  const OnboardingDialog({super.key});
+  final VoidCallback? onComplete;
+
+  const OnboardingDialog({super.key, this.onComplete});
 
   @override
   ConsumerState<OnboardingDialog> createState() => _OnboardingDialogState();
@@ -102,8 +104,14 @@ class _OnboardingDialogState extends ConsumerState<OnboardingDialog> {
   }
 
   void _onSkip() {
-    ref.read(onboardingProvider.notifier).complete();
-    Navigator.of(context).pop();
+    ref.read(onboardingProvider.notifier).complete().then((_) {
+      if (!mounted) return;
+      if (widget.onComplete != null) {
+        widget.onComplete!();
+      } else {
+        Navigator.of(context).pop();
+      }
+    });
   }
 
   void _onNext() {
@@ -121,8 +129,14 @@ class _OnboardingDialogState extends ConsumerState<OnboardingDialog> {
   }
 
   void _onFinish() {
-    ref.read(onboardingProvider.notifier).complete();
-    Navigator.of(context).pop();
+    ref.read(onboardingProvider.notifier).complete().then((_) {
+      if (!mounted) return;
+      if (widget.onComplete != null) {
+        widget.onComplete!();
+      } else {
+        Navigator.of(context).pop();
+      }
+    });
   }
 
   @override
