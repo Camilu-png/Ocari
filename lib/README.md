@@ -63,7 +63,7 @@ Everything the user sees and interacts with. **Riverpod providers** live here an
 The core of the feature. Contains **models** (pure Dart entities, no Flutter or Supabase dependency) and **repository interfaces** (abstract contracts). This layer knows nothing about the database or the UI.
 
 ### `data/` — Data Access
-Implements the contracts defined in `domain/`. Contains actual Supabase calls, JSON fingering file reads, and local cache management.
+Implements the contracts defined in `domain/`. Contains current Supabase calls, JSON fingering file reads, and local cache management.
 
 ## State Management — Riverpod
 

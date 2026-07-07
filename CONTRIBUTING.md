@@ -1,28 +1,75 @@
 # Contributing to Ocari
 
-## Workflow
+Thank you for taking the time to contribute! Whether you are reporting a bug, suggesting a new feature, or submitting code — all contributions are welcome.
 
-1. Pick an issue from the board and move it to **In Progress**
-2. Create a branch from `develop`:
+---
 
-   ```bash
-   git checkout develop && git pull origin develop
-   git checkout -b feature/XX-short-name
-   ```
+## For Everyone — Reporting Bugs & Requesting Features
 
-3. Develop and commit following the commit convention
-4. Open a PR targeting `develop` — never directly to `main`
-5. CI must pass before merging
+You do not need to know how to code to help. Opening a well-written issue is one of the most valuable contributions you can make.
 
-## Commit Convention
+### Before Opening an Issue
 
-We use [Conventional Commits](https://www.conventionalcommits.org/). The format is:
+- **Search existing issues** — check if someone already reported the same bug or suggested the same feature.
+- For bugs: make sure you are running the latest version of the app.
+
+### Reporting a Bug
+
+Use the **Bug Report** template (it will appear automatically when you create a new issue). Include:
+
+- **What happened** vs **what should have happened** — be as specific as you can.
+- **Steps to reproduce** — list the exact actions that led to the bug. For example:
+  1. Open the app and go to the song list.
+  2. Tap on "Saria's Song".
+  3. The app crashes.
+- **Your device and OS** — e.g. iPhone 15, iOS 18.2 or Samsung Galaxy S24, Android 14.
+
+If you are not sure about something, just write what you know. Incomplete reports are still useful.
+
+### Requesting a Feature
+
+Use the **Feature Request** template. Describe:
+
+- **What you want to achieve** — what problem are you trying to solve?
+- **Why it would be useful** — how would it improve your experience with Ocari?
+- (Optional) Screenshots, sketches, or references to similar apps.
+
+### Tips for a Great Issue
+
+- Use a clear, descriptive title.
+- Add screenshots or screen recordings if possible — a image is worth a thousand words.
+- Be respectful and patient. Maintainers are volunteers or working on this in their free time.
+
+---
+
+## For Developers — Development Workflow
+
+This section is for people who want to contribute code.
+
+### Branching Strategy
+
+```
+main        ← production (merge only from develop via PR)
+develop     ← integration (base branch for features)
+feature/*   ← one branch per issue
+```
+
+### Creating a Feature Branch
+
+```bash
+git checkout develop && git pull origin develop
+git checkout -b feature/XX-short-name
+```
+
+Replace `XX` with the issue number and `short-name` with a brief description (e.g. `feature/23-login-email`).
+
+### Commit Convention
+
+We follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
 <type>(<scope>): <short description in lowercase and in english>
 ```
-
-### Allowed Types
 
 | Type       | When to use it                            |
 | ---------- | ----------------------------------------- |
@@ -34,34 +81,24 @@ We use [Conventional Commits](https://www.conventionalcommits.org/). The format 
 | `test`     | Add or fix tests                          |
 | `style`    | Formatting, spacing, no logic changes     |
 
-### Real Examples from This Project
+**Examples:**
 
-```bash
+```
 feat(player): add hole animation for D4 note
-feat(auth): implement email and password login
 fix(router): fix redirect when session expires
-chore(ci): add flutter analyze step to pipeline
 docs(readme): add installation instructions
-test(auth): add unit tests for AuthNotifier
-refactor(songs): extract SongCard to independent widget
 ```
 
-### Recommended Scopes
+**Recommended scopes:** `auth` · `player` · `songs` · `router` · `theme` · `ci` · `readme`
 
-`auth` · `player` · `songs` · `router` · `theme` · `ci` · `readme`
+### Opening a Pull Request
 
-## Branch Naming
+1. Push your branch and open a PR targeting **`develop`** (never directly to `main`).
+2. Fill out the PR template — it includes a checklist to help you.
+3. Make sure CI passes (GitHub will run the checks automatically).
+4. Request a review if possible.
 
-```
-feature/07-login-email
-feature/11-app-theme
-fix/router-redirect-bug
-chore/update-flutter-version
-```
-
-The number at the beginning corresponds to the GitHub issue number.
-
-## What NOT to Do
+### What NOT to Do
 
 - Do not commit directly to `main` or `develop`
 - Do not upload the `.env` file with credentials

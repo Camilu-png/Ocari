@@ -15,7 +15,7 @@ labels: ["bug"]
 ## Expected Behavior
 
 
-## Actual Behavior
+## Current Behavior
 
 
 ## Environment
