@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:ocari/core/services/preferences_service.dart';
 import 'package:ocari/core/theme/app_theme.dart';
 import 'package:ocari/core/theme/note_colors.dart';
 import 'package:ocari/core/widgets/notes_legend.dart';
@@ -11,6 +12,7 @@ import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/features/player/domain/models/player_state.dart';
 import 'package:ocari/features/player/presentation/providers/player_notifier.dart';
 import 'package:ocari/features/player/presentation/widgets/song_completed_sheet.dart';
+import 'package:ocari/features/player/presentation/widgets/song_tutorial_dialog.dart';
 import 'package:ocari/features/songs/data/repositories/supabase_song_repository.dart';
 import 'package:ocari/features/songs/domain/models/song.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
@@ -29,6 +31,7 @@ class PlayerScreen extends ConsumerStatefulWidget {
 
 class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   bool _initialized = false;
+  bool _tutorialShown = false;
   _LoadStage _loadStage = _LoadStage.loading;
   String? _errorMessage;
   List<SongNote> _parsedNotes = [];
@@ -92,6 +95,25 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     );
   }
 
+  Future<void> _showSongTutorialIfNeeded(Song song) async {
+    if (_tutorialShown) return;
+
+    try {
+      final service = await ref.read(preferencesServiceProvider.future);
+      final seen = await service.hasSeenTutorial(song.id);
+      if (!seen && mounted) {
+        _tutorialShown = true;
+        await showDialog(
+          context: context,
+          builder: (_) => SongTutorialDialog(
+            songTitle: song.title,
+            onAcknowledged: () => service.setTutorialSeen(song.id),
+          ),
+        );
+      }
+    } catch (_) {}
+  }
+
   void _initIfReady(Song song, PlayerNotifier notifier) {
     if (_initialized) return;
 
@@ -132,6 +154,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     _initialized = true;
     _loadStage = _LoadStage.ready;
     notifier.initialize(song, _parsedNotes);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showSongTutorialIfNeeded(song);
+    });
   }
 
   Widget _buildLoading(AppColors colors, String? songTitle) {
