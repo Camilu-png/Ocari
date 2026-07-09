@@ -6,50 +6,68 @@ import 'package:go_router/go_router.dart';
 import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart';
 import 'package:ocari/features/auth/presentation/screens/login_screen.dart';
 import 'package:ocari/features/auth/presentation/screens/register_screen.dart';
+import 'package:ocari/features/onboarding/presentation/providers/onboarding_provider.dart';
+import 'package:ocari/features/onboarding/presentation/screens/onboarding_dialog.dart';
 import 'package:ocari/features/player/presentation/screens/player_screen.dart';
 import 'package:ocari/features/songs/presentation/screens/songs_screen.dart';
 import 'package:ocari/core/theme/debug_screen.dart';
 
 final _routerKey = GlobalKey<NavigatorState>();
 
-class _AuthRedirectNotifier extends ChangeNotifier {
+class _AppRedirectNotifier extends ChangeNotifier {
   final Ref _ref;
   bool _isAuthenticated = false;
+  bool _onboardingCompleted = false;
 
-  _AuthRedirectNotifier(this._ref) {
+  _AppRedirectNotifier(this._ref) {
     _ref.listen<AppAuthState>(authProvider, (previous, next) {
-      final wasAuthenticated = _isAuthenticated;
+      final prev = _isAuthenticated;
       _isAuthenticated = next.status == AuthStatus.authenticated;
-      if (wasAuthenticated != _isAuthenticated) {
-        notifyListeners();
-      }
+      if (prev != _isAuthenticated) notifyListeners();
+    });
+    _ref.listen<AsyncValue<bool>>(onboardingProvider, (previous, next) {
+      final prev = _onboardingCompleted;
+      _onboardingCompleted = next.asData?.value ?? false;
+      if (prev != _onboardingCompleted) notifyListeners();
     });
   }
 
   bool get isAuthenticated => _isAuthenticated;
+  bool get onboardingCompleted => _onboardingCompleted;
 }
 
-final _authRedirectNotifierProvider = Provider<_AuthRedirectNotifier>((ref) {
-  return _AuthRedirectNotifier(ref);
+final _redirectNotifierProvider = Provider<_AppRedirectNotifier>((ref) {
+  return _AppRedirectNotifier(ref);
 });
 
 final appRouter = Provider<GoRouter>((ref) {
-  final authNotifier = ref.watch(_authRedirectNotifierProvider);
+  final notifier = ref.watch(_redirectNotifierProvider);
   return GoRouter(
     navigatorKey: _routerKey,
     initialLocation: '/login',
-    refreshListenable: authNotifier,
+    refreshListenable: notifier,
     redirect: (context, state) {
-      final isAuth = authNotifier.isAuthenticated;
-      final isOnLogin = state.matchedLocation == '/login';
-      final isOnRegister = state.matchedLocation == '/register';
-      final isOnDebug = state.matchedLocation == '/debug';
+      final isAuth = notifier.isAuthenticated;
+      final onboardingDone = notifier.onboardingCompleted;
+      final location = state.matchedLocation;
+      final isOnLogin = location == '/login';
+      final isOnRegister = location == '/register';
+      final isOnDebug = location == '/debug';
+      final isOnOnboarding = location == '/onboarding';
 
       if (!isAuth && !isOnLogin && !isOnRegister && !isOnDebug) {
         return '/login';
       }
 
       if (isAuth && (isOnLogin || isOnRegister)) {
+        return '/songs';
+      }
+
+      if (isAuth && !onboardingDone && !isOnOnboarding) {
+        return '/onboarding';
+      }
+
+      if (isAuth && onboardingDone && isOnOnboarding) {
         return '/songs';
       }
 
@@ -72,6 +90,10 @@ final appRouter = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingDialog(),
       ),
       GoRoute(
         path: '/songs',
