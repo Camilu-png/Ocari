@@ -1,68 +1,72 @@
 # AGENT.md — Ocari
 
-Guía de contexto para agentes de IA trabajando en este repositorio.
+Context guide for AI agents working on this repository.
 
 ---
 
-## Qué es este proyecto
+## About This Project
 
-Ocari es una app móvil en Flutter para aprender a tocar la ocarina de 12 agujeros.
-Inspirada en Simply Piano: reproduce una canción mientras muestra en tiempo real
-qué agujeros presionar en una ilustración de la ocarina.
+Ocari is a Flutter mobile app for learning to play the 12-hole ocarina.
+Inspired by Simply Piano: it plays a song while showing in real time
+which holes to press on an illustrated ocarina.
 
 Stack: Flutter · Dart · Riverpod · go_router · Supabase · just_audio
 
 ---
 
-## Estructura del proyecto
+## Project Structure
 
 ```
 lib/
 ├── core/
 │   ├── theme/        # AppTheme, AppColors, AppTextStyles
-│   ├── router/       # go_router — rutas y redirects
-│   └── widgets/      # Componentes reutilizables (OcariButton, etc.)
+│   ├── services/     # AudioService and other services
+│   ├── router/       # go_router — routes and redirects
+│   └── widgets/      # Reusable components (OcariButton, etc.)
 ├── features/
-│   ├── auth/         # Login, registro, sesión (Supabase Auth)
-│   ├── songs/        # Lista de canciones y detalle
-│   └── player/       # Reproductor + ocarina animada (CustomPainter)
+│   ├── auth/         # Login, registration, session (Supabase Auth)
+│   ├── songs/        # Song list and detail
+│   ├── player/       # Player + animated ocarina (CustomPainter)
+│   └── progress/     # Per-song user progress
 └── main.dart
 ```
 
-Cada feature sigue tres capas: `data/` → `domain/` → `presentation/`.
-La dependencia siempre fluye hacia adentro. `presentation` conoce `domain`,
-pero `domain` nunca conoce `presentation` ni `data`.
+> **Note:** The canonical, detailed folder structure with sub-layers is documented in [`lib/README.md`](lib/README.md). The diagram above is a simplified overview; refer to `lib/README.md` for the full architecture.
+
+Each feature follows three layers: `data/` → `domain/` → `presentation/`.
+Dependencies always flow inward. `presentation` knows `domain`,
+but `domain` never knows `presentation` or `data`.
 
 ---
 
-## Convenciones de código
+## Code Conventions
 
-### Nombrado
+### Naming
 
-- Archivos: `snake_case.dart`
-- Clases: `PascalCase`
-- Variables y funciones: `camelCase`
-- Providers de Riverpod: sufijo `Provider` o `Notifier` según el tipo
-- Pantallas: sufijo `Screen` — ej. `LoginScreen`, `SongsScreen`
-- Widgets reutilizables: prefijo `Ocari` — ej. `OcariButton`, `OcariTextField`
+- Files: `snake_case.dart`
+- Classes: `PascalCase`
+- Variables and functions: `camelCase`
+- Riverpod providers: suffix `Provider` or `Notifier` depending on type
+- Screens: suffix `Screen` — e.g. `LoginScreen`, `SongsScreen`
+- Reusable widgets: prefix `Ocari` — e.g. `OcariButton`, `OcariTextField`
 
-### Gestión de estado
+### State Management
 
-Usamos Riverpod con generación de código (`@riverpod`).
+Use Riverpod with code generation (`@riverpod`).
 
-- Datos remotos (auth, canciones): `AsyncNotifier`
-- Estado sincrónico complejo (reproductor): `Notifier`
-- Streams (sincronización audio): `StreamProvider`
-- Repositorios y servicios: `Provider` simple
+- Remote data (auth, songs): `AsyncNotifier`
+- Complex synchronous state (player): `Notifier`
+- Streams (audio sync): `StreamProvider`
+- Repositories and services: simple `Provider`
 
-Nunca usar `setState` fuera de widgets verdaderamente locales.
-Nunca poner lógica de negocio dentro de un widget.
+Never use `setState` outside truly local widgets.
+Never put business logic inside a widget.
 
-### Modelos
+### Models
 
-Todos los modelos de dominio son inmutables con `freezed`.
-Siempre incluir `fromJson` / `toJson` con `json_serializable`.
-Después de modificar un modelo correr:
+All domain models are immutable with `freezed`.
+Always include `fromJson` / `toJson` with `json_serializable`.
+After modifying a model, run:
 
 ```bash
 dart run build_runner build --delete-conflicting-outputs
@@ -70,25 +74,25 @@ dart run build_runner build --delete-conflicting-outputs
 
 ### Imports
 
-Orden: dart → flutter → paquetes externos → imports internos.
-Usar imports relativos dentro de la misma feature.
-Usar imports absolutos (`package:ocari/...`) entre features.
+Order: dart → flutter → external packages → internal imports.
+Use relative imports within the same feature.
+Use absolute imports (`package:ocari/...`) between features.
 
 ---
 
-## Base de datos (Supabase)
+## Database (Supabase)
 
-Tres tablas principales:
+Three main tables:
 
-| Tabla                | Descripción                                                   |
-| -------------------- | ------------------------------------------------------------- |
-| `profiles`           | Extiende `auth.users`. Datos públicos del usuario.            |
-| `songs`              | Catálogo de canciones. Campo `notes_json` con array de notas. |
-| `user_song_progress` | Progreso por usuario/canción. Unique en (user_id, song_id).   |
+| Table                | Description                                                |
+| -------------------- | ---------------------------------------------------------- |
+| `profiles`           | Extends `auth.users`. Public user data.                    |
+| `songs`              | Song catalog. `notes_json` field stores note array.        |
+| `user_song_progress` | Per-user/song progress. Unique on (user_id, song_id).      |
 
-Row Level Security habilitado en todas las tablas.
-Nunca hacer queries directas a `auth.users` — usar `profiles`.
-Las credenciales van en variables de entorno, nunca hardcodeadas:
+Row Level Security enabled on all tables.
+Never query `auth.users` directly — use `profiles`.
+Credentials go in environment variables, never hardcoded:
 
 ```bash
 flutter run --dart-define-from-file=.env
@@ -96,86 +100,86 @@ flutter run --dart-define-from-file=.env
 
 ---
 
-## Rutas
+## Routes
 
-| Ruta              | Pantalla     | Auth requerida |
-| ----------------- | ------------ | -------------- |
-| `/login`          | LoginScreen  | No             |
-| `/songs`          | SongsScreen  | Sí             |
-| `/player/:songId` | PlayerScreen | Sí             |
+| Route              | Screen       | Auth Required |
+| ------------------ | ------------ | ------------- |
+| `/login`           | LoginScreen  | No            |
+| `/songs`           | SongsScreen  | Yes           |
+| `/player/:songId`  | PlayerScreen | Yes           |
 
-El redirect está en `core/router/app_router.dart`:
-sin sesión → `/login`, con sesión → `/songs`.
-
----
-
-## Ocarina — dominio específico
-
-La ocarina de 12 agujeros tiene esta distribución de agujeros:
-
-- 4 agujeros superiores (índice, medio, anular y meñique de la mano derecha, leídos de izquierda a derecha)
-- 4 agujeros inferiores (meñique, anular, medio y índice de la mano izquierda, leídos de izquierda a derecha)
-- 2 agujeros intermedios (medio izquierdo, anular derecho)
-- 2 sub-agujeros en la parte posterior (pulgares)
-
-La digitación de cada nota está en `assets/data/fingerings.json`.
-Formato: `{ "note": "D5", "top": [1,1,1,1], "bot": [1,1,1,1], "inter":[0,0], "sub": [1,1] }`
-donde `1 = presionado`, `0 = abierto`.
-
-El rango de la ocarina de 12 agujeros es A4 → F6 (18 notas en afinación en Si♭).
+Redirect logic is in `core/router/app_router.dart`:
+no session → `/login`, with session → `/songs`.
 
 ---
 
-## La pantalla más compleja: PlayerScreen
+## Ocarina — Domain-Specific Knowledge
 
-El reproductor tiene 4 elementos que deben estar sincronizados:
+The 12-hole ocarina has the following hole layout:
 
-1. **Audio** — `just_audio` reproduce el archivo de la canción
-2. **Carril de notas** — lista horizontal que avanza con el tiempo
-3. **Ocarina animada** — `CustomPainter` pinta los agujeros según la nota activa
-4. **Posición** — `audioPositionProvider` (StreamProvider) hace de puente entre audio y UI
+- 4 top holes (index, middle, ring, pinky of the right hand, read left to right)
+- 4 bottom holes (pinky, ring, middle, index of the left hand, read left to right)
+- 2 middle holes (left middle, right ring)
+- 2 sub-holes at the back (thumbs)
 
-La sincronización es: `posición en ms` → buscar nota activa en `notes_json` →
-actualizar `PlayerNotifier` → rebuild de `OcarinaCanvas` y `NotesTrack`.
+The fingering for each note is in `assets/data/fingerings.json`.
+Format: `{ "note": "D5", "top": [1,1,1,1], "bot": [1,1,1,1], "inter":[0,0], "sub": [1,1] }`
+where `1 = pressed`, `0 = open`.
+
+The 12-hole ocarina range is A4 → F6 (18 notes in Bb tuning).
 
 ---
 
-## Comandos frecuentes
+## The Most Complex Screen: PlayerScreen
+
+The player has 4 elements that must stay synchronized:
+
+1. **Audio** — `just_audio` plays the song file
+2. **Notes track** — horizontal list that advances with time
+3. **Animated ocarina** — `CustomPainter` draws holes according to the active note
+4. **Position** — `audioPositionProvider` (StreamProvider) bridges audio and UI
+
+Synchronization flow: `position in ms` → find active note in `notes_json` →
+update `PlayerNotifier` → rebuild `OcarinaCanvas` and `NotesTrack`.
+
+---
+
+## Common Commands
 
 ```bash
-# Correr la app
+# Run the app
 flutter run --dart-define-from-file=.env
 
-# Análisis estático (debe pasar sin warnings antes de cada PR)
+# Static analysis (must pass without warnings before every PR)
 flutter analyze
 
 # Tests
 flutter test
 
-# Generar código (freezed + riverpod)
+# Generate code (freezed + riverpod)
 dart run build_runner build --delete-conflicting-outputs
 
-# Limpiar build
+# Clean build
 flutter clean && flutter pub get
 ```
 
 ---
 
-## Flujo de trabajo
+## Workflow
 
-- Rama base para features: `develop` (nunca directamente a `main`)
-- Nombre de ramas: `feature/XX-descripcion` donde XX es el número de issue
+- Base branch for features: `develop` (never directly to `main`)
+- Branch naming: `feature/XX-description` where XX is the issue number
 - Commits: Conventional Commits — `feat(player): ...`, `fix(auth): ...`
-- PR siempre hacia `develop`, el CI debe pasar antes de hacer merge
-- Al terminar una issue: moverla a "Hecho" en el Project de GitHub
+- PR always targets `develop`, CI must pass before merging
+- When finishing an issue: move it to "Done" on the GitHub Project
 
 ---
 
-## Lo que NO hacer
+## What NOT to Do
 
-- No hardcodear colores fuera de `core/theme/app_theme.dart`
-- No hacer queries a Supabase directamente desde un widget
-- No subir el archivo `.env` al repo
-- No hacer commit directo a `main` ni a `develop`
-- No mezclar más de una issue en un mismo PR
-- No usar `setState` para estado que afecte a más de un widget
+- Do not hardcode colors outside `core/theme/app_theme.dart`
+- Do not query Supabase directly from a widget
+- Do not commit the `.env` file to the repository
+- Do not commit directly to `main` or `develop`
+- Do not mix more than one issue in a single PR
+- Do not use `setState` for state affecting more than one widget

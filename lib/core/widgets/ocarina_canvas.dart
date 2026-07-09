@@ -182,7 +182,7 @@ class _OcarinaPainter extends CustomPainter {
     _drawHoles(canvas, scaleX, scaleY, pressedColor, holeBorderColor);
   }
 
-  // Path extraído directamente del SVG — coordenadas escaladas al canvas
+  // Path extracted directly from SVG — coordinates scaled to canvas
   Path _buildBodyPath(double sx, double sy) {
     return Path()
       ..moveTo(113.461 * sx, 170.69 * sy)
@@ -279,8 +279,8 @@ class _OcarinaPainter extends CustomPainter {
     final rBig = 10.0 * sx;
     final rSmall = 7.5 * sx;
 
-    // Coordenadas cx/cy exactas de cada círculo en el SVG
-    // top: mano izquierda (índice→meñique de derecha a izquierda en pantalla)
+    // Exact cx/cy coordinates of each circle in the SVG
+    // top: left hand (index→pinky, right to left on screen)
     final topPositions = <Offset>[
       Offset(41.5001 * sx, 72.4998 * sy), // top-0
       Offset(72.5001 * sx, 69.4998 * sy), // top-1
@@ -288,7 +288,7 @@ class _OcarinaPainter extends CustomPainter {
       Offset(119.5 * sx, 29.4998 * sy), // top-3
     ];
 
-    // bot: mano derecha (índice→meñique)
+    // bot: right hand (index→pinky)
     final botPositions = <Offset>[
       Offset(153.5 * sx, 84.4998 * sy), // bot-0
       Offset(185.5 * sx, 57.4998 * sy), // bot-1
@@ -371,7 +371,7 @@ class _OcarinaPainter extends CustomPainter {
         ..style = PaintingStyle.fill,
     );
 
-    // Relleno según si está presionado
+    // Fill based on whether hole is pressed
     if (fillAmount > 0) {
       canvas.drawCircle(
         center,

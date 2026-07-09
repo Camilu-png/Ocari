@@ -1,25 +1,25 @@
-# Gestión de estado — Riverpod
+# State Management — Riverpod
 
-## ¿Por qué Riverpod y no otras opciones?
+## Why Riverpod Over Other Options?
 
-| Criterio | Riverpod | BLoC | Provider | GetX |
-|---|---|---|---|---|
-| Curva de aprendizaje | Media | Alta | Baja | Baja |
-| Testabilidad | ★★★★★ | ★★★★★ | ★★★ | ★★ |
-| Seguridad en tiempo de compilación | ★★★★★ | ★★★★ | ★★★ | ★★ |
-| Boilerplate | Bajo | Alto | Medio | Muy bajo |
-| Escala bien con el proyecto | ✓ | ✓ | Limitado | No recomendado |
-| Adecuado para audio/animaciones en tiempo real | ✓ | ✓ | ✗ | ✗ |
+| Criteria | Riverpod | BLoC | Provider | GetX |
+|---|---|---|---|---|---|
+| Learning curve | Medium | High | Low | Low |
+| Testability | ★★★★★ | ★★★★★ | ★★★ | ★★ |
+| Compile-time safety | ★★★★★ | ★★★★ | ★★★ | ★★ |
+| Boilerplate | Low | High | Medium | Very low |
+| Scales well with the project | ✓ | ✓ | Limited | Not recommended |
+| Suitable for real-time audio/animations | ✓ | ✓ | ✗ | ✗ |
 
-**Riverpod gana** para Ocari porque:
-- El reproductor necesita estado reactivo en tiempo real (nota activa → UI → audio), que Riverpod maneja con `StreamProvider` sin boilerplate extra.
-- Es completamente testeable sin contexto de Flutter — crítico para testear la lógica del player.
-- `AsyncNotifier` simplifica el manejo de estados de carga en auth y canciones.
-- Detección de errores en tiempo de compilación, no en runtime.
+**Riverpod wins** for Ocari because:
+- The player needs real-time reactive state (active note → UI → audio), which Riverpod handles with `StreamProvider` without extra boilerplate.
+- It is fully testable without Flutter context — critical for testing player logic.
+- `AsyncNotifier` simplifies loading state management in auth and songs.
+- Compile-time error detection, not runtime.
 
-## Patrones que usamos en Ocari
+## Patterns Used in Ocari
 
-### 1. `AsyncNotifier` — para datos remotos (auth, canciones)
+### 1. `AsyncNotifier` — for remote data (auth, songs)
 
 ```dart
 // features/auth/presentation/providers/auth_provider.dart
@@ -44,7 +44,7 @@ class AuthNotifier extends _$AuthNotifier {
 }
 ```
 
-### 2. `Notifier` — para estado sincrónico complejo (reproductor)
+### 2. `Notifier` — for complex synchronous state (player)
 
 ```dart
 // features/player/presentation/providers/player_provider.dart
@@ -62,7 +62,7 @@ class PlayerNotifier extends _$PlayerNotifier {
 }
 ```
 
-### 3. `StreamProvider` — para sincronización audio → nota
+### 3. `StreamProvider` — for audio → note synchronization
 
 ```dart
 // features/player/presentation/providers/audio_sync_provider.dart
@@ -73,7 +73,7 @@ Stream<int> audioPosition(AudioPositionRef ref) {
 }
 ```
 
-### 4. `Provider` simple — para repositorios y servicios
+### 4. Simple `Provider` — for repositories and services
 
 ```dart
 // features/auth/data/repositories/auth_repository_provider.dart
@@ -83,15 +83,15 @@ AuthRepository authRepository(AuthRepositoryRef ref) {
 }
 ```
 
-## Convención de nombres
+## Naming Convention
 
-| Tipo | Sufijo | Ejemplo |
+| Type | Suffix | Example |
 |---|---|---|
-| Notifier con estado complejo | `Notifier` | `PlayerNotifier` |
-| Provider de repositorio | `Repository` | `authRepository` |
-| Provider de servicio | `Service` | `audioService` |
-| StreamProvider | descriptor en presente | `audioPosition` |
+| Notifier with complex state | `Notifier` | `PlayerNotifier` |
+| Repository provider | `Repository` | `authRepository` |
+| Service provider | `Service` | `audioService` |
+| StreamProvider | present tense descriptor | `audioPosition` |
 
-## Dónde viven los providers
+## Where Providers Live
 
-Cada provider vive en la capa `presentation/providers/` de su feature — **nunca** en `domain/` ni en `data/`. Los providers de infraestructura compartida (cliente Supabase, just_audio) van en `core/`.
+Each provider lives in the `presentation/providers/` layer of its feature — **never** in `domain/` or `data/`. Shared infrastructure providers (Supabase client, just_audio) go in `core/`.

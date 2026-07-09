@@ -1,22 +1,23 @@
-## Qué hace este PR
+## What does this PR do?
 
-<!-- Describe brevemente los cambios -->
+<!-- Briefly describe the changes -->
 
-## Issue relacionada
+## Related Issue
 
 Closes #
 
-## Tipo de cambio
+## Type of Change
 
-- [ ] feat — nueva funcionalidad
-- [ ] fix — corrección de bug
-- [ ] refactor — cambio de código sin nueva funcionalidad
-- [ ] chore — tareas de mantenimiento (deps, CI, etc.)
-- [ ] docs — documentación
+- [ ] feat — new feature
+- [ ] fix — bug fix
+- [ ] refactor — code change without new functionality
+- [ ] chore — maintenance tasks (deps, CI, etc.)
+- [ ] docs — documentation
 
 ## Checklist
 
-- [ ] El código compila sin errores (`flutter build`)
-- [ ] No hay warnings en `flutter analyze`
-- [ ] Los tests pasan (`flutter test`)
-- [ ] Probé en simulador/dispositivo físico
+- [ ] PR targets the `develop` branch (not `main`)
+- [ ] Code compiles without errors (`flutter build`)
+- [ ] No warnings in `flutter analyze`
+- [ ] All tests pass (`flutter test`)
+- [ ] Tested on simulator / physical device

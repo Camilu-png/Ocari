@@ -1,23 +1,23 @@
 ---
-name: "Nueva funcionalidad"
-about: "Agregar una feature nueva al proyecto"
+name: "Feature Request"
+about: "Add a new feature to the project"
 labels: ["feature"]
 ---
 
-## Descripción
+## Description
 
-<!-- Qué hace esta feature y por qué es necesaria -->
+<!-- What this feature does and why it is needed -->
 
-## Tareas
-
-- [ ]
-- [ ]
-
-## Criterios de aceptación
+## Tasks
 
 - [ ]
 - [ ]
 
-## Notas adicionales
+## Acceptance Criteria
 
-<!-- Capturas, links de referencia, decisiones de diseño -->
+- [ ]
+- [ ]
+
+## Additional Notes
+
+<!-- Screenshots, reference links, design decisions -->
