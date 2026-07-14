@@ -12,7 +12,7 @@ import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/features/player/domain/models/player_state.dart';
 import 'package:ocari/features/player/presentation/providers/player_notifier.dart';
 import 'package:ocari/features/player/presentation/widgets/song_completed_sheet.dart';
-import 'package:ocari/features/player/presentation/widgets/song_tutorial_dialog.dart';
+import 'package:ocari/features/player/presentation/widgets/tutorial_overlay.dart';
 import 'package:ocari/features/songs/data/repositories/supabase_song_repository.dart';
 import 'package:ocari/features/songs/domain/models/song.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
@@ -36,6 +36,11 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   String? _errorMessage;
   List<SongNote> _parsedNotes = [];
   PlayerNotifier? _notifier;
+
+  final _trackKey = GlobalKey();
+  final _ocarinaKey = GlobalKey();
+  final _legendKey = GlobalKey();
+  final _speedChipKey = GlobalKey();
 
   @override
   void dispose() {
@@ -103,12 +108,49 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       final seen = await service.hasSeenTutorial(song.id);
       if (!seen && mounted) {
         _tutorialShown = true;
-        await showDialog(
-          context: context,
-          builder: (_) => SongTutorialDialog(
-            songTitle: song.title,
-            onAcknowledged: () => service.setTutorialSeen(song.id),
-          ),
+        TutorialOverlay.show(
+          context,
+          steps: [
+            TutorialStep(
+              targetKey: _trackKey,
+              text:
+                  'Aquí verás las notas bajar. Cada color es una nota distinta.',
+            ),
+            TutorialStep(
+              targetKey: _trackKey,
+              text:
+                  'Cuando un bloque llegue aquí, presiona ese hoyo.',
+              spotlightHeightFraction: 0.15,
+            ),
+            TutorialStep(
+              targetKey: _ocarinaKey,
+              text:
+                  'Los hoyos se pintan del color de la nota. ¡Presiona los coloreados!',
+            ),
+            TutorialStep(
+              targetKey: _legendKey,
+              text: 'Consulta aquí qué nota es cada color.',
+            ),
+            TutorialStep(
+              targetKey: _speedChipKey,
+              text:
+                  'Si va muy rápida, baja la velocidad con este botón.',
+            ),
+            const TutorialStep(
+              text:
+                  '¡Empecemos despacio! La canción arrancará en ×0.5',
+            ),
+          ],
+          onCompleted: () async {
+            await service.setTutorialSeen(song.id);
+            _notifier?.setSpeed(0.5);
+            _notifier?.pause();
+          },
+          onSkipped: () async {
+            await service.setTutorialSeen(song.id);
+            _notifier?.setSpeed(0.5);
+            _notifier?.pause();
+          },
         );
       }
     } catch (_) {}
@@ -213,24 +255,33 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     return OcariScaffold(
       title: state.song.title,
       actions: [
-        _SpeedChip(
-          speed: state.speed,
-          onSpeedChanged: (speed) {
-            _notifier?.setSpeed(speed);
-          },
+        KeyedSubtree(
+          key: _speedChipKey,
+          child: _SpeedChip(
+            speed: state.speed,
+            onSpeedChanged: (speed) {
+              _notifier?.setSpeed(speed);
+            },
+          ),
         ),
       ],
       body: Column(
         children: [
-          NotesLegend(notes: state.notes),
+          KeyedSubtree(
+            key: _legendKey,
+            child: NotesLegend(notes: state.notes),
+          ),
           const SizedBox(height: 4),
           Expanded(
             flex: 3,
             child: ClipRect(
               child: RepaintBoundary(
-                child: NotesTrack(
-                  notes: state.notes,
-                  position: state.position,
+                child: KeyedSubtree(
+                  key: _trackKey,
+                  child: NotesTrack(
+                    notes: state.notes,
+                    position: state.position,
+                  ),
                 ),
               ),
             ),
@@ -253,9 +304,12 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
             child: Center(
               child: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.5,
-                child: OcarinaCanvas(
-                  note: currentNote,
-                  showNoteLabel: false,
+                child: KeyedSubtree(
+                  key: _ocarinaKey,
+                  child: OcarinaCanvas(
+                    note: currentNote,
+                    showNoteLabel: false,
+                  ),
                 ),
               ),
             ),
@@ -275,11 +329,14 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     return OcariScaffold(
       title: state.song.title,
       actions: [
-        _SpeedChip(
-          speed: state.speed,
-          onSpeedChanged: (speed) {
-            _notifier?.setSpeed(speed);
-          },
+        KeyedSubtree(
+          key: _speedChipKey,
+          child: _SpeedChip(
+            speed: state.speed,
+            onSpeedChanged: (speed) {
+              _notifier?.setSpeed(speed);
+            },
+          ),
         ),
       ],
       body: LayoutBuilder(
@@ -292,7 +349,10 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
           return SingleChildScrollView(
             child: Column(
               children: [
-                NotesLegend(notes: state.notes),
+                KeyedSubtree(
+                  key: _legendKey,
+                  child: NotesLegend(notes: state.notes),
+                ),
                 SizedBox(
                   height: trackAreaHeight,
                   child: Row(
@@ -300,9 +360,12 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                       Expanded(
                         child: ClipRect(
                           child: RepaintBoundary(
-                            child: NotesTrack(
-                              notes: state.notes,
-                              position: state.position,
+                            child: KeyedSubtree(
+                              key: _trackKey,
+                              child: NotesTrack(
+                                notes: state.notes,
+                                position: state.position,
+                              ),
                             ),
                           ),
                         ),
@@ -315,9 +378,12 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                           const aspectRatio = ocarinaSvgW / ocarinaSvgH;
                           return SizedBox(
                             width: canvasHeight * aspectRatio,
-                            child: OcarinaCanvas(
-                              note: currentNote,
-                              showNoteLabel: false,
+                            child: KeyedSubtree(
+                              key: _ocarinaKey,
+                              child: OcarinaCanvas(
+                                note: currentNote,
+                                showNoteLabel: false,
+                              ),
                             ),
                           );
                         },
