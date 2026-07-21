@@ -41,6 +41,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   final _ocarinaKey = GlobalKey();
   final _legendKey = GlobalKey();
   final _speedChipKey = GlobalKey();
+  Song? _currentSong;
 
   @override
   void dispose() {
@@ -108,52 +109,63 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       final seen = await service.hasSeenTutorial(song.id);
       if (!seen && mounted) {
         _tutorialShown = true;
-        TutorialOverlay.show(
-          context,
-          steps: [
-            TutorialStep(
-              targetKey: _trackKey,
-              text:
-                  'Aquí verás las notas bajar. Cada color es una nota distinta.',
-            ),
-            TutorialStep(
-              targetKey: _trackKey,
-              text:
-                  'Cuando un bloque llegue aquí, presiona ese hoyo.',
-              spotlightHeightFraction: 0.15,
-            ),
-            TutorialStep(
-              targetKey: _ocarinaKey,
-              text:
-                  'Los hoyos se pintan del color de la nota. ¡Presiona los coloreados!',
-            ),
-            TutorialStep(
-              targetKey: _legendKey,
-              text: 'Consulta aquí qué nota es cada color.',
-            ),
-            TutorialStep(
-              targetKey: _speedChipKey,
-              text:
-                  'Si va muy rápida, baja la velocidad con este botón.',
-            ),
-            const TutorialStep(
-              text:
-                  '¡Empecemos despacio! La canción arrancará en ×0.5',
-            ),
-          ],
-          onCompleted: () async {
-            await service.setTutorialSeen(song.id);
-            _notifier?.setSpeed(0.5);
-            _notifier?.pause();
-          },
-          onSkipped: () async {
-            await service.setTutorialSeen(song.id);
-            _notifier?.setSpeed(0.5);
-            _notifier?.pause();
-          },
-        );
+        _showTutorial(song, markSeen: true);
       }
     } catch (_) {}
+  }
+
+  void _showTutorial(Song song, {bool markSeen = false}) async {
+    PreferencesService? service;
+    if (markSeen) {
+      try {
+        service = await ref.read(preferencesServiceProvider.future);
+      } catch (_) {}
+    }
+    if (!mounted) return;
+    TutorialOverlay.show(
+      context,
+      steps: [
+        TutorialStep(
+          targetKey: _trackKey,
+          text:
+              'Aquí verás las notas bajar. Cada color es una nota distinta.',
+        ),
+        TutorialStep(
+          targetKey: _trackKey,
+          text:
+              'Cuando un bloque llegue aquí, presiona ese hoyo.',
+          spotlightHeightFraction: 0.15,
+        ),
+        TutorialStep(
+          targetKey: _ocarinaKey,
+          text:
+              'Los hoyos se pintan del color de la nota. ¡Presiona los coloreados!',
+        ),
+        TutorialStep(
+          targetKey: _legendKey,
+          text: 'Consulta aquí qué nota es cada color.',
+        ),
+        TutorialStep(
+          targetKey: _speedChipKey,
+          text:
+              'Si va muy rápida, baja la velocidad con este botón.',
+        ),
+        const TutorialStep(
+          text:
+              '¡Empecemos despacio! La canción arrancará en ×0.5',
+        ),
+      ],
+      onCompleted: () async {
+        if (markSeen) await service?.setTutorialSeen(song.id);
+        _notifier?.setSpeed(0.5);
+        _notifier?.pause();
+      },
+      onSkipped: () async {
+        if (markSeen) await service?.setTutorialSeen(song.id);
+        _notifier?.setSpeed(0.5);
+        _notifier?.pause();
+      },
+    );
   }
 
   void _initIfReady(Song song, PlayerNotifier notifier) {
@@ -195,6 +207,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
     _initialized = true;
     _loadStage = _LoadStage.ready;
+    _currentSong = song;
     notifier.initialize(song, _parsedNotes);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showSongTutorialIfNeeded(song);
@@ -255,6 +268,14 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     return OcariScaffold(
       title: state.song.title,
       actions: [
+        IconButton(
+          icon: const Icon(Icons.help_outline_rounded, size: 22),
+          color: colors.onBgLight,
+          tooltip: 'Ver tutorial',
+          onPressed: _currentSong != null
+              ? () => _showTutorial(_currentSong!)
+              : null,
+        ),
         KeyedSubtree(
           key: _speedChipKey,
           child: _SpeedChip(
@@ -329,6 +350,14 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     return OcariScaffold(
       title: state.song.title,
       actions: [
+        IconButton(
+          icon: const Icon(Icons.help_outline_rounded, size: 22),
+          color: colors.onBgLight,
+          tooltip: 'Ver tutorial',
+          onPressed: _currentSong != null
+              ? () => _showTutorial(_currentSong!)
+              : null,
+        ),
         KeyedSubtree(
           key: _speedChipKey,
           child: _SpeedChip(
