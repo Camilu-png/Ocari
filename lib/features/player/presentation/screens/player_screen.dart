@@ -122,39 +122,39 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       } catch (_) {}
     }
     if (!mounted) return;
-    TutorialOverlay.show(
-      context,
-      steps: [
-        TutorialStep(
-          targetKey: _trackKey,
-          text:
-              'Aquí verás las notas bajar. Cada color es una nota distinta.',
-        ),
-        TutorialStep(
-          targetKey: _trackKey,
-          text:
-              'Cuando un bloque llegue aquí, presiona ese hoyo.',
-          spotlightHeightFraction: 0.15,
-        ),
-        TutorialStep(
-          targetKey: _ocarinaKey,
-          text:
-              'Los hoyos se pintan del color de la nota. ¡Presiona los coloreados!',
-        ),
-        TutorialStep(
-          targetKey: _legendKey,
-          text: 'Consulta aquí qué nota es cada color.',
-        ),
-        TutorialStep(
-          targetKey: _speedChipKey,
-          text:
-              'Si va muy rápida, baja la velocidad con este botón.',
-        ),
-        const TutorialStep(
-          text:
-              '¡Empecemos despacio! La canción arrancará en ×0.5',
-        ),
-      ],
+        TutorialOverlay.show(
+          context,
+          steps: [
+            TutorialStep(
+              targetKey: _trackKey,
+              text:
+                  'Here you\'ll see the notes fall. Each color is a different note.',
+            ),
+            TutorialStep(
+              targetKey: _trackKey,
+              text:
+                  'When a block reaches here, tap that hole.',
+              spotlightHeightFraction: 0.15,
+            ),
+            TutorialStep(
+              targetKey: _ocarinaKey,
+              text:
+                  'The holes light up in the note\'s color. Press the lit ones!',
+            ),
+            TutorialStep(
+              targetKey: _legendKey,
+              text: 'Check here to see which color is each note.',
+            ),
+            TutorialStep(
+              targetKey: _speedChipKey,
+              text:
+                  'Too fast? Slow down with this button.',
+            ),
+            const TutorialStep(
+              text:
+                  'Let\'s start slow! The song will begin at ×0.5',
+            ),
+          ],
       onCompleted: () async {
         if (markSeen) await service?.setTutorialSeen(song.id);
         _notifier?.setSpeed(0.5);
@@ -271,7 +271,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
         IconButton(
           icon: const Icon(Icons.help_outline_rounded, size: 22),
           color: colors.onBgLight,
-          tooltip: 'Ver tutorial',
+          tooltip: 'View tutorial',
           onPressed: _currentSong != null
               ? () => _showTutorial(_currentSong!)
               : null,
@@ -353,7 +353,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
         IconButton(
           icon: const Icon(Icons.help_outline_rounded, size: 22),
           color: colors.onBgLight,
-          tooltip: 'Ver tutorial',
+          tooltip: 'View tutorial',
           onPressed: _currentSong != null
               ? () => _showTutorial(_currentSong!)
               : null,

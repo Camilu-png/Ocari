@@ -20,7 +20,6 @@ class TutorialStep {
 
 class TutorialOverlay {
   static OverlayEntry? _entry;
-  static _TutorialOverlayState? _state;
 
   static void show(
     BuildContext context, {
@@ -41,14 +40,9 @@ class TutorialOverlay {
     overlay.insert(_entry!);
   }
 
-  static void nextStep() {
-    _state?.nextStep();
-  }
-
   static void dismiss() {
     _entry?.remove();
     _entry = null;
-    _state = null;
   }
 }
 
@@ -77,7 +71,6 @@ class _TutorialOverlayState extends State<_TutorialOverlayWidget>
   @override
   void initState() {
     super.initState();
-    TutorialOverlay._state = this;
     _fadeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 250),
@@ -91,7 +84,6 @@ class _TutorialOverlayState extends State<_TutorialOverlayWidget>
 
   @override
   void dispose() {
-    TutorialOverlay._state = null;
     _fadeController.dispose();
     super.dispose();
   }
@@ -118,6 +110,7 @@ class _TutorialOverlayState extends State<_TutorialOverlayWidget>
 
   void _complete() {
     _fadeController.reverse().then((_) {
+      if (!mounted) return;
       TutorialOverlay.dismiss();
       widget.onCompleted();
     });
@@ -125,6 +118,7 @@ class _TutorialOverlayState extends State<_TutorialOverlayWidget>
 
   void _skip() {
     _fadeController.reverse().then((_) {
+      if (!mounted) return;
       TutorialOverlay.dismiss();
       widget.onSkipped();
     });
@@ -194,7 +188,7 @@ class _TutorialOverlayState extends State<_TutorialOverlayWidget>
                 child: TextButton(
                   onPressed: _skip,
                   child: Text(
-                    'Saltar tutorial',
+                    'Skip tutorial',
                     style: TextStyle(
                       color: colors.onAccent,
                       fontSize: 14,
@@ -281,6 +275,12 @@ class _TutorialOverlayState extends State<_TutorialOverlayWidget>
       }
     }
 
+    tooltipLeft = tooltipLeft.clamp(16.0, screenSize.width - tooltipWidth - 16.0);
+    tooltipTop = tooltipTop.clamp(
+      MediaQuery.of(context).padding.top + 50,
+      screenSize.height - 200,
+    );
+
     return Positioned(
       left: tooltipLeft,
       top: tooltipTop,
@@ -342,7 +342,7 @@ class _TutorialOverlayState extends State<_TutorialOverlayWidget>
                     ),
                   ),
                   child: Text(
-                    isLastStep ? '¡Empezar!' : 'Siguiente',
+                    isLastStep ? 'Let\'s go!' : 'Next',
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
