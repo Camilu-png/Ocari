@@ -2,17 +2,21 @@ import 'package:flutter/material.dart';
 
 import 'package:ocari/core/theme/app_theme.dart';
 
+enum TooltipPosition { below, bottom, left, right, center }
+
 class TutorialStep {
   final GlobalKey? targetKey;
   final String text;
   final double? spotlightHeightFraction;
   final double? spotlightOffsetY;
+  final TooltipPosition tooltipPosition;
 
   const TutorialStep({
     this.targetKey,
     required this.text,
     this.spotlightHeightFraction,
     this.spotlightOffsetY,
+    this.tooltipPosition = TooltipPosition.below,
   });
 
   bool get isCentered => targetKey == null;
@@ -170,15 +174,24 @@ class _TutorialOverlayState extends State<_TutorialOverlayWidget>
                   ),
                 ),
               ),
-            FadeTransition(
-              opacity: _fadeAnimation,
-              child: _buildTooltip(
-                context,
-                step,
-                spotlightRect,
-                screenSize,
-                colors,
-              ),
+            Builder(
+              builder: (context) {
+                final tooltipRect = _getTooltipRect(
+                  context,
+                  step,
+                  spotlightRect,
+                  screenSize,
+                );
+                return Positioned(
+                  left: tooltipRect.left,
+                  top: tooltipRect.top,
+                  width: tooltipRect.width,
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: _buildTooltipContent(step, screenSize, colors),
+                  ),
+                );
+              },
             ),
             Positioned(
               top: MediaQuery.of(context).padding.top + 8,
@@ -244,114 +257,146 @@ class _TutorialOverlayState extends State<_TutorialOverlayWidget>
     return rect;
   }
 
-  Widget _buildTooltip(
+  Rect _getTooltipRect(
     BuildContext context,
     TutorialStep step,
     Rect? spotlightRect,
     Size screenSize,
-    AppColors colors,
   ) {
-    final isLastStep = _currentStep == widget.steps.length - 1;
     final tooltipWidth = (screenSize.width * 0.85).clamp(280.0, 400.0);
+    const tooltipHeight = 220.0;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final topPadding = MediaQuery.of(context).padding.top;
 
     double tooltipLeft;
     double tooltipTop;
 
     if (step.isCentered || spotlightRect == null) {
       tooltipLeft = (screenSize.width - tooltipWidth) / 2;
-      tooltipTop = screenSize.height * 0.35;
+      tooltipTop = (screenSize.height - tooltipHeight) / 2;
     } else {
-      tooltipLeft = (screenSize.width - tooltipWidth) / 2;
-      final spaceAbove = spotlightRect.top - 80;
-      final spaceBelow =
-          screenSize.height - spotlightRect.bottom - 80;
+      switch (step.tooltipPosition) {
+        case TooltipPosition.below:
+          tooltipLeft = (screenSize.width - tooltipWidth) / 2;
+          final belowTop = spotlightRect.bottom + 20;
+          final belowFits =
+              belowTop + tooltipHeight < screenSize.height - bottomPadding - 16;
+          final aboveTop = spotlightRect.top - tooltipHeight - 20;
+          final aboveFits = aboveTop > topPadding + 8;
+          if (belowFits) {
+            tooltipTop = belowTop;
+          } else if (aboveFits) {
+            tooltipTop = aboveTop;
+          } else {
+            tooltipTop = spotlightRect.bottom + 12;
+          }
+          break;
 
-      if (spaceAbove > 100) {
-        tooltipTop = spotlightRect.top - 140;
-      } else if (spaceBelow > 100) {
-        tooltipTop = spotlightRect.bottom + 20;
-      } else {
-        tooltipTop = spotlightRect.bottom + 16;
+        case TooltipPosition.bottom:
+          tooltipLeft = (screenSize.width - tooltipWidth) / 2;
+          tooltipTop = screenSize.height - tooltipHeight - bottomPadding - 16;
+          break;
+
+        case TooltipPosition.left:
+          tooltipLeft = spotlightRect.left - tooltipWidth - 16;
+          tooltipTop = spotlightRect.center.dy - tooltipHeight / 2;
+          break;
+
+        case TooltipPosition.right:
+          tooltipLeft = spotlightRect.right + 16;
+          tooltipTop = spotlightRect.center.dy - tooltipHeight / 2;
+          break;
+
+        case TooltipPosition.center:
+          tooltipLeft = (screenSize.width - tooltipWidth) / 2;
+          tooltipTop = (screenSize.height - tooltipHeight) / 2;
+          break;
       }
     }
 
-    tooltipLeft = tooltipLeft.clamp(16.0, screenSize.width - tooltipWidth - 16.0);
+    tooltipLeft =
+        tooltipLeft.clamp(16.0, screenSize.width - tooltipWidth - 16.0);
     tooltipTop = tooltipTop.clamp(
-      MediaQuery.of(context).padding.top + 50,
-      screenSize.height - 200,
+      topPadding + 8,
+      screenSize.height - tooltipHeight - bottomPadding,
     );
 
-    return Positioned(
-      left: tooltipLeft,
-      top: tooltipTop,
-      width: tooltipWidth,
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (!step.isCentered)
-                Container(
-                  width: 36,
-                  height: 36,
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: colors.accent.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    _iconForStep(_currentStep),
-                    color: colors.accent,
-                    size: 20,
-                  ),
+    return Rect.fromLTWH(tooltipLeft, tooltipTop, tooltipWidth, tooltipHeight);
+  }
+
+  Widget _buildTooltipContent(
+    TutorialStep step,
+    Size screenSize,
+    AppColors colors,
+  ) {
+    final isLastStep = _currentStep == widget.steps.length - 1;
+
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (!step.isCentered)
+              Container(
+                width: 36,
+                height: 36,
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: colors.accent.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
                 ),
-              Text(
-                step.text,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: colors.onBgLight,
-                  height: 1.4,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: isLastStep ? _complete : nextStep,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: colors.accent,
-                    foregroundColor: colors.onAccent,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    isLastStep ? 'Let\'s go!' : 'Next',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                child: Icon(
+                  _iconForStep(_currentStep),
+                  color: colors.accent,
+                  size: 20,
                 ),
               ),
-            ],
-          ),
+            Text(
+              step.text,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: colors.onBgLight,
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: isLastStep ? _complete : nextStep,
+                style: FilledButton.styleFrom(
+                  backgroundColor: colors.accent,
+                  foregroundColor: colors.onAccent,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  isLastStep ? 'Let\'s go!' : 'Next',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

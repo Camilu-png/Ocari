@@ -122,39 +122,47 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       } catch (_) {}
     }
     if (!mounted) return;
-        TutorialOverlay.show(
-          context,
-          steps: [
-            TutorialStep(
-              targetKey: _trackKey,
-              text:
-                  'Here you\'ll see the notes fall. Each color is a different note.',
-            ),
-            TutorialStep(
-              targetKey: _trackKey,
-              text:
-                  'When a block reaches here, tap that hole.',
-              spotlightHeightFraction: 0.15,
-            ),
-            TutorialStep(
-              targetKey: _ocarinaKey,
-              text:
-                  'The holes light up in the note\'s color. Press the lit ones!',
-            ),
-            TutorialStep(
-              targetKey: _legendKey,
-              text: 'Check here to see which color is each note.',
-            ),
-            TutorialStep(
-              targetKey: _speedChipKey,
-              text:
-                  'Too fast? Slow down with this button.',
-            ),
-            const TutorialStep(
-              text:
-                  'Let\'s start slow! The song will begin at ×0.5',
-            ),
-          ],
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    TutorialOverlay.show(
+      context,
+      steps: [
+        TutorialStep(
+          targetKey: _trackKey,
+          text:
+              'Here you\'ll see the notes fall. Each color is a different note.',
+          tooltipPosition: isLandscape
+              ? TooltipPosition.right
+              : TooltipPosition.bottom,
+        ),
+        TutorialStep(
+          targetKey: _trackKey,
+          text: 'When a block reaches here, tap that hole.',
+          spotlightHeightFraction: 0.15,
+        ),
+        TutorialStep(
+          targetKey: _ocarinaKey,
+          text:
+              'The holes light up in the note\'s color. Press the lit ones!',
+          tooltipPosition: isLandscape
+              ? TooltipPosition.left
+              : TooltipPosition.below,
+        ),
+        TutorialStep(
+          targetKey: _legendKey,
+          text: 'Check here to see which color is each note.',
+          tooltipPosition: TooltipPosition.bottom,
+        ),
+        TutorialStep(
+          targetKey: _speedChipKey,
+          text: 'Too fast? Slow down with this button.',
+          tooltipPosition: TooltipPosition.bottom,
+        ),
+        const TutorialStep(
+          text: 'Let\'s start slow! The song will begin at ×0.5',
+          tooltipPosition: TooltipPosition.center,
+        ),
+      ],
       onCompleted: () async {
         if (markSeen) await service?.setTutorialSeen(song.id);
         _notifier?.setSpeed(0.5);
