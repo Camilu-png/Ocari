@@ -21,6 +21,14 @@ class PreferencesService {
   Future<void> setTutorialSeen(String songId) async {
     await _prefs.setBool('tutorial_seen_$songId', true);
   }
+
+  Future<bool> useFlats() async {
+    return _prefs.getBool('use_flats') ?? false;
+  }
+
+  Future<void> setUseFlats(bool value) async {
+    await _prefs.setBool('use_flats', value);
+  }
 }
 
 final preferencesServiceProvider =
