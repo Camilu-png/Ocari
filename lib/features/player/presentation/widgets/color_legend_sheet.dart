@@ -142,14 +142,15 @@ class _ColorLegendSheetState extends ConsumerState<ColorLegendSheet> {
               Expanded(
                 child: _loading
                     ? const Center(child: CircularProgressIndicator())
-                    : OrientationBuilder(
-                        builder: (context, orientation) {
-                          if (orientation == Orientation.landscape) {
+                    : LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isWide = constraints.maxWidth > 520;
+                          if (isWide) {
                             return _buildLandscapeContent(
-                                colors, scrollController);
+                                colors, scrollController, constraints);
                           }
                           return _buildPortraitContent(
-                              colors, scrollController);
+                              colors, scrollController, constraints);
                         },
                       ),
               ),
@@ -205,10 +206,13 @@ class _ColorLegendSheetState extends ConsumerState<ColorLegendSheet> {
     );
   }
 
-  Widget _buildSwatchGrid(AppColors colors) {
+  Widget _buildSwatchGrid(AppColors colors, BoxConstraints constraints) {
+    final swatchSize = constraints.maxWidth < 360 ? 36.0 : 40.0;
+    final spacing = constraints.maxWidth < 360 ? 8.0 : 10.0;
+
     return Wrap(
-      spacing: 10,
-      runSpacing: 10,
+      spacing: spacing,
+      runSpacing: spacing,
       alignment: WrapAlignment.center,
       children: _notes.map((note) {
         return _Swatch(
@@ -217,13 +221,14 @@ class _ColorLegendSheetState extends ConsumerState<ColorLegendSheet> {
           useFlats: _useFlats,
           borderColor: colors.textSecondary.withValues(alpha: 0.2),
           textColor: colors.textSecondary,
+          size: swatchSize,
           onTap: () => _onNoteTap(note),
         );
       }).toList(),
     );
   }
 
-  Widget _buildOcarinaPreview(AppColors colors) {
+  Widget _buildOcarinaPreview(AppColors colors, {double? width}) {
     if (_selectedNote == null) {
       return Center(
         child: Text(
@@ -247,7 +252,7 @@ class _ColorLegendSheetState extends ConsumerState<ColorLegendSheet> {
         ),
         const SizedBox(height: 12),
         SizedBox(
-          width: 200,
+          width: width ?? 200,
           child: OcarinaCanvas(note: _selectedNote!.fingering),
         ),
       ],
@@ -255,13 +260,13 @@ class _ColorLegendSheetState extends ConsumerState<ColorLegendSheet> {
   }
 
   Widget _buildPortraitContent(
-      AppColors colors, ScrollController scrollController) {
+      AppColors colors, ScrollController scrollController, BoxConstraints constraints) {
     return SingleChildScrollView(
       controller: scrollController,
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
-          _buildSwatchGrid(colors),
+          _buildSwatchGrid(colors, constraints),
           const SizedBox(height: 24),
           _buildOcarinaPreview(colors),
           const SizedBox(height: 24),
@@ -271,21 +276,23 @@ class _ColorLegendSheetState extends ConsumerState<ColorLegendSheet> {
   }
 
   Widget _buildLandscapeContent(
-      AppColors colors, ScrollController scrollController) {
+      AppColors colors, ScrollController scrollController, BoxConstraints constraints) {
+    final ocarinaWidth = (constraints.maxWidth * 0.35).clamp(180.0, 280.0);
+
     return Row(
       children: [
         Expanded(
           child: SingleChildScrollView(
             controller: scrollController,
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: _buildSwatchGrid(colors),
+            child: _buildSwatchGrid(colors, constraints),
           ),
         ),
         const SizedBox(width: 16),
         Container(
-          width: 240,
+          width: ocarinaWidth,
           padding: const EdgeInsets.only(right: 24, top: 16, bottom: 16),
-          child: _buildOcarinaPreview(colors),
+          child: _buildOcarinaPreview(colors, width: ocarinaWidth - 48),
         ),
       ],
     );
@@ -333,6 +340,7 @@ class _Swatch extends StatefulWidget {
   final bool useFlats;
   final Color borderColor;
   final Color textColor;
+  final double size;
   final VoidCallback onTap;
 
   const _Swatch({
@@ -341,6 +349,7 @@ class _Swatch extends StatefulWidget {
     required this.useFlats,
     required this.borderColor,
     required this.textColor,
+    required this.size,
     required this.onTap,
   });
 
@@ -395,11 +404,11 @@ class _SwatchState extends State<_Swatch>
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: widget.size,
+              height: widget.size,
               decoration: BoxDecoration(
                 color: widget.note.color,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(widget.size * 0.25),
                 border: Border.all(
                   color: widget.isSelected
                       ? widget.note.color
@@ -412,7 +421,7 @@ class _SwatchState extends State<_Swatch>
             Text(
               widget.note.name,
               style: TextStyle(
-                fontSize: 10,
+                fontSize: widget.size < 40 ? 9 : 10,
                 fontWeight: FontWeight.w600,
                 color: widget.textColor,
               ),
@@ -420,7 +429,7 @@ class _SwatchState extends State<_Swatch>
             Text(
               solfegeName,
               style: TextStyle(
-                fontSize: 8,
+                fontSize: widget.size < 40 ? 7 : 8,
                 color: widget.textColor.withValues(alpha: 0.6),
               ),
             ),

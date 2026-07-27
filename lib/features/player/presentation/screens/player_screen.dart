@@ -178,6 +178,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   }
 
   void _showColorLegend() {
+    _notifier?.pause();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
