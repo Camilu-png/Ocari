@@ -8,6 +8,7 @@ import 'package:ocari/core/services/preferences_service.dart';
 import 'package:ocari/core/theme/app_theme.dart';
 import 'package:ocari/core/theme/note_colors.dart';
 import 'package:ocari/core/widgets/ocarina_canvas.dart';
+import 'package:ocari/features/onboarding/presentation/services/note_player.dart';
 import 'package:ocari/features/player/domain/models/legend_note.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
 
@@ -23,11 +24,18 @@ class _ColorLegendSheetState extends ConsumerState<ColorLegendSheet> {
   LegendNote? _selectedNote;
   bool _loading = true;
   bool _useFlats = false;
+  final NotePlayer _notePlayer = NotePlayer();
 
   @override
   void initState() {
     super.initState();
     _loadNotes();
+  }
+
+  @override
+  void dispose() {
+    _notePlayer.dispose();
+    super.dispose();
   }
 
   Future<void> _loadNotes() async {
@@ -77,6 +85,11 @@ class _ColorLegendSheetState extends ConsumerState<ColorLegendSheet> {
         });
       }
     }
+  }
+
+  void _onNoteTap(LegendNote note) {
+    setState(() => _selectedNote = note);
+    _notePlayer.play(note.name);
   }
 
   @override
@@ -129,7 +142,16 @@ class _ColorLegendSheetState extends ConsumerState<ColorLegendSheet> {
               Expanded(
                 child: _loading
                     ? const Center(child: CircularProgressIndicator())
-                    : _buildContent(colors, scrollController),
+                    : OrientationBuilder(
+                        builder: (context, orientation) {
+                          if (orientation == Orientation.landscape) {
+                            return _buildLandscapeContent(
+                                colors, scrollController);
+                          }
+                          return _buildPortraitContent(
+                              colors, scrollController);
+                        },
+                      ),
               ),
             ],
           ),
@@ -183,45 +205,89 @@ class _ColorLegendSheetState extends ConsumerState<ColorLegendSheet> {
     );
   }
 
-  Widget _buildContent(AppColors colors, ScrollController scrollController) {
+  Widget _buildSwatchGrid(AppColors colors) {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      alignment: WrapAlignment.center,
+      children: _notes.map((note) {
+        return _Swatch(
+          note: note,
+          isSelected: _selectedNote?.name == note.name,
+          useFlats: _useFlats,
+          borderColor: colors.textSecondary.withValues(alpha: 0.2),
+          textColor: colors.textSecondary,
+          onTap: () => _onNoteTap(note),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildOcarinaPreview(AppColors colors) {
+    if (_selectedNote == null) {
+      return Center(
+        child: Text(
+          'Select a note',
+          style: context.textTheme.bodyMedium?.copyWith(
+            color: colors.textSecondary,
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '${_selectedNote!.name}  ·  ${_solfege(_selectedNote!.name, useFlats: _useFlats)}',
+          style: context.textTheme.titleMedium?.copyWith(
+            color: _selectedNote!.color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: 200,
+          child: OcarinaCanvas(note: _selectedNote!.fingering),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPortraitContent(
+      AppColors colors, ScrollController scrollController) {
     return SingleChildScrollView(
       controller: scrollController,
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            alignment: WrapAlignment.center,
-            children: _notes.map((note) {
-              return _Swatch(
-                note: note,
-                isSelected: _selectedNote?.name == note.name,
-                useFlats: _useFlats,
-                borderColor: colors.textSecondary.withValues(alpha: 0.2),
-                textColor: colors.textSecondary,
-                onTap: () => setState(() => _selectedNote = note),
-              );
-            }).toList(),
-          ),
+          _buildSwatchGrid(colors),
           const SizedBox(height: 24),
-          if (_selectedNote != null) ...[
-            Text(
-              '${_selectedNote!.name}  ·  ${_solfege(_selectedNote!.name, useFlats: _useFlats)}',
-              style: context.textTheme.titleMedium?.copyWith(
-                color: _selectedNote!.color,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: 200,
-              child: OcarinaCanvas(note: _selectedNote!.fingering),
-            ),
-          ],
+          _buildOcarinaPreview(colors),
           const SizedBox(height: 24),
         ],
       ),
+    );
+  }
+
+  Widget _buildLandscapeContent(
+      AppColors colors, ScrollController scrollController) {
+    return Row(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            controller: scrollController,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: _buildSwatchGrid(colors),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Container(
+          width: 240,
+          padding: const EdgeInsets.only(right: 24, top: 16, bottom: 16),
+          child: _buildOcarinaPreview(colors),
+        ),
+      ],
     );
   }
 
