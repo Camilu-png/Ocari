@@ -11,6 +11,7 @@ import 'package:ocari/core/widgets/ocarina_canvas.dart';
 import 'package:ocari/core/widgets/ocari_scaffold.dart';
 import 'package:ocari/features/player/domain/models/player_state.dart';
 import 'package:ocari/features/player/presentation/providers/player_notifier.dart';
+import 'package:ocari/features/player/presentation/widgets/color_legend_sheet.dart';
 import 'package:ocari/features/player/presentation/widgets/song_completed_sheet.dart';
 import 'package:ocari/features/player/presentation/widgets/tutorial_overlay.dart';
 import 'package:ocari/features/songs/data/repositories/supabase_song_repository.dart';
@@ -176,6 +177,15 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     );
   }
 
+  void _showColorLegend() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const ColorLegendSheet(),
+    );
+  }
+
   void _initIfReady(Song song, PlayerNotifier notifier) {
     if (_initialized) return;
 
@@ -277,6 +287,12 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       title: state.song.title,
       actions: [
         IconButton(
+          icon: const Icon(Icons.info_outline_rounded, size: 22),
+          color: colors.onBgLight,
+          tooltip: 'Color legend',
+          onPressed: _showColorLegend,
+        ),
+        IconButton(
           icon: const Icon(Icons.help_outline_rounded, size: 22),
           color: colors.onBgLight,
           tooltip: 'View tutorial',
@@ -358,6 +374,12 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     return OcariScaffold(
       title: state.song.title,
       actions: [
+        IconButton(
+          icon: const Icon(Icons.info_outline_rounded, size: 22),
+          color: colors.onBgLight,
+          tooltip: 'Color legend',
+          onPressed: _showColorLegend,
+        ),
         IconButton(
           icon: const Icon(Icons.help_outline_rounded, size: 22),
           color: colors.onBgLight,
