@@ -340,6 +340,7 @@ class _NotesTrackDemoPageState extends State<_NotesTrackDemoPage>
     _controller = AnimationController(
       vsync: this,
       duration: _animDuration,
+      animationBehavior: AnimationBehavior.preserve,
     );
     _positionMs = Tween<double>(
       begin: -2000,
@@ -352,6 +353,9 @@ class _NotesTrackDemoPageState extends State<_NotesTrackDemoPage>
     _controller.addListener(_onUpdate);
     _controller.forward();
   }
+
+  double get _realTimeFactor =>
+      _animDuration.inMilliseconds / (widget.totalMs + 4000);
 
   void _onUpdate() {
     final ms = _positionMs.value.round();
@@ -367,7 +371,10 @@ class _NotesTrackDemoPageState extends State<_NotesTrackDemoPage>
       _lastPlayedIndex = activeIndex;
       widget.notePlayer.play(
         widget.notes[activeIndex].note,
-        duration: Duration(milliseconds: widget.notes[activeIndex].durationMs),
+        duration: Duration(
+          milliseconds:
+              (widget.notes[activeIndex].durationMs * _realTimeFactor).round(),
+        ),
       );
     } else if (activeIndex == -1 && _lastPlayedIndex != -1) {
       _lastPlayedIndex = -1;
@@ -634,6 +641,7 @@ class _OcarinaDemoPageState extends State<_OcarinaDemoPage>
     _controller = AnimationController(
       vsync: this,
       duration: _animDuration,
+      animationBehavior: AnimationBehavior.preserve,
     );
     _positionMs = Tween<double>(
       begin: -2000,
@@ -659,6 +667,9 @@ class _OcarinaDemoPageState extends State<_OcarinaDemoPage>
     }
   }
 
+  double get _realTimeFactor =>
+      _animDuration.inMilliseconds / (widget.totalMs + 4000);
+
   void _onUpdate() {
     final ms = _positionMs.value.round();
     SongNote? found;
@@ -675,7 +686,9 @@ class _OcarinaDemoPageState extends State<_OcarinaDemoPage>
       _lastPlayedIndex = foundIndex;
       widget.notePlayer.play(
         found!.note,
-        duration: Duration(milliseconds: found.durationMs),
+        duration: Duration(
+          milliseconds: (found.durationMs * _realTimeFactor).round(),
+        ),
       );
     } else if (foundIndex == -1 && _lastPlayedIndex != -1) {
       _lastPlayedIndex = -1;

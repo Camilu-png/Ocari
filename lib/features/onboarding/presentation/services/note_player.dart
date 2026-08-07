@@ -42,7 +42,9 @@ class NotePlayer {
 
   final Map<String, AudioPlayer> _preloaded = {};
   final AudioPlayer _fallbackPlayer = AudioPlayer();
+  AudioPlayer? _activePlayer;
   Timer? _stopTimer;
+  int _generation = 0;
 
   NotePlayer() {
     for (final note in _preloadNotes) {
@@ -55,34 +57,39 @@ class NotePlayer {
   }
 
   Future<void> play(String noteName, {Duration? duration}) async {
+    final generation = ++_generation;
     _stopTimer?.cancel();
-
-    for (final p in _preloaded.values) {
-      await p.stop();
-    }
-    await _fallbackPlayer.stop();
-
-    final player = _preloaded[noteName];
-    if (player != null) {
-      try {
-        await player.seek(Duration.zero);
-        await player.play();
-        if (duration != null) {
-          _stopTimer = Timer(duration, () => player.stop());
-        }
-      } catch (e) {
-        debugPrint('NotePlayer: failed to play preloaded $noteName: $e');
-      }
-      return;
-    }
 
     final asset = _noteToAsset[noteName];
     if (asset == null) return;
+
+    final player = _preloaded[noteName] ?? _fallbackPlayer;
+    final previous = _activePlayer;
+    _activePlayer = player;
+    if (previous != null && previous != player) {
+      unawaited(previous.stop().catchError((Object e) {
+        debugPrint('NotePlayer: failed to stop previous note: $e');
+      }));
+    }
+
     try {
-      await _fallbackPlayer.setAsset(asset);
-      await _fallbackPlayer.play();
+      if (player == _fallbackPlayer) {
+        await player.setAsset(asset);
+      }
+      await player.seek(Duration.zero);
+      if (generation != _generation) return;
+      unawaited(player.play().catchError((Object e) {
+        debugPrint('NotePlayer: failed to start $noteName: $e');
+      }));
       if (duration != null) {
-        _stopTimer = Timer(duration, () => _fallbackPlayer.stop());
+        _stopTimer = Timer(duration, () {
+          if (generation == _generation && _activePlayer == player) {
+            _activePlayer = null;
+            unawaited(player.stop().catchError((Object e) {
+              debugPrint('NotePlayer: failed to stop $noteName: $e');
+            }));
+          }
+        });
       }
     } catch (e) {
       debugPrint('NotePlayer: failed to play $noteName: $e');
@@ -90,24 +97,30 @@ class NotePlayer {
   }
 
   Future<void> stop() async {
+    _generation++;
     _stopTimer?.cancel();
-    for (final player in _preloaded.values) {
-      await player.stop();
-    }
-    await _fallbackPlayer.stop();
-  }
-
-  Future<void> stopNote(String noteName) async {
-    final player = _preloaded[noteName];
-    if (player != null) {
-      await player.stop();
+    final active = _activePlayer;
+    _activePlayer = null;
+    if (active != null) {
+      await active.stop();
     } else {
       await _fallbackPlayer.stop();
     }
   }
 
+  Future<void> stopNote(String noteName) async {
+    _generation++;
+    _stopTimer?.cancel();
+    final player = _preloaded[noteName] ?? _fallbackPlayer;
+    if (_activePlayer == player) {
+      _activePlayer = null;
+    }
+    await player.stop();
+  }
+
   Future<void> dispose() async {
     _stopTimer?.cancel();
+    _generation++;
     for (final player in _preloaded.values) {
       await player.dispose();
     }
