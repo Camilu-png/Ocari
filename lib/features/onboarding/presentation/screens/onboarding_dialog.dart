@@ -175,7 +175,7 @@ class _OnboardingDialogState extends ConsumerState<OnboardingDialog> {
                 child: TextButton(
                   onPressed: _onSkip,
                   child: Text(
-                    'Saltar',
+                    'Skip',
                     style: TextStyle(color: colors.textSecondary),
                   ),
                 ),
@@ -233,7 +233,7 @@ class _BottomBar extends StatelessWidget {
             TextButton.icon(
               onPressed: onBack,
               icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
-              label: const Text('Atrás'),
+              label: const Text('Back'),
             )
           else
             const SizedBox(width: 80),
@@ -258,12 +258,12 @@ class _BottomBar extends StatelessWidget {
           if (isLastPage)
             FilledButton(
               onPressed: onFinish,
-              child: const Text('Ir al catálogo'),
+              child: const Text('Go to catalog'),
             )
           else
             FilledButton(
               onPressed: onNext,
-              child: const Text('Siguiente'),
+              child: const Text('Next'),
             ),
         ],
       ),
@@ -288,7 +288,7 @@ class _WelcomePage extends StatelessWidget {
           Icon(Icons.music_note_rounded, size: 80, color: colors.accent),
           const SizedBox(height: 24),
           Text(
-            'Aprende a tocar\nla ocarina con Ocari',
+            'Learn to play\nthe ocarina with Ocari',
             textAlign: TextAlign.center,
             style: context.textTheme.headlineMedium?.copyWith(
               color: colors.onBgLight,
@@ -297,8 +297,8 @@ class _WelcomePage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Te guiaremos a través de los conceptos básicos para que puedas '
-            'empezar a tocar tus canciones favoritas.',
+            "We'll walk you through the basics so you can "
+            'start playing your favorite songs.',
             textAlign: TextAlign.center,
             style: context.textTheme.bodyLarge?.copyWith(
               color: colors.textSecondary,
@@ -406,14 +406,14 @@ class _NotesTrackDemoPageState extends State<_NotesTrackDemoPage>
           Icon(Icons.swap_vert_rounded, size: 36, color: colors.accent),
           const SizedBox(height: 16),
           Text(
-            'El carril de notas',
+            'The notes track',
             style: context.textTheme.headlineSmall?.copyWith(
               color: colors.onBgLight,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Las notas caen por el carril. Toca cuando pasen por la línea.',
+            'Notes fall down the track. Tap when they cross the line.',
             textAlign: TextAlign.center,
             style: context.textTheme.bodyMedium?.copyWith(
               color: colors.textSecondary,
@@ -473,15 +473,15 @@ class _ColorPalettePage extends StatelessWidget {
           Icon(Icons.palette_rounded, size: 36, color: colors.accent),
           const SizedBox(height: 16),
           Text(
-            'Los colores de las notas',
+            'Note colors',
             style: context.textTheme.headlineSmall?.copyWith(
               color: colors.onBgLight,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Cada nota musical tiene su propio color. Así podrás '
-            'identificarlas rápidamente mientras tocas.',
+            'Each note has its own color. This way, '
+            'yoy can quickly identify them while you play.',
             textAlign: TextAlign.center,
             style: context.textTheme.bodyMedium?.copyWith(
               color: colors.textSecondary,
@@ -721,15 +721,15 @@ class _OcarinaDemoPageState extends State<_OcarinaDemoPage>
           Icon(Icons.touch_app_rounded, size: 36, color: colors.accent),
           const SizedBox(height: 16),
           Text(
-            'La ocarina',
+            'The ocarina',
             style: context.textTheme.headlineSmall?.copyWith(
               color: colors.onBgLight,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Los hoyos se iluminan del color de la nota activa. '
-            'Solo tapa los hoyos que se enciendan.',
+            'The holes light up in the color of the currently active note. '
+            'Just cover the holes that light up.',
             textAlign: TextAlign.center,
             style: context.textTheme.bodyMedium?.copyWith(
               color: colors.textSecondary,
@@ -744,7 +744,7 @@ class _OcarinaDemoPageState extends State<_OcarinaDemoPage>
           if (_loopMode) ...[
             const SizedBox(height: 16),
             Text(
-              'Ahora te toca a ti practicar',
+              "Now it's your turn to practice",
               textAlign: TextAlign.center,
               style: context.textTheme.bodyMedium?.copyWith(
                 color: colors.accent,
@@ -781,7 +781,7 @@ class _ReadyPage extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            '¡Listo para tocar!',
+            'Ready to play!',
             textAlign: TextAlign.center,
             style: context.textTheme.headlineMedium?.copyWith(
               color: colors.onBgLight,
@@ -790,8 +790,8 @@ class _ReadyPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Ahora puedes explorar el catálogo de canciones '
-            'y empezar a practicar.',
+            'Now you can browse the song catalog '
+            'and star practicing.',
             textAlign: TextAlign.center,
             style: context.textTheme.bodyLarge?.copyWith(
               color: colors.textSecondary,
