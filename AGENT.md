@@ -10,7 +10,7 @@ Ocari es una app móvil en Flutter para aprender a tocar la ocarina de 12 agujer
 Inspirada en Simply Piano: reproduce una canción mientras muestra en tiempo real
 qué agujeros presionar en una ilustración de la ocarina.
 
-Stack: Flutter · Dart · Riverpod · go_router · Supabase · just_audio
+Stack: Flutter · Dart · Riverpod · go_router · just_audio
 
 ---
 
@@ -23,7 +23,7 @@ lib/
 │   ├── router/       # go_router — rutas y redirects
 │   └── widgets/      # Componentes reutilizables (OcariButton, etc.)
 ├── features/
-│   ├── auth/         # Login, registro, sesión (Supabase Auth)
+│   ├── auth/         # Login, registro, sesión (Firebase Auth)
 │   ├── songs/        # Lista de canciones y detalle
 │   └── player/       # Reproductor + ocarina animada (CustomPainter)
 └── main.dart
@@ -76,18 +76,18 @@ Usar imports absolutos (`package:ocari/...`) entre features.
 
 ---
 
-## Base de datos (Supabase)
+## Base de datos (Firebase)
 
-Tres tablas principales:
+Colecciones principales en Firestore:
 
-| Tabla                | Descripción                                                   |
-| -------------------- | ------------------------------------------------------------- |
-| `profiles`           | Extiende `auth.users`. Datos públicos del usuario.            |
-| `songs`              | Catálogo de canciones. Campo `notes_json` con array de notas. |
-| `user_song_progress` | Progreso por usuario/canción. Unique en (user_id, song_id).   |
+| Colección             | Descripción                                                   |
+| --------------------- | ------------------------------------------------------------- |
+| `users`               | Datos públicos del usuario (auth uid como ID del documento).  |
+| `songs`               | Catálogo de canciones. Campo `notes_json` con array de notas. |
+| `user_song_progress`  | Progreso por usuario/canción.                                   |
 
-Row Level Security habilitado en todas las tablas.
-Nunca hacer queries directas a `auth.users` — usar `profiles`.
+`recordSongCompletion` es una Cloud Function (HTTPS callable) que registra el progreso transaccionalmente.
+Las reglas de acceso se definen en `firestore.rules`.
 Las credenciales van en variables de entorno, nunca hardcodeadas:
 
 ```bash
@@ -174,7 +174,7 @@ flutter clean && flutter pub get
 ## Lo que NO hacer
 
 - No hardcodear colores fuera de `core/theme/app_theme.dart`
-- No hacer queries a Supabase directamente desde un widget
+- No hacer queries a Firebase directamente desde un widget
 - No subir el archivo `.env` al repo
 - No hacer commit directo a `main` ni a `develop`
 - No mezclar más de una issue en un mismo PR

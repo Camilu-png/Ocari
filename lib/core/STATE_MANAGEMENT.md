@@ -79,7 +79,7 @@ Stream<int> audioPosition(AudioPositionRef ref) {
 // features/auth/data/repositories/auth_repository_provider.dart
 @riverpod
 AuthRepository authRepository(AuthRepositoryRef ref) {
-  return SupabaseAuthRepository(ref.watch(supabaseClientProvider));
+  return FirebaseAuthRepository(ref.watch(firebaseAuthProvider));
 }
 ```
 
@@ -94,4 +94,4 @@ AuthRepository authRepository(AuthRepositoryRef ref) {
 
 ## Dónde viven los providers
 
-Cada provider vive en la capa `presentation/providers/` de su feature — **nunca** en `domain/` ni en `data/`. Los providers de infraestructura compartida (cliente Supabase, just_audio) van en `core/`.
+Cada provider vive en la capa `presentation/providers/` de su feature — **nunca** en `domain/` ni en `data/`. Los providers de infraestructura compartida (cliente Firebase, just_audio) van en `core/`.

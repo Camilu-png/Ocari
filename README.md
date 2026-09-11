@@ -23,7 +23,7 @@ Ocari es una aplicación móvil diseñada para músicos y entusiastas que desean
 | Mobile         | Flutter (Dart) |
 | Estado         | Riverpod       |
 | Navegación     | go_router      |
-| Backend / Auth | Supabase       |
+| Backend / Auth | Firebase       |
 | Audio          | just_audio     |
 | CI/CD          | GitHub Actions |
 
@@ -57,7 +57,7 @@ lib/
 
 - Flutter SDK `>=3.18.0`
 - Dart `>=3.3.0 <4.0.0`
-- Una cuenta en [Supabase](https://supabase.com) (free tier)
+- Una cuenta en [Firebase](https://console.firebase.google.com) (free tier)
 
 ### Instalación
 
@@ -71,7 +71,7 @@ flutter pub get
 
 # 3. Configurar variables de entorno
 cp .env.example .env
-# Editar .env con tus credenciales de Supabase
+# Editar .env con tus credenciales
 
 # 4. Correr la app
 flutter run --dart-define-from-file=.env
@@ -82,8 +82,7 @@ flutter run --dart-define-from-file=.env
 Crea un archivo `.env` en la raíz del proyecto (nunca lo subas al repo):
 
 ```env
-SUPABASE_URL=https://tu-proyecto.supabase.co
-SUPABASE_ANON_KEY=tu-anon-key
+
 ```
 
 ---
@@ -125,7 +124,7 @@ git checkout -b feature/07-login-email
 
 - [x] Aplicación base Flutter inicializada
 - [x] Estructura de carpetas y arquitectura
-- [x] Configuración de Supabase
+- [x] Configuración de la base de datos
 - [x] Navegación base con go_router
 - [x] Auth (login, registro, Google Sign-In)
 - [x] Design system y componentes base

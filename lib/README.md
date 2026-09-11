@@ -15,7 +15,7 @@ lib/
 ├── features/                    # Cada feature es un módulo autónomo
 │   ├── auth/                    # Autenticación y sesión
 │   │   ├── data/
-│   │   │   ├── repositories/    # Implementación concreta (Supabase)
+│   │   │   ├── repositories/    # Implementación concreta (Firebase)
 │   │   │   └── datasources/     # Llamadas directas a la API
 │   │   ├── domain/
 │   │   │   ├── models/          # Entidades del negocio (User, etc.)
@@ -52,10 +52,10 @@ lib/
 Todo lo que el usuario ve e interactúa. Los **providers de Riverpod** viven aquí y son el puente entre la UI y el dominio. Las pantallas y widgets solo consumen providers — nunca llaman repositorios directamente.
 
 ### `domain/` — Reglas del negocio
-El corazón de la feature. Contiene los **modelos** (entidades puras en Dart, sin dependencia de Flutter ni de Supabase) y las **interfaces de repositorio** (contratos abstractos). Esta capa no sabe nada de la base de datos ni de la UI.
+El corazón de la feature. Contiene los **modelos** (entidades puras en Dart, sin dependencia de Flutter ni de Firebase) y las **interfaces de repositorio** (contratos abstractos). Esta capa no sabe nada de la base de datos ni de la UI.
 
 ### `data/` — Acceso a datos
-Implementa los contratos definidos en `domain/`. Aquí viven las llamadas reales a Supabase, la lectura de archivos JSON de digitación, y el manejo de caché local.
+Implementa los contratos definidos en `domain/`. Aquí viven las llamadas reales a Firebase, la lectura de archivos JSON de digitación, y el manejo de caché local.
 
 ## Gestor de estado — Riverpod
 
