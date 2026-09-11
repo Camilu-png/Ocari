@@ -37,7 +37,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>io.supabase.flutter</string>
+				<string>com.abatista.ocari</string>
 			</array>
 		</dict>
 	</array>
