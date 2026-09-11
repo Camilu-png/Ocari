@@ -1,27 +1,17 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:ocari/core/router/app_router.dart';
 import 'package:ocari/core/theme/app_theme.dart';
-
-const _supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-const _supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+import 'package:ocari/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  if (_supabaseUrl.isEmpty || _supabaseAnonKey.isEmpty) {
-    throw Exception(
-      'Missing env vars. Run with: flutter run --dart-define-from-file=.env',
-    );
-  }
-
-  await Supabase.initialize(
-    url: _supabaseUrl,
-    anonKey: _supabaseAnonKey,
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
   );
 
   runApp(const ProviderScope(child: OcariApp()));

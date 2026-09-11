@@ -1,21 +1,24 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 enum AuthStatus { authenticated, unauthenticated, loading }
 
 class AppAuthState {
   final AuthStatus status;
-  final supabase.User? user;
+  final fb.User? user;
 
   const AppAuthState({
     this.status = AuthStatus.loading,
     this.user,
   });
 
-  AppAuthState copyWith({AuthStatus? status, supabase.User? user, bool clearUser = false}) {
+  AppAuthState copyWith(
+      {AuthStatus? status, fb.User? user, bool clearUser = false}) {
     return AppAuthState(
       status: status ?? this.status,
       user: clearUser ? null : (user ?? this.user),
@@ -25,8 +28,12 @@ class AppAuthState {
   bool get isAuthenticated => status == AuthStatus.authenticated;
 }
 
-final supabaseAuthClientProvider = Provider<supabase.GoTrueClient>((ref) {
-  return supabase.Supabase.instance.client.auth;
+final firebaseAuthProvider = Provider<fb.FirebaseAuth>((ref) {
+  return fb.FirebaseAuth.instance;
+});
+
+final firebaseFirestoreProvider = Provider<FirebaseFirestore>((ref) {
+  return FirebaseFirestore.instance;
 });
 
 const _googleServerClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
@@ -34,7 +41,8 @@ const _googleServerClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
 final googleSignInProvider = Provider<GoogleSignIn>((ref) {
   return GoogleSignIn(
     scopes: ['email', 'profile'],
-    serverClientId: _googleServerClientId.isNotEmpty ? _googleServerClientId : null,
+    serverClientId:
+        _googleServerClientId.isNotEmpty ? _googleServerClientId : null,
   );
 });
 
@@ -43,15 +51,14 @@ class AuthNotifier extends Notifier<AppAuthState> {
 
   @override
   AppAuthState build() {
-    final authClient = ref.watch(supabaseAuthClientProvider);
+    final auth = ref.watch(firebaseAuthProvider);
 
-    _authSubscription = authClient.onAuthStateChange.listen(
-      (event) {
-        final session = authClient.currentSession;
-        if (session != null) {
+    _authSubscription = auth.authStateChanges().listen(
+      (user) {
+        if (user != null) {
           state = AppAuthState(
             status: AuthStatus.authenticated,
-            user: session.user,
+            user: user,
           );
         } else {
           state = const AppAuthState(status: AuthStatus.unauthenticated);
@@ -66,11 +73,11 @@ class AuthNotifier extends Notifier<AppAuthState> {
       _authSubscription?.cancel();
     });
 
-    final initialSession = authClient.currentSession;
-    if (initialSession != null) {
+    final currentUser = auth.currentUser;
+    if (currentUser != null) {
       return AppAuthState(
         status: AuthStatus.authenticated,
-        user: initialSession.user,
+        user: currentUser,
       );
     }
 
@@ -78,13 +85,12 @@ class AuthNotifier extends Notifier<AppAuthState> {
   }
 
   Future<void> logout() async {
-    final authClient = ref.read(supabaseAuthClientProvider);
-    await authClient.signOut();
+    final auth = ref.read(firebaseAuthProvider);
+    await auth.signOut();
     state = const AppAuthState(status: AuthStatus.unauthenticated);
     try {
       await ref.read(googleSignInProvider).signOut();
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 
   Future<({bool success, String? error})> signUp({
@@ -93,14 +99,15 @@ class AuthNotifier extends Notifier<AppAuthState> {
     String? name,
   }) async {
     try {
-      final authClient = ref.read(supabaseAuthClientProvider);
-      final data = name != null ? {'full_name': name} : null;
-      final response = await authClient.signUp(
+      final auth = ref.read(firebaseAuthProvider);
+      final credential = await auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
-        data: data,
       );
-      if (response.user != null) {
+      if (credential.user != null) {
+        if (name != null && name.isNotEmpty) {
+          await credential.user!.updateDisplayName(name);
+        }
         return (success: true, error: null);
       }
       return (success: false, error: 'Failed to create user');
@@ -114,27 +121,31 @@ class AuthNotifier extends Notifier<AppAuthState> {
     required String password,
   }) async {
     try {
-      final authClient = ref.read(supabaseAuthClientProvider);
-      final response = await authClient.signInWithPassword(
+      final auth = ref.read(firebaseAuthProvider);
+      final credential = await auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      if (response.user != null) {
+      if (credential.user != null) {
         return (success: true, error: null);
       }
       return (success: false, error: 'Login failed');
-    } on supabase.AuthException catch (e) {
-      if (e.statusCode == '400' || e.statusCode == '401') {
+    } on fb.FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found' || e.code == 'wrong-password' ||
+          e.code == 'invalid-credential') {
         return (success: false, error: 'Incorrect email or password.');
       }
-      return (success: false, error: e.message);
+      return (success: false, error: e.message ?? 'Authentication error');
     } catch (e) {
       final errStr = e.toString().toLowerCase();
       if (errStr.contains('socketexception') ||
           errStr.contains('connection') ||
           errStr.contains('failed host lookup') ||
           errStr.contains('network')) {
-        return (success: false, error: 'Connection error. Please check your internet connection.');
+        return (
+          success: false,
+          error: 'Connection error. Please check your internet connection.'
+        );
       }
       return (success: false, error: 'An unexpected error occurred.');
     }
@@ -150,22 +161,55 @@ class AuthNotifier extends Notifier<AppAuthState> {
       }
 
       final googleAuth = await googleUser.authentication;
-      final idToken = googleAuth.idToken;
-
-      if (idToken == null) {
-        return (success: false, error: 'Failed to get Google ID token');
-      }
-
-      final authClient = ref.read(supabaseAuthClientProvider);
-      final response = await authClient.signInWithIdToken(
-        provider: supabase.OAuthProvider.google,
-        idToken: idToken,
+      final credential = fb.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
       );
 
-      if (response.user != null) {
+      final auth = ref.read(firebaseAuthProvider);
+      final userCredential = await auth.signInWithCredential(credential);
+
+      if (userCredential.user != null) {
         return (success: true, error: null);
       }
-      return (success: false, error: 'Failed to sign in with Supabase');
+      return (success: false, error: 'Failed to sign in with Google');
+    } catch (e) {
+      return (success: false, error: e.toString());
+    }
+  }
+
+  Future<({bool success, String? error})> signInWithApple() async {
+    try {
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final oauthCredential = fb.OAuthProvider('apple.com').credential(
+        idToken: appleCredential.identityToken,
+        accessToken: appleCredential.authorizationCode,
+      );
+
+      final auth = ref.read(firebaseAuthProvider);
+      final userCredential = await auth.signInWithCredential(oauthCredential);
+
+      if (userCredential.user != null) {
+        if (appleCredential.givenName != null &&
+            appleCredential.familyName != null) {
+          await userCredential.user!.updateDisplayName(
+            '${appleCredential.givenName} ${appleCredential.familyName}',
+          );
+        }
+        return (success: true, error: null);
+      }
+      return (success: false, error: 'Failed to sign in with Apple');
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (e.code == AuthorizationErrorCode.canceled) {
+        return (success: false, error: 'Apple sign in cancelled');
+      }
+      return (success: false, error: e.message);
     } catch (e) {
       return (success: false, error: e.toString());
     }

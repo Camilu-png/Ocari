@@ -224,7 +224,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
   Future<void> _handleSongCompletion() async {
     try {
       final authState = ref.read(authProvider);
-      final userId = authState.user?.id;
+      final userId = authState.user?.uid;
       if (userId == null) return;
 
       final repo = ref.read(userSongProgressRepositoryProvider);

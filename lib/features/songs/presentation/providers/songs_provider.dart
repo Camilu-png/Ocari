@@ -1,16 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'package:ocari/features/songs/data/repositories/supabase_song_repository.dart';
+import 'package:ocari/features/auth/presentation/providers/auth_notifier.dart';
+import 'package:ocari/features/songs/data/repositories/firebase_song_repository.dart';
 import 'package:ocari/features/songs/domain/models/song.dart';
 import 'package:ocari/features/songs/domain/repositories/song_repository.dart';
 
-final supabaseClientProvider = Provider<SupabaseClient>((ref) {
-  return Supabase.instance.client;
-});
-
 final songRepositoryProvider = Provider<SongRepository>((ref) {
-  return SupabaseSongRepository(ref.watch(supabaseClientProvider));
+  return FirebaseSongRepository(
+    ref.watch(firebaseFirestoreProvider),
+  );
 });
 
 final songsProvider =

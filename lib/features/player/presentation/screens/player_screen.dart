@@ -14,7 +14,7 @@ import 'package:ocari/features/player/presentation/providers/player_notifier.dar
 import 'package:ocari/features/player/presentation/widgets/color_legend_sheet.dart';
 import 'package:ocari/features/player/presentation/widgets/song_completed_sheet.dart';
 import 'package:ocari/features/player/presentation/widgets/tutorial_overlay.dart';
-import 'package:ocari/features/songs/data/repositories/supabase_song_repository.dart';
+import 'package:ocari/core/utils/note_parser.dart';
 import 'package:ocari/features/songs/domain/models/song.dart';
 import 'package:ocari/features/songs/domain/models/song_note.dart';
 import 'package:ocari/features/songs/presentation/providers/songs_provider.dart';
@@ -199,7 +199,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     if (song.notesJson == null) {
       debugPrint(
         'PlayerScreen: notesJson is null for "${song.title}" (id=${song.id}). '
-        'Verify the Supabase "notes_json" column is populated.',
+        'Verify the Firestore "notes_json" field is populated.',
       );
       _errorMessage = 'This song has no note data.';
       _loadStage = _LoadStage.error;
@@ -207,7 +207,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     }
 
     try {
-      _parsedNotes = SupabaseSongRepository.parseNotes(song.notesJson!);
+      _parsedNotes = parseNotes(song.notesJson!);
     } catch (e) {
       debugPrint(
         'PlayerScreen: failed to parse notes for "${song.title}": $e. '
