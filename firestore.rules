@@ -1,0 +1,21 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Song catalog: anyone signed in can read, no client writes.
+    match /songs/{songId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // Per-user song progress: only the owner can read/write their own.
+    match /users/{userId}/songs/{songId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Users collection root documents (implicit subcollections only).
+    match /users/{userId} {
+      allow read, write: if false;
+    }
+  }
+}
