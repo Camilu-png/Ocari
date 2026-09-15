@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -36,14 +37,8 @@ final firebaseFirestoreProvider = Provider<FirebaseFirestore>((ref) {
   return FirebaseFirestore.instance;
 });
 
-const _googleServerClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
-
 final googleSignInProvider = Provider<GoogleSignIn>((ref) {
-  return GoogleSignIn(
-    scopes: ['email', 'profile'],
-    serverClientId:
-        _googleServerClientId.isNotEmpty ? _googleServerClientId : null,
-  );
+  return GoogleSignIn(scopes: ['email', 'profile']);
 });
 
 class AuthNotifier extends Notifier<AppAuthState> {
@@ -153,8 +148,20 @@ class AuthNotifier extends Notifier<AppAuthState> {
 
   Future<({bool success, String? error})> signInWithGoogle() async {
     try {
-      final googleSignIn = ref.read(googleSignInProvider);
+      final auth = ref.read(firebaseAuthProvider);
 
+      if (kIsWeb) {
+        final provider = fb.GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        final userCredential = await auth.signInWithPopup(provider);
+        if (userCredential.user != null) {
+          return (success: true, error: null);
+        }
+        return (success: false, error: 'Failed to sign in with Google');
+      }
+
+      final googleSignIn = ref.read(googleSignInProvider);
       final googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
         return (success: false, error: 'Google sign in cancelled');
@@ -166,9 +173,7 @@ class AuthNotifier extends Notifier<AppAuthState> {
         idToken: googleAuth.idToken,
       );
 
-      final auth = ref.read(firebaseAuthProvider);
       final userCredential = await auth.signInWithCredential(credential);
-
       if (userCredential.user != null) {
         return (success: true, error: null);
       }
