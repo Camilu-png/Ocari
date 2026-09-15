@@ -3,12 +3,32 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>744538709104-04bk535m6a7u29l69tg96ssi2qgeb80e.apps.googleusercontent.com</string>
+	<string>1053081788408-o8pd2g74g85e0mpt4ifef5snq4re3oeh.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.744538709104-04bk535m6a7u29l69tg96ssi2qgeb80e</string>
+	<string>com.googleusercontent.apps.1053081788408-o8pd2g74g85e0mpt4ifef5snq4re3oeh</string>
+	<key>API_KEY</key>
+	<string>AIzaSyABJggfsX-4HWk2HRShdswW1zuVeKSQkXs</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1053081788408</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.abatista.ocari</string>
+	<key>PROJECT_ID</key>
+	<string>ocari-ed7da</string>
+	<key>STORAGE_BUCKET</key>
+	<string>ocari-ed7da.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1053081788408:ios:724f2c237f80458ea5c00d</string>
 </dict>
 </plist>

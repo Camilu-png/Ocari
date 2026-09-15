@@ -1,9 +1,46 @@
 {
-  "installed": {
-    "client_id": "744538709104-mm2u4sco2q93rg1jlbv99tmfbkvfirgb.apps.googleusercontent.com",
-    "project_id": "ocari-496418",
-    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-    "token_uri": "https://oauth2.googleapis.com/token",
-    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs"
-  }
+  "project_info": {
+    "project_number": "1053081788408",
+    "project_id": "ocari-ed7da",
+    "storage_bucket": "ocari-ed7da.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1053081788408:android:bb2cf7c640e8d33da5c00d",
+        "android_client_info": {
+          "package_name": "com.abatista.ocari"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1053081788408-n3k74pnap8hip8sc373eocl9j0jd7bv6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBC-gzCVbkaWsz146fc14dC1WqsD7Bs-IE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1053081788408-n3k74pnap8hip8sc373eocl9j0jd7bv6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1053081788408-o8pd2g74g85e0mpt4ifef5snq4re3oeh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.abatista.ocari"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
 }
